@@ -134,7 +134,7 @@
         <div>
           <label class="block font-semibold mb-1">ID Client OAuth 2.0 Google Cloud</label>
           <input id="inputClientId" type="text" placeholder="123456789-abc.apps.googleusercontent.com" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-brand-500 outline-none" />
-          <p class="text-xs text-slate-500 mt-1">Requis pour Google Drive (sync cloud + dépôt Clipper v2) et Google Agenda.</p>
+          <p class="text-xs text-slate-500 mt-1">Requis pour Google Drive (sync cloud + dépôt Clipper v2) et Google Agenda personnel.</p>
         </div>
 
         <div>
@@ -181,7 +181,7 @@
       const manifest = {
         name: 'StudyFlow IA — Grenoble INP',
         short_name: 'StudyFlow IA',
-        description: "Hub d'études IA : ADE, Chamilo/Moodle Clipper v2, Webmail IA, KaTeX, SM-2 et Colle orale.",
+        description: "Hub d'études IA : ADE auto-sync CAS, Chamilo/Moodle Clipper v2, Webmail IA, KaTeX, SM-2 et Colle orale.",
         start_url: window.location.href,
         display: 'standalone',
         background_color: '#0f172a',
@@ -238,8 +238,8 @@
     const GOOGLE_SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/calendar.readonly';
 
     const MODULE_DEFINITIONS = [
-      { id: 'calendar', name: 'Planning ADE & Agendas Google', desc: 'Synchronisation Google Calendar, IDs abonnés et import direct lien/fichier .ics ADE.', icon: '📅', category: 'Sources & Flux' },
-      { id: 'clipper', name: 'Pont Chamilo / Moodle (Clipper v2)', desc: "Réception sélective des supports aspirés par l'extension navigateur et dépôt Drive.", icon: '🧩', category: 'Sources & Flux' },
+      { id: 'calendar', name: 'Planning ADE (Sync URL + CAS)', desc: 'Synchronisation automatique par URL ADE via le pont CAS de Clipper v2 + agendas Google.', icon: '📅', category: 'Sources & Flux' },
+      { id: 'clipper', name: 'Pont Chamilo / Moodle / ADE (Clipper v2)', desc: "Aspiration PDF, session CAS et synchronisation automatique de l'URL ADE sans blocage CORS.", icon: '🧩', category: 'Sources & Flux' },
       { id: 'webmail', name: 'Automate Webmail → Action', desc: 'Analyse IA des e-mails Zimbra/Partage pour détecter deadlines et changements de salle.', icon: '✉️', category: 'Sources & Flux' },
       { id: 'drive', name: 'Google Drive & Cloud Sync', desc: 'Exploration de dossiers UE, import PDF sélectif et fusion studyflow_db.json.', icon: '☁️', category: 'Sources & Flux' },
       { id: 'deadlines', name: 'Deadlines & Rapports', desc: 'Suivi des rendus, projets, comptes-rendus de TP et sous-tâches.', icon: '⏰', category: 'Organisation' },
@@ -265,8 +265,8 @@
           geminiApiKey: '',
           selectedCalendarId: 'primary',
           selectedCalendarIds: ['primary'],
-          customGoogleCalendarIds: [],
           adeIcalUrl: '',
+          adeLastSyncAt: 0,
           selectedCalendarName: 'Agenda Principal'
         },
         modules: {
@@ -478,6 +478,7 @@
     let speechRecognition = null;
     let isListeningMic = false;
     let calendarHorizonDays = 14;
+    let extensionBridgeConnected = false;
 
     function openIndexedDB() {
       return new Promise((resolve, reject) => {
@@ -512,9 +513,6 @@
               };
               if (!Array.isArray(state.settings.selectedCalendarIds) || !state.settings.selectedCalendarIds.length) {
                 state.settings.selectedCalendarIds = [state.settings.selectedCalendarId || 'primary'];
-              }
-              if (!Array.isArray(state.settings.customGoogleCalendarIds)) {
-                state.settings.customGoogleCalendarIds = [];
               }
             }
             ensureSm2MetadataOnAllCards();
@@ -595,7 +593,7 @@
         .trim();
     }
 
-    function parseIcsContent(icsText, sourceLabel = 'Flux ADE (.ics)') {
+    function parseIcsContent(icsText, sourceLabel = 'ADE Grenoble INP (Auto)') {
       const unfolded = icsText.replace(/\r\n[ \t]/g, '').replace(/\n[ \t]/g, '');
       const lines = unfolded.split(/\r?\n/);
       const parsed = [];
@@ -642,87 +640,40 @@
       const inputEl = document.getElementById('inputAdeUrl');
       const rawUrl = (inputEl ? inputEl.value : state.settings.adeIcalUrl || '').trim();
       if (!rawUrl) {
-        if (!silent) showToast("Colle d'abord ton lien d'abonnement ADE (http:// ou webcal://).", 'warn');
+        if (!silent) showToast("Colle d'abord ton lien d'abonnement ADE (https:// ou webcal://).", 'warn');
         return;
       }
       const normalizedUrl = rawUrl.replace(/^webcal:\/\//i, 'https://');
       state.settings.adeIcalUrl = normalizedUrl;
       await saveStateToDB();
 
-      if (!silent) showToast('Téléchargement du flux ADE en cours...', 'info');
-      const proxies = [
-        (u) => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
-        (u) => 'https://corsproxy.io/?' + encodeURIComponent(u),
-        (u) => u
-      ];
+      if (!silent) showToast('Synchronisation automatique ADE via le pont CAS Clipper v2...', 'info');
 
-      let icsData = null;
-      for (const buildUrl of proxies) {
-        try {
-          const res = await fetch(buildUrl(normalizedUrl));
-          if (res.ok) {
-            const txt = await res.text();
-            if (txt.includes('BEGIN:VCALENDAR')) {
-              icsData = txt;
-              break;
-            }
-          }
-        } catch (e) {}
-      }
+      window.postMessage({
+        type: 'STUDYFLOW_FETCH_ADE_URL',
+        url: normalizedUrl,
+        silent
+      }, '*');
 
-      if (!icsData) {
-        if (!silent) showToast("Le serveur ADE bloque l'accès direct. Télécharge le fichier .ics depuis ADE et importe-le avec le bouton « Importer .ics » juste à côté !", 'warn');
+      clearTimeout(window._adeBridgeTimeout);
+      window._adeBridgeTimeout = setTimeout(() => {
+        if (!extensionBridgeConnected && !silent) {
+          showToast("Extension StudyFlow Clipper v2 non détectée sur cet onglet. Télécharge/mets à jour les 5 fichiers de l'extension dans l'onglet Clipper v2 pour activer le pont CAS & sans-CORS.", 'warn');
+        }
+      }, 3000);
+    }
+
+    async function handleAdeRawPayloadFromExtension(icsText, silent = false) {
+      if (!icsText || !icsText.includes('BEGIN:VCALENDAR')) {
+        if (!silent) showToast("Le flux renvoyé par ADE n'est pas un calendrier valide (vérifie ta connexion CAS sur un onglet Grenoble INP ou l'URL d'abonnement).", 'warn');
         return;
       }
-
-      const events = parseIcsContent(icsData, 'ADE Grenoble INP (Lien)');
-      if (!events.length) {
-        if (!silent) showToast('Flux ADE lu, mais aucun créneau trouvé.', 'warn');
-        return;
-      }
+      const events = parseIcsContent(icsText, 'ADE Grenoble INP (Auto)');
       state.adeImportedEvents = events;
+      state.settings.adeLastSyncAt = Date.now();
       await saveStateToDB();
       renderCurrentView();
-      if (!silent) showToast(events.length + ' créneau(x) ADE importé(s) avec succès !', 'success');
-    }
-
-    function handleAdeIcsFileUpload(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const text = e.target.result || '';
-        const events = parseIcsContent(text, 'ADE Grenoble INP (.ics)');
-        if (!events.length) {
-          showToast('Aucun événement trouvé dans ce fichier .ics.', 'error');
-          return;
-        }
-        state.adeImportedEvents = events;
-        await saveStateToDB();
-        renderCurrentView();
-        showToast(events.length + ' créneau(x) ADE importé(s) depuis ' + file.name + ' !', 'success');
-      };
-      reader.readAsText(file);
-    }
-
-    async function addCustomGoogleCalendarId() {
-      const inp = document.getElementById('inputCustomGoogleCalId');
-      const val = inp?.value.trim();
-      if (!val) return;
-      if (!state.settings.customGoogleCalendarIds.includes(val)) {
-        state.settings.customGoogleCalendarIds.push(val);
-      }
-      if (!state.settings.selectedCalendarIds.includes(val)) {
-        state.settings.selectedCalendarIds.push(val);
-      }
-      if (!state.calendars.some(c => c.id === val)) {
-        state.calendars.push({ id: val, summary: 'Agenda Abonné (' + val.slice(0, 22) + '...)', primary: false });
-      }
-      inp.value = '';
-      await saveStateToDB();
-      if (googleToken) await syncSelectedGoogleCalendar();
-      else renderCalendarView();
-      showToast('ID d’agenda Google ajouté !', 'success');
+      if (!silent) showToast(events.length + ' créneau(x) ADE mis à jour automatiquement !', 'success');
     }
 
     function getAllCombinedEvents() {
@@ -884,7 +835,21 @@
       window.addEventListener('message', async (event) => {
         const msg = event.data;
         if (!msg || typeof msg !== 'object') return;
-        if (msg.type === 'STUDYFLOW_CLIPPER_FILES' && Array.isArray(msg.items)) {
+        if (msg.type === 'STUDYFLOW_EXTENSION_READY') {
+          extensionBridgeConnected = true;
+          if (currentView === 'calendar') renderCalendarView();
+          if (state.settings.adeIcalUrl) {
+            syncAdeFromUrl(true);
+          }
+        } else if (msg.type === 'STUDYFLOW_ADE_ICS_RESULT') {
+          extensionBridgeConnected = true;
+          clearTimeout(window._adeBridgeTimeout);
+          if (msg.error) {
+            if (!msg.silent) showToast('Erreur ADE : ' + msg.error, 'error');
+          } else {
+            await handleAdeRawPayloadFromExtension(msg.icsText, msg.silent);
+          }
+        } else if (msg.type === 'STUDYFLOW_CLIPPER_FILES' && Array.isArray(msg.items)) {
           ingestClipperPayload(msg.items);
         } else if (msg.type === 'STUDYFLOW_CLIPPER_MAIL' && msg.mail) {
           await ingestWebmailPayload(msg.mail);
@@ -900,6 +865,8 @@
           } catch (e) {}
         }
       });
+
+      window.postMessage({ type: 'STUDYFLOW_PING_EXTENSION' }, '*');
     }
 
     function ingestClipperPayload(items) {
@@ -1136,31 +1103,17 @@
     async function fetchGoogleCalendars() {
       if (!googleToken) return;
       try {
-        const data = await googleFetch('https://www.googleapis.com/calendar/v3/users/me/calendarList?showHidden=true&minAccessRole=reader');
+        const data = await googleFetch('https://www.googleapis.com/calendar/v3/users/me/calendarList?showHidden=true');
         const list = (data.items || []).map(c => ({
           id: c.id,
           summary: c.summaryOverride || c.summary || c.id,
           primary: !!c.primary
         }));
-
-        (state.settings.customGoogleCalendarIds || []).forEach(cid => {
-          if (!list.some(c => c.id === cid)) {
-            list.push({ id: cid, summary: 'Agenda Abonné (' + cid.slice(0, 22) + '...)', primary: false });
-          }
-        });
-
         if (list.length) {
           state.calendars = list;
           const validIds = new Set(state.calendars.map(c => c.id));
           let selected = (state.settings.selectedCalendarIds || []).filter(id => validIds.has(id));
-          const adeCals = state.calendars.filter(c => /ade|inp|edt|cours|univ|grenoble|import\.calendar/i.test(c.summary + ' ' + c.id));
-          if (adeCals.length > 0) {
-            adeCals.forEach(ac => {
-              if (!selected.includes(ac.id)) selected.push(ac.id);
-            });
-          } else if (selected.length === 0) {
-            selected = state.calendars.map(c => c.id);
-          }
+          if (selected.length === 0) selected = state.calendars.map(c => c.id);
           state.settings.selectedCalendarIds = selected;
           state.settings.selectedCalendarId = selected[0] || 'primary';
           await saveStateToDB();
@@ -1172,18 +1125,18 @@
     }
 
     async function syncSelectedGoogleCalendar() {
+      if (state.settings.adeIcalUrl) {
+        await syncAdeFromUrl(true);
+      }
       if (!googleToken) {
-        showToast('Connecte ton compte Google ou importe ton lien/fichier ADE ci-dessous.', 'warn');
+        if (!state.settings.adeIcalUrl) {
+          showToast('Connecte ton compte Google ou configure ton URL ADE ci-dessous.', 'warn');
+        }
         return;
       }
       try {
         await fetchGoogleCalendars();
-        const idsToFetch = Array.from(new Set([
-          ...(state.settings.selectedCalendarIds || []),
-          ...(state.settings.customGoogleCalendarIds || [])
-        ]));
-        if (!idsToFetch.length) idsToFetch.push('primary');
-
+        const idsToFetch = state.settings.selectedCalendarIds || ['primary'];
         const timeMin = new Date(Date.now() - 2 * 86400000).toISOString();
         const timeMax = new Date(Date.now() + 30 * 86400000).toISOString();
         const mergedEvents = [];
@@ -1215,9 +1168,6 @@
         }
 
         state.events = mergedEvents;
-        if (state.settings.adeIcalUrl) {
-          await syncAdeFromUrl(true);
-        }
         await saveStateToDB();
         renderCurrentView();
         showToast(getAllCombinedEvents().length + ' créneau(x) synchronisé(s).', 'success');
@@ -1307,7 +1257,7 @@
       (state.deadlines || []).forEach(d => dlMap.set(d.id, d));
       state.deadlines = Array.from(dlMap.values());
 
-      if (remote.adeImportedEvents?.length && !state.adeImportedEvents?.length) {
+      if (remote.adeImportedEvents?.length && (remote.settings?.adeLastSyncAt || 0) >= (state.settings.adeLastSyncAt || 0)) {
         state.adeImportedEvents = remote.adeImportedEvents;
       }
       if (remote.settings?.adeIcalUrl && !state.settings.adeIcalUrl) {
@@ -1414,10 +1364,10 @@
           <div class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4">
             <div class="flex items-center justify-between">
               <h3 class="font-bold text-base">📅 Séances du jour (${todayEvents.length})</h3>
-              <button onclick="switchView('calendar')" class="text-xs font-semibold text-brand-600 hover:underline">Importer ADE / Planning complet →</button>
+              <button onclick="switchView('calendar')" class="text-xs font-semibold text-brand-600 hover:underline">Planning complet & URL ADE →</button>
             </div>
             <div class="space-y-3">
-              ${todayEvents.map(ev => renderEventCardHtml(ev, true)).join('') || "<p class='text-sm text-slate-500'>Aucun créneau aujourd'hui. Ouvre <strong>Planning ADE</strong> pour importer ton lien ou fichier .ics ADE.</p>"}
+              ${todayEvents.map(ev => renderEventCardHtml(ev, true)).join('') || "<p class='text-sm text-slate-500'>Aucun créneau aujourd'hui. Configure ton URL d'abonnement ADE dans <strong>Planning ADE</strong>.</p>"}
             </div>
           </div>
           ` : ''}
@@ -1454,8 +1404,8 @@
       el.innerHTML = `
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h2 class="text-2xl font-extrabold">🧩 Pont Chamilo / Moodle & Extension Clipper v2</h2>
-            <p class="text-sm text-slate-500">Sélectionne uniquement les supports PDF qui te concernent, dépose-les automatiquement dans tes dossiers Drive par UE et génère leurs fiches IA.</p>
+            <h2 class="text-2xl font-extrabold">🧩 Pont Chamilo / Moodle / ADE (Clipper v2)</h2>
+            <p class="text-sm text-slate-500">Gère tes supports PDF aspirés et assure le relais automatique (CAS + sans-CORS) pour ton URL d'agenda ADE.</p>
           </div>
           <div class="flex flex-wrap gap-2">
             <button onclick="processSelectedClipperItems(false)" class="px-3.5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold ${selectedCount === 0 ? 'opacity-50 pointer-events-none' : ''}">
@@ -1503,15 +1453,15 @@
         <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h3 class="font-bold text-base">🛠️ Extension Navigateur : StudyFlow Clipper v2 (Manifest V3)</h3>
-              <p class="text-xs text-slate-500">Aspire tes PDF sur Chamilo/Moodle (via ta session CAS active) et capture tes e-mails sur Webmail Zimbra/Partage.</p>
+              <h3 class="font-bold text-base">🛠️ Extension Navigateur : StudyFlow Clipper v2 (avec Pont ADE & CAS)</h3>
+              <p class="text-xs text-slate-500">Télécharge ces 5 fichiers dans un dossier local, puis charge-le via <code>chrome://extensions</code> (Mode développeur → Charger l'extension non empaquetée).</p>
             </div>
-            <button onclick="downloadExtensionBundle()" class="px-3.5 py-2 rounded-xl bg-slate-900 dark:bg-slate-800 text-white text-xs font-semibold hover:bg-brand-600 transition shrink-0">📦 Télécharger les 4 fichiers</button>
+            <button onclick="downloadExtensionBundle()" class="px-3.5 py-2 rounded-xl bg-slate-900 dark:bg-slate-800 text-white text-xs font-semibold hover:bg-brand-600 transition shrink-0">📦 Télécharger les 5 fichiers</button>
           </div>
 
           <div class="flex gap-2 border-b border-slate-200 dark:border-slate-800 overflow-x-auto no-scrollbar">
-            ${['manifest', 'content', 'popup_html', 'popup_js'].map(tab => {
-              const labels = { manifest: 'manifest.json', content: 'content.js', popup_html: 'popup.html', popup_js: 'popup.js' };
+            ${['manifest', 'background', 'content', 'popup_html', 'popup_js'].map(tab => {
+              const labels = { manifest: 'manifest.json', background: 'background.js', content: 'content.js', popup_html: 'popup.html', popup_js: 'popup.js' };
               return `<button onclick="switchExtensionTab('${tab}')" class="pb-2 px-3 text-xs font-bold border-b-2 whitespace-nowrap ${activeExtensionTab === tab ? 'border-brand-600 text-brand-600 dark:text-brand-400' : 'border-transparent text-slate-500'}">${labels[tab]}</button>`;
             }).join('')}
           </div>
@@ -1540,15 +1490,17 @@
       const manifest = JSON.stringify({
         manifest_version: 3,
         name: 'StudyFlow Clipper v2 — Grenoble INP',
-        version: '2.0.0',
-        description: 'Extrait les supports PDF Chamilo/Moodle (avec session CAS) et les mails Zimbra/Partage vers StudyFlow IA & Google Drive.',
+        version: '2.1.0',
+        description: 'Synchronisation automatique ADE (via session CAS), extraction PDF Chamilo/Moodle et mails Zimbra/Partage vers StudyFlow IA.',
         permissions: ['activeTab', 'scripting', 'storage'],
         host_permissions: [
-          'https://chamilo.grenoble-inp.fr/*',
-          'https://moodle.grenoble-inp.fr/*',
-          'https://webmail.grenoble-inp.fr/*',
-          'https://partage.grenet.fr/*'
+          'https://*.grenoble-inp.fr/*',
+          'https://*.grenet.fr/*',
+          'https://*.univ-grenoble-alpes.fr/*'
         ],
+        background: {
+          service_worker: 'background.js'
+        },
         action: { default_popup: 'popup.html', default_title: 'StudyFlow Clipper v2' },
         content_scripts: [
           {
@@ -1568,6 +1520,23 @@
           }
         ]
       }, null, 2);
+
+      const background = [
+        'chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {',
+        "  if (msg && msg.type === 'FETCH_ADE_ICS_BG' && msg.url) {",
+        "    fetch(msg.url, { credentials: 'include' })",
+        '      .then(async (res) => {',
+        "        if (!res.ok) throw new Error('HTTP ' + res.status);",
+        '        const text = await res.text();',
+        '        sendResponse({ icsText: text });',
+        '      })',
+        '      .catch((err) => {',
+        '        sendResponse({ error: err.message });',
+        '      });',
+        '    return true;',
+        '  }',
+        '});'
+      ].join('\n');
 
       const content = [
         '(() => {',
@@ -1610,6 +1579,18 @@
         '    }',
         '  });',
         "  if (host === 'localhost' || host.endsWith('.github.io')) {",
+        "    window.postMessage({ type: 'STUDYFLOW_EXTENSION_READY' }, '*');",
+        "    window.addEventListener('message', (event) => {",
+        '      const msg = event.data;',
+        '      if (!msg || typeof msg !== "object") return;',
+        "      if (msg.type === 'STUDYFLOW_PING_EXTENSION') {",
+        "        window.postMessage({ type: 'STUDYFLOW_EXTENSION_READY' }, '*');",
+        "      } else if (msg.type === 'STUDYFLOW_FETCH_ADE_URL' && msg.url) {",
+        "        chrome.runtime.sendMessage({ type: 'FETCH_ADE_ICS_BG', url: msg.url }, (resp) => {",
+        "          window.postMessage({ type: 'STUDYFLOW_ADE_ICS_RESULT', icsText: resp?.icsText || '', error: resp?.error || null, silent: !!msg.silent }, '*');",
+        '        });',
+        '      }',
+        '    });',
         "    chrome.storage.local.get(['studyflow_pending_payload'], (res) => {",
         '      if (res.studyflow_pending_payload) {',
         "        window.postMessage(res.studyflow_pending_payload, '*');",
@@ -1645,13 +1626,14 @@
         '});'
       ].join('\n');
 
-      return { manifest, content, popup_html, popup_js };
+      return { manifest, background, content, popup_html, popup_js };
     }
 
     function downloadExtensionBundle() {
       const files = getExtensionFilesCode();
       [
         { name: 'manifest.json', content: files.manifest },
+        { name: 'background.js', content: files.background },
         { name: 'content.js', content: files.content },
         { name: 'popup.html', content: files.popup_html },
         { name: 'popup.js', content: files.popup_js }
@@ -1663,7 +1645,7 @@
           a.click();
         }, idx * 250);
       });
-      showToast('Téléchargement des 4 fichiers de StudyFlow Clipper v2 lancé.', 'success');
+      showToast('Téléchargement des 5 fichiers de StudyFlow Clipper v2 lancé.', 'success');
     }
 
     function toggleClipperItemSelection(id, checked) {
@@ -1872,33 +1854,38 @@
       });
 
       const selectedCalIds = state.settings.selectedCalendarIds || [];
+      const lastSyncLabel = state.settings.adeLastSyncAt
+        ? 'Dernière sync : ' + new Date(state.settings.adeLastSyncAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+        : '';
 
       el.innerHTML = `
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h2 class="text-2xl font-extrabold">📅 Planning ADE & Agendas Google</h2>
-            <p class="text-sm text-slate-500">Connecte ton flux ADE directement (lien iCal ou fichier .ics) et fusionne-le avec tes agendas Google.</p>
+            <h2 class="text-2xl font-extrabold">📅 Planning ADE (Mise à jour automatique par URL)</h2>
+            <p class="text-sm text-slate-500">Ton URL d'abonnement ADE est synchronisée automatiquement via le pont CAS + sans-CORS de StudyFlow Clipper v2.</p>
           </div>
           <div class="flex flex-wrap gap-2">
-            <button onclick="syncSelectedGoogleCalendar()" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold shadow-sm">🔄 Tout actualiser</button>
+            <button onclick="syncSelectedGoogleCalendar()" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold shadow-sm">🔄 Actualiser maintenant</button>
           </div>
         </div>
 
         <div class="bg-gradient-to-r from-brand-50 to-indigo-50 dark:from-brand-950/40 dark:to-indigo-950/40 border border-brand-200 dark:border-brand-800 rounded-2xl p-5 space-y-3">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <h3 class="font-bold text-sm text-brand-900 dark:text-brand-200">🎓 Pont Direct ADE Grenoble INP (Lien iCal / Webcal ou Fichier .ics)</h3>
-              <p class="text-xs text-slate-600 dark:text-slate-300">Google masque souvent les agendas abonnés par URL à son API. Colle ton lien ADE (celui utilisé sur ton téléphone) ou importe le fichier <code>.ics</code> exporté depuis ADE.</p>
+              <h3 class="font-bold text-sm text-brand-900 dark:text-brand-200">🎓 URL d'abonnement ADE Grenoble INP (Auto-Sync CAS & sans-CORS)</h3>
+              <p class="text-xs text-slate-600 dark:text-slate-300">Colle une seule fois ton URL ADE : StudyFlow IA la rafraîchit automatiquement à chaque ouverture grâce à l'extension Clipper v2.</p>
             </div>
-            ${state.adeImportedEvents.length > 0 ? `<span class="px-2.5 py-1 rounded-full bg-emerald-600 text-white text-xs font-bold">✓ ${state.adeImportedEvents.length} créneaux ADE chargés</span>` : ''}
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-1 rounded-full text-[11px] font-bold ${extensionBridgeConnected ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'}">
+                ${extensionBridgeConnected ? '✓ Pont CAS Clipper v2 actif' : '⚠️ Extension Clipper v2 requise'}
+              </span>
+              ${state.adeImportedEvents.length > 0 ? `<span class="px-2.5 py-1 rounded-full bg-brand-600 text-white text-[11px] font-bold">${state.adeImportedEvents.length} créneaux • ${lastSyncLabel}</span>` : ''}
+            </div>
           </div>
           <div class="flex flex-col sm:flex-row gap-2">
             <input id="inputAdeUrl" type="text" value="${state.settings.adeIcalUrl || ''}" placeholder="https://ade-web-consult.grenoble-inp.fr/jsp/custom/modules/plannings/anonymous_cal.jsp?..." class="flex-1 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs" />
-            <button onclick="syncAdeFromUrl(false)" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold shrink-0">📥 Synchroniser le lien ADE</button>
-            <label class="px-4 py-2 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-indigo-600 text-white text-xs font-semibold cursor-pointer text-center shrink-0">
-              📂 Importer fichier .ics
-              <input type="file" accept=".ics,.ical,text/calendar" onchange="handleAdeIcsFileUpload(event)" class="hidden" />
-            </label>
+            <button onclick="syncAdeFromUrl(false)" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold shrink-0">🔄 Synchroniser l'URL ADE</button>
+            ${!extensionBridgeConnected ? `<button onclick="switchView('clipper')" class="px-3.5 py-2 rounded-xl bg-slate-900 dark:bg-slate-800 text-white text-xs font-semibold shrink-0">Installer Clipper v2 →</button>` : ''}
           </div>
         </div>
 
@@ -1906,7 +1893,7 @@
           <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-5 h-fit">
             <div>
               <div class="flex items-center justify-between mb-2">
-                <label class="text-xs font-bold uppercase text-slate-500">Agendas Google synchronisés</label>
+                <label class="text-xs font-bold uppercase text-slate-500">Agendas Google associés</label>
                 <button onclick="fetchGoogleCalendars()" class="text-[11px] font-semibold text-brand-600 hover:underline">Actualiser</button>
               </div>
               <div class="space-y-1.5 max-h-40 overflow-y-auto pr-1">
@@ -1919,14 +1906,6 @@
                     </label>
                   `;
                 }).join('')}
-              </div>
-
-              <div class="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 space-y-1.5">
-                <span class="text-[11px] font-semibold text-slate-500 block">Ajouter un ID d'agenda Google abonné :</span>
-                <div class="flex gap-1.5">
-                  <input id="inputCustomGoogleCalId" type="text" placeholder="xxx@import.calendar.google.com" class="flex-1 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs" />
-                  <button onclick="addCustomGoogleCalendarId()" class="px-2.5 py-1.5 rounded-lg bg-slate-800 text-white text-xs font-bold">+</button>
-                </div>
               </div>
             </div>
 
@@ -1974,7 +1953,7 @@
             ${groupedByDay.size === 0 ? `
               <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 text-center space-y-2">
                 <p class="text-sm font-semibold">Aucune séance affichée sur cette période.</p>
-                <p class="text-xs text-slate-500">Colle ton lien d'abonnement ADE ou importe ton fichier <code>.ics</code> dans le cadre bleu en haut de cette page.</p>
+                <p class="text-xs text-slate-500">Colle ton URL d'abonnement ADE dans le cadre bleu en haut de cette page et clique sur <strong>Synchroniser l'URL ADE</strong>.</p>
               </div>
             ` : Array.from(groupedByDay.entries()).map(([dayKey, dayEvents]) => {
               const header = formatDayHeaderLabel(dayKey);
