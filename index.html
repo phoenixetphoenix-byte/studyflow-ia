@@ -730,7 +730,7 @@
       }
       return res;
     }
-
+    
     async function scanCoursePageViaRelay() {
       const urlInput = document.getElementById('relayCoursePageUrl');
       const ueInput = document.getElementById('relayCoursePageUE');
@@ -747,6 +747,7 @@
         const res = await fetchProtectedUrlViaRelay(targetUrl);
         const html = await res.text();
         const doc = new DOMParser().parseFromString(html, 'text/html');
+        const pageTitle = (doc.querySelector('title')?.textContent || '').trim();
         const anchors = Array.from(doc.querySelectorAll('a[href]'));
         const found = [];
         const seen = new Set();
@@ -761,21 +762,27 @@
             return;
           }
           if (seen.has(fullUrl)) return;
-          if (/\.pdf(\?|$)/i.test(fullUrl) || fullUrl.includes('mod_resource') || fullUrl.includes('/document/')) {
+
+          const label = (a.textContent || a.getAttribute('title') || '').replace(/\s+/g, ' ').trim();
+          const isMoodleFile = fullUrl.includes('/mod/resource/view.php') || fullUrl.includes('/mod/folder/view.php') || fullUrl.includes('/pluginfile.php/');
+          const isChamiloFile = fullUrl.includes('download.php') || (fullUrl.includes('/document/') && !fullUrl.includes('document.php?cidReq=') && !fullUrl.includes('action='));
+          const isDirectPdf = /\.pdf(\?|$)/i.test(fullUrl) || /\.pdf$/i.test(label);
+
+          if (isDirectPdf || isMoodleFile || isChamiloFile) {
             seen.add(fullUrl);
-            const label = (a.textContent || '').trim() || fullUrl.split('/').pop().split('?')[0] || 'Support.pdf';
+            const cleanTitle = label || fullUrl.split('/').pop().split('?')[0] || 'Support_Cours.pdf';
             found.push({
               source: targetUrl.includes('chamilo') ? 'Chamilo (Relais CAS)' : 'Moodle (Relais CAS)',
               ue: targetUe,
-              title: label,
+              title: cleanTitle,
               url: fullUrl,
-              snippet: 'Détecté automatiquement via le relais CAS Cloudflare'
+              snippet: 'Page : ' + (pageTitle || targetUe)
             });
           }
         });
 
         if (found.length === 0) {
-          showToast('Aucun lien PDF détecté sur cette page (vérifie le lien du dossier ou du cours).', 'warn');
+          showToast('Aucun support détecté sur « ' + (pageTitle || 'cette page') + ' ». Vérifie que le cours contient des fichiers ou ouvre un sous-dossier.', 'warn');
           return;
         }
 
@@ -784,7 +791,7 @@
         showToast(err.message, 'error');
       }
     }
-
+    
     function getAllCombinedEvents() {
       if (state.adeImportedEvents && state.adeImportedEvents.length > 0) {
         const map = new Map();
