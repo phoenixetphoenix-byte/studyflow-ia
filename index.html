@@ -178,7 +178,7 @@
     }
 
     function initPwaManifestAndIcons() {
-      const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#2563eb"/><stop offset="100%" stop-color="#4f46e5"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#g)"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" fill="#ffffff" font-family="Inter,Arial,sans-serif" font-weight="800" font-size="220">SF</text></svg>`;
+      const svgIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#2563eb"/><stop offset="100%" stop-color="#4f46e5"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#g)"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" fill="#ffffff" font-family="Inter,Arial,sans-serif" font-weight="800" font-size="220">SF</text></svg>';
       const iconUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgIcon);
       const appleLink = document.getElementById('pwaAppleIcon');
       if (appleLink) appleLink.href = iconUrl;
@@ -243,7 +243,7 @@
     const GOOGLE_SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/calendar.readonly';
 
     const MODULE_DEFINITIONS = [
-      { id: 'calendar', name: 'Google Agenda (Pont ADE)', desc: 'Synchronisation des créneaux ADE via Google Calendar et filtrage UE/Groupes.', icon: '📅', category: 'Sources & Flux' },
+      { id: 'calendar', name: 'Google Agenda (Pont ADE)', desc: 'Synchronisation multi-agendas ADE via Google Calendar et filtrage UE/Groupes.', icon: '📅', category: 'Sources & Flux' },
       { id: 'clipper', name: 'Pont Chamilo / Moodle (Clipper v2)', desc: "Réception sélective des supports aspirés par l'extension navigateur et dépôt Drive.", icon: '🧩', category: 'Sources & Flux' },
       { id: 'webmail', name: 'Automate Webmail → Action', desc: 'Analyse IA des e-mails Zimbra/Partage pour détecter deadlines et changements de salle.', icon: '✉️', category: 'Sources & Flux' },
       { id: 'drive', name: 'Google Drive & Cloud Sync', desc: 'Exploration de dossiers UE, import PDF sélectif et fusion studyflow_db.json.', icon: '☁️', category: 'Sources & Flux' },
@@ -269,6 +269,7 @@
           googleClientId: '',
           geminiApiKey: '',
           selectedCalendarId: 'primary',
+          selectedCalendarIds: ['primary'],
           selectedCalendarName: 'ADE Grenoble INP — Génie Industriel (Sync)'
         },
         modules: {
@@ -284,10 +285,10 @@
         },
         filters: {
           enabledUEs: ['Supply Chain & MRP', 'Écoconception & ACV', 'Systèmes Mécaniques', 'Ergonomie & Postes'],
-          disabledUEs: ['Option Anglais Renforcé G2', 'Réunion BDE / Hors-cursus'],
-          allowedGroups: ['CM', 'TD1', 'TP2', 'G1'],
-          blockedGroups: ['TD2', 'TD3', 'TP1', 'TP3', 'G2'],
-          excludeKeywords: ['annulé', 'option', 'g2', 'tp1'],
+          disabledUEs: [],
+          allowedGroups: [],
+          blockedGroups: [],
+          excludeKeywords: [],
           bypassFilters: false
         },
         ignoredDriveIds: [],
@@ -348,7 +349,7 @@
                 ue: 'Écoconception & ACV',
                 title: 'Rapport ACV Comparative (PDF 6 pages max sur Chamilo)',
                 dueDate: inFiveDays,
-                summary: `Ajouter la deadline « Rapport ACV Comparative » pour le ${inFiveDays}`,
+                summary: 'Ajouter la deadline « Rapport ACV Comparative » pour le ' + inFiveDays,
                 applied: false
               }
             ]
@@ -365,9 +366,10 @@
             ue: 'Supply Chain & MRP',
             type: 'CM',
             group: 'CM',
+            calendarName: 'ADE Grenoble INP',
             location: 'Amphi Bergès — Viallet',
-            start: `${todayStr}T08:30:00`,
-            end: `${todayStr}T10:30:00`,
+            start: todayStr + 'T08:30:00',
+            end: todayStr + 'T10:30:00',
             description: 'Dimensionnement du Plan Directeur de Production (PDP) et calcul des besoins nets (MRP2).'
           },
           {
@@ -376,9 +378,10 @@
             ue: 'Écoconception & ACV',
             type: 'TP',
             group: 'TP2',
+            calendarName: 'ADE Grenoble INP',
             location: 'Salle Informatique B204',
-            start: `${todayStr}T10:45:00`,
-            end: `${todayStr}T12:45:00`,
+            start: todayStr + 'T10:45:00',
+            end: todayStr + 'T12:45:00',
             description: "Bilan énergétique et impact carbone d'un assemblage soudé."
           },
           {
@@ -387,9 +390,10 @@
             ue: 'Systèmes Mécaniques',
             type: 'TD',
             group: 'TD1',
+            calendarName: 'ADE Grenoble INP',
             location: 'Salle D102',
-            start: `${todayStr}T14:00:00`,
-            end: `${todayStr}T16:00:00`,
+            start: todayStr + 'T14:00:00',
+            end: todayStr + 'T16:00:00',
             description: "Dimensionnement d'un réducteur à engrenages droits et vérification à la fatigue."
           },
           {
@@ -398,9 +402,10 @@
             ue: 'Ergonomie & Postes',
             type: 'CM',
             group: 'CM',
+            calendarName: 'ADE Grenoble INP',
             location: 'Amphi Gosse',
-            start: `${tomorrowStr}T09:00:00`,
-            end: `${tomorrowStr}T11:00:00`,
+            start: tomorrowStr + 'T09:00:00',
+            end: tomorrowStr + 'T11:00:00',
             description: "Cotation RULA/REBA et flux physiques en ligne d'assemblage."
           }
         ],
@@ -411,12 +416,7 @@
             ue: 'Supply Chain & MRP',
             updatedAt: now - 3600000,
             rawText: "Le Plan Industriel et Commercial (PIC) assure l'adéquation globale charge-capacité sur 6 à 18 mois. La quantité économique de commande (EOQ / Wilson) minimise la somme des coûts de lancement et de possession.",
-            summary: `### Pilotage Industriel & Gestion des Stocks
-- **PIC (Plan Industriel et Commercial)** : horizon tactique (6 à 18 mois) par familles de produits.
-- **PDP (Programme Directeur de Production)** : échéancier des produits finis semaine par semaine.
-- **Formule de Wilson (EOQ)** : quantité optimale $Q^*$ minimisant le coût total annuel de gestion des stocks :
-$$Q^* = \\sqrt{\\frac{2 \\cdot D \\cdot C_l}{C_p}}$$
-avec $D$ la demande annuelle, $C_l$ le coût unitaire de lancement d'une commande et $C_p = t \\cdot P_u$ le coût annuel de possession d'une unité en stock.`,
+            summary: "### Pilotage Industriel & Gestion des Stocks\n- **PIC (Plan Industriel et Commercial)** : horizon tactique (6 à 18 mois) par familles de produits.\n- **PDP (Programme Directeur de Production)** : échéancier des produits finis semaine par semaine.\n- **Formule de Wilson (EOQ)** : quantité optimale $Q^*$ minimisant le coût total annuel de gestion des stocks :\n$$Q^* = \\sqrt{\\frac{2 \\cdot D \\cdot C_l}{C_p}}$$\navec $D$ la demande annuelle, $C_l$ le coût unitaire de lancement d'une commande et $C_p = t \\cdot P_u$ le coût annuel de possession d'une unité en stock.",
             memo: "- **Piège classique d'examen** : vérifier l'homogénéité des unités de temps entre $D$ (annuelle) et $C_p$ (coût de stockage par an).",
             quiz: [
               {
@@ -447,12 +447,7 @@ avec $D$ la demande annuelle, $C_l$ le coût unitaire de lancement d'une command
             ue: 'Systèmes Mécaniques',
             updatedAt: now - 7200000,
             rawText: "Dimensionnement d'un engrenage cylindrique à denture droite. Entraxe a = m*(Z1+Z2)/2. Contrainte en pied de dent par la formule de Lewis.",
-            summary: `### Géométrie & Résistance des Engrenages Droits
-- **Entraxe théorique** d'un engrenage extérieur à denture droite de module $m$ :
-$$a = \\frac{m \\cdot (Z_1 + Z_2)}{2}$$
-- **Contrainte de flexion en pied de dent (Formule de Lewis)** :
-$$\\sigma_f = \\frac{F_t}{b \\cdot m \\cdot Y} \\le \\sigma_{\\text{adm}}$$
-où $F_t = \\frac{2 \\cdot C_1}{m \\cdot Z_1}$ est l'effort tangentiel, $b$ la largeur de denture et $Y$ le facteur de forme de Lewis.`,
+            summary: "### Géométrie & Résistance des Engrenages Droits\n- **Entraxe théorique** d'un engrenage extérieur à denture droite de module $m$ :\n$$a = \\frac{m \\cdot (Z_1 + Z_2)}{2}$$\n- **Contrainte de flexion en pied de dent (Formule de Lewis)** :\n$$\\sigma_f = \\frac{F_t}{b \\cdot m \\cdot Y} \\le \\sigma_{\\text{adm}}$$\noù $F_t = \\frac{2 \\cdot C_1}{m \\cdot Z_1}$ est l'effort tangentiel, $b$ la largeur de denture et $Y$ le facteur de forme de Lewis.",
             memo: "- **Condition de non-interférence** : pour un angle de pression $\\alpha = 20^\\circ$, le nombre minimal de dents d'un pignon sans déport est $Z_{\\min} = 17$.",
             quiz: [
               {
@@ -513,6 +508,7 @@ où $F_t = \\frac{2 \\cdot C_1}{m \\cdot Z_1}$ est l'effort tangentiel, $b$ la l
     let colleSelectedUE = 'Supply Chain & MRP';
     let speechRecognition = null;
     let isListeningMic = false;
+    let calendarHorizonDays = 14;
 
     function openIndexedDB() {
       return new Promise((resolve, reject) => {
@@ -544,6 +540,9 @@ où $F_t = \\frac{2 \\cdot C_1}{m \\cdot Z_1}$ est l'effort tangentiel, $b$ la l
                 modules: { ...def.modules, ...(req.result.modules || {}) },
                 filters: { ...def.filters, ...(req.result.filters || {}) }
               };
+              if (!Array.isArray(state.settings.selectedCalendarIds) || !state.settings.selectedCalendarIds.length) {
+                state.settings.selectedCalendarIds = [state.settings.selectedCalendarId || 'primary'];
+              }
             }
             ensureSm2MetadataOnAllCards();
             resolve();
@@ -581,7 +580,7 @@ où $F_t = \\frac{2 \\cdot C_1}{m \\cdot Z_1}$ est l'effort tangentiel, $b$ la l
         warn: 'bg-amber-500 text-slate-950 border-amber-400',
         error: 'bg-rose-600 text-white border-rose-500'
       };
-      el.className = `fixed bottom-20 md:bottom-6 right-4 left-4 md:left-auto md:w-96 z-50 p-3.5 rounded-xl shadow-xl border text-sm font-medium transition-all ${colors[type] || colors.info}`;
+      el.className = 'fixed bottom-20 md:bottom-6 right-4 left-4 md:left-auto md:w-96 z-50 p-3.5 rounded-xl shadow-xl border text-sm font-medium transition-all ' + (colors[type] || colors.info);
       el.textContent = msg;
       el.classList.remove('hidden');
       clearTimeout(window._toastTimer);
@@ -647,8 +646,8 @@ où $F_t = \\frac{2 \\cdot C_1}{m \\cdot Z_1}$ est l'effort tangentiel, $b$ la l
       saveStateToDB();
       renderNavigation();
       renderSm2View();
-      const label = quality < 3 ? 'Reprogrammée dans 10 min' : `Prochaine révision dans ${card.sm2.interval} jour(s)`;
-      showToast(`SM-2 enregistré : ${label}`, 'success');
+      const label = quality < 3 ? 'Reprogrammée dans 10 min' : 'Prochaine révision dans ' + card.sm2.interval + ' jour(s)';
+      showToast('SM-2 enregistré : ' + label, 'success');
     }
 
     function renderSm2View() {
@@ -793,7 +792,7 @@ où $F_t = \\frac{2 \\cdot C_1}{m \\cdot Z_1}$ est l'effort tangentiel, $b$ la l
         saveStateToDB();
         renderNavigation();
         renderCurrentView();
-        showToast(`${added} support(s) reçu(s) depuis StudyFlow Clipper v2 !`, 'success');
+        showToast(added + ' support(s) reçu(s) depuis StudyFlow Clipper v2 !', 'success');
       }
     }
 
@@ -869,7 +868,7 @@ où $F_t = \\frac{2 \\cdot C_1}{m \\cdot Z_1}$ est l'effort tangentiel, $b$ la l
     function switchView(viewId) {
       currentView = viewId;
       document.querySelectorAll('main section[id^="view-"]').forEach(sec => {
-        sec.classList.toggle('hidden', sec.id !== `view-${viewId}`);
+        sec.classList.toggle('hidden', sec.id !== 'view-' + viewId);
       });
       renderNavigation();
       renderCurrentView();
@@ -903,15 +902,40 @@ où $F_t = \\frac{2 \\cdot C_1}{m \\cdot Z_1}$ est l'effort tangentiel, $b$ la l
     }
 
     function parseEventMetadata(rawTitle, rawDesc = '') {
-      const combined = `${rawTitle} ${rawDesc}`;
-      let type = 'Cours';
-      if (/\bCM\b/i.test(rawTitle)) type = 'CM';
-      else if (/\bTD\d*\b/i.test(rawTitle)) type = 'TD';
-      else if (/\bTP\d*\b/i.test(rawTitle)) type = 'TP';
+      const combined = rawTitle + ' ' + rawDesc;
+      let type = 'Séance';
+      if (/\bCM\b|Cours\s*Magistral/i.test(combined)) type = 'CM';
+      else if (/\bTD\d*\b|Travaux\s*Dirig/i.test(combined)) type = 'TD';
+      else if (/\bTP\d*\b|Travaux\s*Prat/i.test(combined)) type = 'TP';
+      else if (/Examen|DS|Partiel|Contrôle/i.test(combined)) type = 'Examen';
+
       const grpMatch = combined.match(/\b(CM|TD\d+|TP\d+|G\d+|Groupe\s*\d+)\b/i);
       const group = grpMatch ? grpMatch[1].toUpperCase().replace(/\s+/g, '') : type;
-      let ue = rawTitle.replace(/\b(CM|TD\d*|TP\d*|G\d+|Groupe\s*\d+)\b/gi, '').replace(/^[\s\-–—:]+|[\s\-–—:]+$/g, '').trim();
+      let ue = rawTitle
+        .replace(/\[[^\]]+\]/g, '')
+        .replace(/\b(CM|TD\d*|TP\d*|G\d+|Groupe\s*\d+)\b/gi, '')
+        .replace(/^[\s\-–—:]+|[\s\-–—:]+$/g, '')
+        .trim();
       return { ue: ue || rawTitle, type, group };
+    }
+
+    function getEventBadgeStyle(type) {
+      if (type === 'CM') return { border: 'border-l-4 border-l-blue-600', badge: 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300' };
+      if (type === 'TD') return { border: 'border-l-4 border-l-indigo-600', badge: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300' };
+      if (type === 'TP') return { border: 'border-l-4 border-l-emerald-600', badge: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' };
+      if (type === 'Examen') return { border: 'border-l-4 border-l-rose-600', badge: 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300' };
+      return { border: 'border-l-4 border-l-slate-400', badge: 'bg-slate-200 text-slate-800 dark:bg-slate-800 dark:text-slate-300' };
+    }
+
+    function formatDayHeaderLabel(dateStr) {
+      const todayStr = new Date().toISOString().split('T')[0];
+      const tomorrowStr = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+      const d = new Date(dateStr + 'T12:00:00');
+      const formatted = d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+      const capitalized = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+      if (dateStr === todayStr) return { title: "Aujourd'hui — " + capitalized, isToday: true };
+      if (dateStr === tomorrowStr) return { title: 'Demain — ' + capitalized, isToday: false };
+      return { title: capitalized, isToday: false };
     }
 
     function connectGoogle() {
@@ -937,6 +961,7 @@ où $F_t = \\frac{2 \\cdot C_1}{m \\cdot Z_1}$ est l'effort tangentiel, $b$ la l
           updateGoogleStatusUI(true);
           showToast('Connecté à Google Drive & Agenda !', 'success');
           await fetchGoogleCalendars();
+          await syncSelectedGoogleCalendar();
           await syncDriveDatabase();
         }
       });
@@ -965,14 +990,14 @@ où $F_t = \\frac{2 \\cdot C_1}{m \\cdot Z_1}$ est l'effort tangentiel, $b$ la l
       if (!googleToken) throw new Error('Non authentifié auprès de Google.');
       const res = await fetch(url, {
         ...options,
-        headers: { Authorization: `Bearer ${googleToken}`, ...(options.headers || {}) }
+        headers: { Authorization: 'Bearer ' + googleToken, ...(options.headers || {}) }
       });
       if (res.status === 401) {
         googleToken = null;
         updateGoogleStatusUI(false);
         throw new Error('Session Google expirée, reconnecte-toi.');
       }
-      if (!res.ok) throw new Error(`Erreur API Google (${res.status})`);
+      if (!res.ok) throw new Error('Erreur API Google (' + res.status + ')');
       return res.json();
     }
 
@@ -981,7 +1006,25 @@ où $F_t = \\frac{2 \\cdot C_1}{m \\cdot Z_1}$ est l'effort tangentiel, $b$ la l
       try {
         const data = await googleFetch('https://www.googleapis.com/calendar/v3/users/me/calendarList');
         if (data.items?.length) {
-          state.calendars = data.items.map(c => ({ id: c.id, summary: c.summary, primary: !!c.primary }));
+          state.calendars = data.items.map(c => ({
+            id: c.id,
+            summary: c.summary || c.id,
+            primary: !!c.primary,
+            backgroundColor: c.backgroundColor || '#2563eb'
+          }));
+
+          const validIds = new Set(state.calendars.map(c => c.id));
+          let selected = (state.settings.selectedCalendarIds || []).filter(id => validIds.has(id));
+          const adeCals = state.calendars.filter(c => /ade|inp|edt|cours|univ|grenoble/i.test(c.summary));
+          if (adeCals.length > 0) {
+            adeCals.forEach(ac => {
+              if (!selected.includes(ac.id)) selected.push(ac.id);
+            });
+          } else if (selected.length === 0) {
+            selected = state.calendars.map(c => c.id);
+          }
+          state.settings.selectedCalendarIds = selected;
+          state.settings.selectedCalendarId = selected[0] || 'primary';
           await saveStateToDB();
           renderCurrentView();
         }
@@ -996,38 +1039,56 @@ où $F_t = \\frac{2 \\cdot C_1}{m \\cdot Z_1}$ est l'effort tangentiel, $b$ la l
         return;
       }
       try {
-        const calId = encodeURIComponent(state.settings.selectedCalendarId || 'primary');
+        if (!state.calendars || state.calendars.length <= 2) {
+          await fetchGoogleCalendars();
+        }
+        const idsToFetch = (state.settings.selectedCalendarIds && state.settings.selectedCalendarIds.length)
+          ? state.settings.selectedCalendarIds
+          : [state.settings.selectedCalendarId || 'primary'];
+
         const timeMin = new Date(Date.now() - 2 * 86400000).toISOString();
-        const timeMax = new Date(Date.now() + 14 * 86400000).toISOString();
-        const data = await googleFetch(`https://www.googleapis.com/calendar/v3/calendars/${calId}/events?singleEvents=true&orderBy=startTime&timeMin=${timeMin}&timeMax=${timeMax}&maxResults=150`);
-        state.events = (data.items || []).filter(item => item.start).map(item => {
-          const rawTitle = item.summary || 'Séance';
-          const rawDesc = item.description || '';
-          const meta = parseEventMetadata(rawTitle, rawDesc);
-          return {
-            id: item.id,
-            title: rawTitle,
-            ue: meta.ue,
-            type: meta.type,
-            group: meta.group,
-            location: item.location || 'Salle non précisée',
-            start: item.start.dateTime || `${item.start.date}T08:00:00`,
-            end: item.end?.dateTime || `${item.end?.date || item.start.date}T10:00:00`,
-            description: rawDesc
-          };
-        });
+        const timeMax = new Date(Date.now() + 30 * 86400000).toISOString();
+        const mergedEvents = [];
+
+        for (const rawId of idsToFetch) {
+          const calMeta = state.calendars.find(c => c.id === rawId);
+          const calLabel = calMeta ? calMeta.summary : 'Agenda';
+          const calId = encodeURIComponent(rawId);
+          try {
+            const data = await googleFetch('https://www.googleapis.com/calendar/v3/calendars/' + calId + '/events?singleEvents=true&orderBy=startTime&timeMin=' + timeMin + '&timeMax=' + timeMax + '&maxResults=250');
+            (data.items || []).filter(item => item.start).forEach(item => {
+              const rawTitle = item.summary || 'Séance';
+              const rawDesc = item.description || '';
+              const meta = parseEventMetadata(rawTitle, rawDesc);
+              mergedEvents.push({
+                id: rawId + '_' + item.id,
+                title: rawTitle,
+                ue: meta.ue,
+                type: meta.type,
+                group: meta.group,
+                calendarName: calLabel,
+                location: item.location || 'Salle non précisée',
+                start: item.start.dateTime || (item.start.date + 'T08:00:00'),
+                end: item.end?.dateTime || ((item.end?.date || item.start.date) + 'T10:00:00'),
+                description: rawDesc
+              });
+            });
+          } catch (subErr) {}
+        }
+
+        state.events = mergedEvents;
         await saveStateToDB();
         renderCurrentView();
-        showToast(`${state.events.length} créneaux synchronisés.`, 'success');
+        showToast(state.events.length + ' créneau(x) récupéré(s) sur ' + idsToFetch.length + ' agenda(s).', 'success');
       } catch (err) {
         showToast(err.message, 'error');
       }
     }
 
     async function ensureDriveFolder(folderName, parentId = null) {
-      const parentClause = parentId ? `and '${parentId}' in parents` : '';
-      const q = encodeURIComponent(`name='${folderName.replace(/'/g, "\\'")}' and mimeType='application/vnd.google-apps.folder' ${parentClause} and trashed=false`);
-      const res = await googleFetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`);
+      const parentClause = parentId ? "and '" + parentId + "' in parents" : '';
+      const q = encodeURIComponent("name='" + folderName.replace(/'/g, "\\'") + "' and mimeType='application/vnd.google-apps.folder' " + parentClause + " and trashed=false");
+      const res = await googleFetch('https://www.googleapis.com/drive/v3/files?q=' + q + '&fields=files(id,name)');
       if (res.files?.length > 0) return res.files[0].id;
       const body = { name: folderName, mimeType: 'application/vnd.google-apps.folder' };
       if (parentId) body.parents = [parentId];
@@ -1049,10 +1110,10 @@ où $F_t = \\frac{2 \\cdot C_1}{m \\cdot Z_1}$ est l'effort tangentiel, $b$ la l
 
       const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${googleToken}` },
+        headers: { Authorization: 'Bearer ' + googleToken },
         body: form
       });
-      if (!res.ok) throw new Error(`Échec upload Drive (${res.status})`);
+      if (!res.ok) throw new Error('Échec upload Drive (' + res.status + ')');
       return res.json();
     }
 
@@ -1064,13 +1125,13 @@ où $F_t = \\frac{2 \\cdot C_1}{m \\cdot Z_1}$ est l'effort tangentiel, $b$ la l
       try {
         showToast('Fusion cloud studyflow_db.json...', 'info');
         const folderId = await ensureDriveFolder(DRIVE_FOLDER_NAME);
-        const q = encodeURIComponent(`name='${DRIVE_DB_FILENAME}' and '${folderId}' in parents and trashed=false`);
-        const search = await googleFetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`);
+        const q = encodeURIComponent("name='" + DRIVE_DB_FILENAME + "' and '" + folderId + "' in parents and trashed=false");
+        const search = await googleFetch('https://www.googleapis.com/drive/v3/files?q=' + q + '&fields=files(id,name)');
 
         if (search.files?.length > 0) {
           const fileId = search.files[0].id;
-          const dlRes = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
-            headers: { Authorization: `Bearer ${googleToken}` }
+          const dlRes = await fetch('https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media', {
+            headers: { Authorization: 'Bearer ' + googleToken }
           });
           if (dlRes.ok) {
             const remoteData = await dlRes.json();
@@ -1114,17 +1175,44 @@ où $F_t = \\frac{2 \\cdot C_1}{m \\cdot Z_1}$ est l'effort tangentiel, $b$ la l
       const metadata = existingFileId ? { name: DRIVE_DB_FILENAME } : { name: DRIVE_DB_FILENAME, parents: [folderId] };
       const boundary = '-------studyflow_boundary_final';
       const body =
-        `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n` +
-        `--${boundary}\r\nContent-Type: application/json\r\n\r\n${payload}\r\n` +
-        `--${boundary}--`;
+        '--' + boundary + '\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(metadata) + '\r\n' +
+        '--' + boundary + '\r\nContent-Type: application/json\r\n\r\n' + payload + '\r\n' +
+        '--' + boundary + '--';
       const url = existingFileId
-        ? `https://www.googleapis.com/upload/drive/v3/files/${existingFileId}?uploadType=multipart`
+        ? 'https://www.googleapis.com/upload/drive/v3/files/' + existingFileId + '?uploadType=multipart'
         : 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
       await fetch(url, {
         method: existingFileId ? 'PATCH' : 'POST',
-        headers: { Authorization: `Bearer ${googleToken}`, 'Content-Type': `multipart/related; boundary=${boundary}` },
+        headers: { Authorization: 'Bearer ' + googleToken, 'Content-Type': 'multipart/related; boundary=' + boundary },
         body
       });
+    }
+
+    function renderEventCardHtml(ev, compact = false) {
+      const h1 = new Date(ev.start).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+      const h2 = new Date(ev.end).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+      const style = getEventBadgeStyle(ev.type);
+      return `
+        <div class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 ${style.border} bg-white dark:bg-slate-900/90 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-start sm:items-center gap-3.5 min-w-0">
+            <div class="w-16 shrink-0 text-left sm:text-center border-r border-slate-200 dark:border-slate-800 pr-3">
+              <div class="text-sm font-extrabold text-slate-900 dark:text-white leading-tight">${h1}</div>
+              <div class="text-xs font-medium text-slate-400 mt-0.5">${h2}</div>
+            </div>
+            <div class="min-w-0 space-y-1">
+              <div class="flex flex-wrap items-center gap-1.5 text-[11px]">
+                <span class="px-2 py-0.5 rounded-md font-bold ${style.badge}">${ev.type}</span>
+                ${ev.group && ev.group !== ev.type ? `<span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 font-semibold text-slate-600 dark:text-slate-300">${ev.group}</span>` : ''}
+                <span class="font-semibold ${ev.roomUpdated ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-600 dark:text-slate-300'}">📍 ${ev.location}</span>
+                ${!compact && ev.calendarName ? `<span class="text-slate-400 truncate max-w-[160px]">• ${ev.calendarName}</span>` : ''}
+              </div>
+              <h4 class="font-bold text-sm text-slate-900 dark:text-slate-100 leading-snug">${ev.title}</h4>
+              ${!compact && ev.description ? `<p class="text-xs text-slate-500 line-clamp-1">${ev.description}</p>` : ''}
+            </div>
+          </div>
+          ${state.modules.tutor ? `<button onclick="askTutorAboutEvent('${ev.id.replace(/'/g, "\\'")}')" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-brand-600 hover:text-white text-xs font-semibold shrink-0 self-end sm:self-center transition">🤖 Résumer</button>` : ''}
+        </div>
+      `;
     }
 
     function renderDashboard() {
@@ -1178,26 +1266,10 @@ où $F_t = \\frac{2 \\cdot C_1}{m \\cdot Z_1}$ est l'effort tangentiel, $b$ la l
           <div class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4">
             <div class="flex items-center justify-between">
               <h3 class="font-bold text-base">📅 Séances du jour (${todayEvents.length})</h3>
-              <button onclick="switchView('calendar')" class="text-xs font-semibold text-brand-600 hover:underline">Filtres UE/Groupes →</button>
+              <button onclick="switchView('calendar')" class="text-xs font-semibold text-brand-600 hover:underline">Planning complet & Agendas →</button>
             </div>
             <div class="space-y-3">
-              ${todayEvents.map(ev => {
-                const h1 = new Date(ev.start).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-                const h2 = new Date(ev.end).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-                return `
-                  <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div>
-                      <div class="flex flex-wrap items-center gap-2 text-xs mb-1">
-                        <span class="px-2 py-0.5 rounded bg-brand-100 dark:bg-brand-950 text-brand-700 dark:text-brand-300 font-bold">${h1} - ${h2}</span>
-                        <span class="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 font-semibold">${ev.group}</span>
-                        <span class="font-semibold ${ev.roomUpdated ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500'}">📍 ${ev.location} ${ev.roomUpdated ? '(Mis à jour via Mail)' : ''}</span>
-                      </div>
-                      <h4 class="font-bold text-sm">${ev.title}</h4>
-                    </div>
-                    ${state.modules.tutor ? `<button onclick="askTutorAboutEvent('${ev.id}')" class="px-3 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold shrink-0">🤖 Expliquer</button>` : ''}
-                  </div>
-                `;
-              }).join('') || "<p class='text-sm text-slate-500'>Aucun créneau retenu aujourd'hui.</p>"}
+              ${todayEvents.map(ev => renderEventCardHtml(ev, true)).join('') || "<p class='text-sm text-slate-500'>Aucun créneau aujourd'hui. Vérifie tes agendas sélectionnés dans l'onglet <strong>Planning ADE</strong>.</p>"}
             </div>
           </div>
           ` : ''}
@@ -1349,77 +1421,81 @@ où $F_t = \\frac{2 \\cdot C_1}{m \\cdot Z_1}$ est l'effort tangentiel, $b$ la l
         ]
       }, null, 2);
 
-      const content = `(() => {
-  const host = window.location.hostname;
-  function detectUE() {
-    const h1 = document.querySelector('h1, .page-header-headings h1, .breadcrumb li:nth-child(2)');
-    return h1 ? h1.textContent.trim().slice(0, 60) : 'UE Grenoble INP';
-  }
-  function scanEducationalLinks() {
-    const ue = detectUE();
-    const source = host.includes('chamilo') ? 'Chamilo Grenoble INP' : 'Moodle Grenoble INP';
-    const anchors = Array.from(document.querySelectorAll('a[href]'));
-    const results = [];
-    const seen = new Set();
-    anchors.forEach(a => {
-      const href = a.href;
-      const text = (a.textContent || '').trim();
-      if (!href || seen.has(href)) return;
-      if (/\\.pdf(\\?|$)/i.test(href) || href.includes('mod_resource') || href.includes('/document/')) {
-        seen.add(href);
-        results.push({ source, ue, title: text || href.split('/').pop().split('?')[0] || 'Support.pdf', url: href, snippet: 'Support extrait depuis ' + source });
-      }
-    });
-    return results;
-  }
-  function extractVisibleWebmail() {
-    const subjEl = document.querySelector('.ZmMailMsgView .Subject, [role="heading"], h2');
-    const fromEl = document.querySelector('.ZmMailMsgView .Address, .sender');
-    const bodyEl = document.querySelector('.ZmMailMsgView .MsgBody, iframe');
-    let bodyText = '';
-    if (bodyEl && bodyEl.tagName === 'IFRAME' && bodyEl.contentDocument) bodyText = bodyEl.contentDocument.body.innerText || '';
-    else if (bodyEl) bodyText = bodyEl.innerText || '';
-    else bodyText = document.body.innerText.slice(0, 2500);
-    return { sender: fromEl ? fromEl.textContent.trim() : 'Webmail Grenoble INP', subject: subjEl ? subjEl.textContent.trim() : document.title, body: bodyText.trim().slice(0, 3500) };
-  }
-  chrome.runtime.onMessage.addListener((req, _sender, sendResponse) => {
-    if (req.action === 'SCAN_PAGE') {
-      if (host.includes('webmail') || host.includes('partage')) sendResponse({ mode: 'webmail', mail: extractVisibleWebmail() });
-      else sendResponse({ mode: 'courses', items: scanEducationalLinks() });
-    }
-  });
-  if (host === 'localhost' || host.endsWith('.github.io')) {
-    chrome.storage.local.get(['studyflow_pending_payload'], (res) => {
-      if (res.studyflow_pending_payload) {
-        window.postMessage(res.studyflow_pending_payload, '*');
-        chrome.storage.local.remove('studyflow_pending_payload');
-      }
-    });
-  }
-})();`;
+      const content = [
+        '(() => {',
+        '  const host = window.location.hostname;',
+        '  function detectUE() {',
+        "    const h1 = document.querySelector('h1, .page-header-headings h1, .breadcrumb li:nth-child(2)');",
+        "    return h1 ? h1.textContent.trim().slice(0, 60) : 'UE Grenoble INP';",
+        '  }',
+        '  function scanEducationalLinks() {',
+        '    const ue = detectUE();',
+        "    const source = host.includes('chamilo') ? 'Chamilo Grenoble INP' : 'Moodle Grenoble INP';",
+        "    const anchors = Array.from(document.querySelectorAll('a[href]'));",
+        '    const results = [];',
+        '    const seen = new Set();',
+        '    anchors.forEach(a => {',
+        '      const href = a.href;',
+        "      const text = (a.textContent || '').trim();",
+        '      if (!href || seen.has(href)) return;',
+        "      if (/\\.pdf(\\?|$)/i.test(href) || href.includes('mod_resource') || href.includes('/document/')) {",
+        '        seen.add(href);',
+        "        results.push({ source, ue, title: text || href.split('/').pop().split('?')[0] || 'Support.pdf', url: href, snippet: 'Support extrait depuis ' + source });",
+        '      }',
+        '    });',
+        '    return results;',
+        '  }',
+        '  function extractVisibleWebmail() {',
+        "    const subjEl = document.querySelector('.ZmMailMsgView .Subject, [role=\"heading\"], h2');",
+        "    const fromEl = document.querySelector('.ZmMailMsgView .Address, .sender');",
+        "    const bodyEl = document.querySelector('.ZmMailMsgView .MsgBody, iframe');",
+        "    let bodyText = '';",
+        "    if (bodyEl && bodyEl.tagName === 'IFRAME' && bodyEl.contentDocument) bodyText = bodyEl.contentDocument.body.innerText || '';",
+        "    else if (bodyEl) bodyText = bodyEl.innerText || '';",
+        '    else bodyText = document.body.innerText.slice(0, 2500);',
+        "    return { sender: fromEl ? fromEl.textContent.trim() : 'Webmail Grenoble INP', subject: subjEl ? subjEl.textContent.trim() : document.title, body: bodyText.trim().slice(0, 3500) };",
+        '  }',
+        '  chrome.runtime.onMessage.addListener((req, _sender, sendResponse) => {',
+        "    if (req.action === 'SCAN_PAGE') {",
+        "      if (host.includes('webmail') || host.includes('partage')) sendResponse({ mode: 'webmail', mail: extractVisibleWebmail() });",
+        "      else sendResponse({ mode: 'courses', items: scanEducationalLinks() });",
+        '    }',
+        '  });',
+        "  if (host === 'localhost' || host.endsWith('.github.io')) {",
+        "    chrome.storage.local.get(['studyflow_pending_payload'], (res) => {",
+        '      if (res.studyflow_pending_payload) {',
+        "        window.postMessage(res.studyflow_pending_payload, '*');",
+        "        chrome.storage.local.remove('studyflow_pending_payload');",
+        '      }',
+        '    });',
+        '  }',
+        '})();'
+      ].join('\n');
 
-      const popup_html = `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8" /><style>body{font-family:Arial,sans-serif;width:340px;padding:12px;background:#0f172a;color:#f8fafc}h2{font-size:15px;margin:0 0 8px;color:#60a5fa}.item{display:flex;align-items:center;gap:6px;font-size:12px;padding:5px 0;border-bottom:1px solid #1e293b}button{width:100%;margin-top:10px;padding:8px;border:none;border-radius:8px;background:#2563eb;color:#fff;font-weight:700;cursor:pointer}#status{font-size:11px;color:#94a3b8;margin-top:6px}</style></head><body><h2>StudyFlow Clipper v2</h2><div id="list">Analyse de la page...</div><button id="sendBtn">Envoyer vers StudyFlow IA</button><div id="status"></div><script src="popup.js"><\/script></body></html>`;
+      const popup_html = '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8" /><style>body{font-family:Arial,sans-serif;width:340px;padding:12px;background:#0f172a;color:#f8fafc}h2{font-size:15px;margin:0 0 8px;color:#60a5fa}.item{display:flex;align-items:center;gap:6px;font-size:12px;padding:5px 0;border-bottom:1px solid #1e293b}button{width:100%;margin-top:10px;padding:8px;border:none;border-radius:8px;background:#2563eb;color:#fff;font-weight:700;cursor:pointer}#status{font-size:11px;color:#94a3b8;margin-top:6px}</style></head><body><h2>StudyFlow Clipper v2</h2><div id="list">Analyse de la page...</div><button id="sendBtn">Envoyer vers StudyFlow IA</button><div id="status"></div><' + 'script src="popup.js"><' + '/script></body></html>';
 
-      const popup_js = `let scannedData = null;
-chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-  chrome.tabs.sendMessage(tabs[0].id, { action: 'SCAN_PAGE' }, (resp) => {
-    const listEl = document.getElementById('list');
-    if (!resp) { listEl.textContent = 'Ouvre Chamilo, Moodle ou Webmail.'; return; }
-    scannedData = resp;
-    if (resp.mode === 'webmail') listEl.innerHTML = '<strong>Mail :</strong><br/>' + resp.mail.subject;
-    else listEl.innerHTML = resp.items.map((it, idx) => '<label class="item"><input type="checkbox" checked data-idx="' + idx + '" /><span>[' + it.ue + '] ' + it.title + '</span></label>').join('') || 'Aucun PDF détecté.';
-  });
-});
-document.getElementById('sendBtn').addEventListener('click', () => {
-  if (!scannedData) return;
-  const statusEl = document.getElementById('status');
-  if (scannedData.mode === 'webmail') {
-    chrome.storage.local.set({ studyflow_pending_payload: { type: 'STUDYFLOW_CLIPPER_MAIL', mail: scannedData.mail } }, () => { statusEl.textContent = 'Mail prêt pour StudyFlow IA !'; });
-  } else {
-    const selected = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(c => scannedData.items[Number(c.dataset.idx)]);
-    chrome.storage.local.set({ studyflow_pending_payload: { type: 'STUDYFLOW_CLIPPER_FILES', items: selected } }, () => { statusEl.textContent = selected.length + ' support(s) prêts !'; });
-  }
-});`;
+      const popup_js = [
+        'let scannedData = null;',
+        'chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {',
+        "  chrome.tabs.sendMessage(tabs[0].id, { action: 'SCAN_PAGE' }, (resp) => {",
+        "    const listEl = document.getElementById('list');",
+        "    if (!resp) { listEl.textContent = 'Ouvre Chamilo, Moodle ou Webmail.'; return; }",
+        '    scannedData = resp;',
+        "    if (resp.mode === 'webmail') listEl.innerHTML = '<strong>Mail :</strong><br/>' + resp.mail.subject;",
+        "    else listEl.innerHTML = resp.items.map((it, idx) => '<label class=\"item\"><input type=\"checkbox\" checked data-idx=\"' + idx + '\" /><span>[' + it.ue + '] ' + it.title + '</span></label>').join('') || 'Aucun PDF détecté.';",
+        '  });',
+        '});',
+        "document.getElementById('sendBtn').addEventListener('click', () => {",
+        '  if (!scannedData) return;',
+        "  const statusEl = document.getElementById('status');",
+        "  if (scannedData.mode === 'webmail') {",
+        "    chrome.storage.local.set({ studyflow_pending_payload: { type: 'STUDYFLOW_CLIPPER_MAIL', mail: scannedData.mail } }, () => { statusEl.textContent = 'Mail prêt pour StudyFlow IA !'; });",
+        '  } else {',
+        "    const selected = Array.from(document.querySelectorAll('input[type=\"checkbox\"]:checked')).map(c => scannedData.items[Number(c.dataset.idx)]);",
+        "    chrome.storage.local.set({ studyflow_pending_payload: { type: 'STUDYFLOW_CLIPPER_FILES', items: selected } }, () => { statusEl.textContent = selected.length + ' support(s) prêts !'; });",
+        '  }',
+        '});'
+      ].join('\n');
 
       return { manifest, content, popup_html, popup_js };
     }
@@ -1479,7 +1555,7 @@ document.getElementById('sendBtn').addEventListener('click', () => {
       }
 
       for (const item of selected) {
-        let extractedText = item.snippet || `Support importé depuis ${item.source} : ${item.title}`;
+        let extractedText = item.snippet || ('Support importé depuis ' + item.source + ' : ' + item.title);
         let pdfBlob = new Blob([extractedText], { type: 'text/plain;charset=utf-8' });
 
         if (item.base64Pdf) {
@@ -1495,7 +1571,7 @@ document.getElementById('sendBtn').addEventListener('click', () => {
           try {
             await uploadBinaryOrTextToDriveUE(item.ue, item.title, pdfBlob);
           } catch (err) {
-            showToast(`Erreur dépôt Drive (${item.title}) : ${err.message}`, 'error');
+            showToast('Erreur dépôt Drive (' + item.title + ') : ' + err.message, 'error');
           }
         }
 
@@ -1573,8 +1649,8 @@ document.getElementById('sendBtn').addEventListener('click', () => {
       const apiKey = state.settings.geminiApiKey.trim();
       if (apiKey) {
         try {
-          const prompt = `Analyse cet e-mail universitaire et détecte changement de salle ou deadline. Réponds UNIQUEMENT en JSON [{kind: "room_change"|"deadline", ue, targetEventTitle, newLocation, title, dueDate, summary}]. Sujet: ${subject}. Corps: ${body}`;
-          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`, {
+          const prompt = 'Analyse cet e-mail universitaire et détecte changement de salle ou deadline. Réponds UNIQUEMENT en JSON [{kind: "room_change"|"deadline", ue, targetEventTitle, newLocation, title, dueDate, summary}]. Sujet: ' + subject + '. Corps: ' + body;
+          const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + encodeURIComponent(apiKey), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: 'application/json' } })
@@ -1588,10 +1664,10 @@ document.getElementById('sendBtn').addEventListener('click', () => {
       const actions = [];
       const roomMatch = body.match(/(?:salle|amphi)\s+([A-Z0-9éèêàâîïôûü\- ]{2,25})/i);
       if (/salle|amphi|déplacé|reporté/i.test(subject + ' ' + body) && roomMatch) {
-        actions.push({ id: 'act-' + Date.now() + '-r', kind: 'room_change', ue: 'UE Détectée', targetEventTitle: subject, newLocation: roomMatch[0].trim(), summary: `Mettre à jour le lieu → ${roomMatch[0].trim()}`, applied: false });
+        actions.push({ id: 'act-' + Date.now() + '-r', kind: 'room_change', ue: 'UE Détectée', targetEventTitle: subject, newLocation: roomMatch[0].trim(), summary: 'Mettre à jour le lieu → ' + roomMatch[0].trim(), applied: false });
       }
       if (/rendu|rapport|devoir|déposer|échéance|avant le/i.test(subject + ' ' + body) || !actions.length) {
-        actions.push({ id: 'act-' + Date.now() + '-d', kind: 'deadline', ue: 'UE Mail', title: subject, dueDate: new Date(Date.now() + 4 * 86400000).toISOString().split('T')[0], summary: `Créer la deadline « ${subject} »`, applied: false });
+        actions.push({ id: 'act-' + Date.now() + '-d', kind: 'deadline', ue: 'UE Mail', title: subject, dueDate: new Date(Date.now() + 4 * 86400000).toISOString().split('T')[0], summary: 'Créer la deadline « ' + subject + ' »', applied: false });
       }
       return actions;
     }
@@ -1607,7 +1683,7 @@ document.getElementById('sendBtn').addEventListener('click', () => {
           target.location = act.newLocation;
           target.roomUpdated = true;
         }
-        showToast(`Salle mise à jour : ${act.newLocation}`, 'success');
+        showToast('Salle mise à jour : ' + act.newLocation, 'success');
       } else {
         state.deadlines.push({
           id: 'dl-' + Date.now(),
@@ -1629,72 +1705,138 @@ document.getElementById('sendBtn').addEventListener('click', () => {
 
     function renderCalendarView() {
       const el = document.getElementById('view-calendar');
-      const allUEs = Array.from(new Set([...state.filters.enabledUEs, ...state.filters.disabledUEs, ...state.events.map(e => e.ue)]));
-      const allGroups = Array.from(new Set([...state.filters.allowedGroups, ...state.filters.blockedGroups, ...state.events.map(e => e.group)]));
-      const visibleEvents = getFilteredEvents();
+      const allUEs = Array.from(new Set([...(state.filters.enabledUEs || []), ...(state.filters.disabledUEs || []), ...state.events.map(e => e.ue)]));
+      const allGroups = Array.from(new Set([...(state.filters.allowedGroups || []), ...(state.filters.blockedGroups || []), ...state.events.map(e => e.group)]));
+      const horizonLimit = Date.now() + calendarHorizonDays * 86400000;
+      const visibleEvents = getFilteredEvents().filter(ev => new Date(ev.start).getTime() <= horizonLimit);
+
+      const groupedByDay = new Map();
+      visibleEvents.forEach(ev => {
+        const dayKey = ev.start.split('T')[0];
+        if (!groupedByDay.has(dayKey)) groupedByDay.set(dayKey, []);
+        groupedByDay.get(dayKey).push(ev);
+      });
+
+      const selectedCalIds = state.settings.selectedCalendarIds || [];
 
       el.innerHTML = `
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h2 class="text-2xl font-extrabold">📅 Google Agenda (Pont ADE) & Filtrage</h2>
-            <p class="text-sm text-slate-500">Sélectionne ton agenda synchronisé avec ADE et ne garde que tes UE et groupes.</p>
+            <h2 class="text-2xl font-extrabold">📅 Planning ADE & Agendas Google</h2>
+            <p class="text-sm text-slate-500">Coche tous les agendas Google à afficher (ADE abonné + agenda principal) et filtre par UE ou groupe.</p>
           </div>
-          <button onclick="syncSelectedGoogleCalendar()" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold">🔄 Synchroniser l'agenda</button>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="fetchGoogleCalendars().then(() => syncSelectedGoogleCalendar())" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold shadow-sm">🔄 Actualiser ADE & Google</button>
+          </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4">
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-5 h-fit">
             <div>
-              <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Agenda source</label>
-              <select onchange="changeSelectedCalendar(this.value)" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-semibold">
-                ${state.calendars.map(c => `<option value="${c.id}" ${c.id === state.settings.selectedCalendarId ? 'selected' : ''}>${c.summary}</option>`).join('')}
-              </select>
-            </div>
-            <div>
-              <div class="text-xs font-bold uppercase text-slate-500 mb-2">Mes UE</div>
-              ${allUEs.map(ue => `
-                <label class="flex items-center gap-2 py-1 text-xs cursor-pointer">
-                  <input type="checkbox" ${!state.filters.disabledUEs.includes(ue) ? 'checked' : ''} onchange="toggleUEFilter('${ue.replace(/'/g, "\\'")}', this.checked)" class="accent-brand-600" />
-                  <span class="truncate">${ue}</span>
-                </label>
-              `).join('')}
-            </div>
-            <div>
-              <div class="text-xs font-bold uppercase text-slate-500 mb-2">Mes Groupes</div>
-              <div class="flex flex-wrap gap-1.5">
-                ${allGroups.map(grp => {
-                  const active = !state.filters.blockedGroups.includes(grp);
-                  return `<button onclick="toggleGroupFilter('${grp.replace(/'/g, "\\'")}')" class="px-2.5 py-1 rounded-lg text-xs font-bold border ${active ? 'bg-brand-600 text-white border-brand-600' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 line-through'}">${grp}</button>`;
+              <div class="flex items-center justify-between mb-2">
+                <label class="text-xs font-bold uppercase text-slate-500">Agendas Google synchronisés</label>
+                <button onclick="fetchGoogleCalendars()" class="text-[11px] font-semibold text-brand-600 hover:underline">Actualiser la liste</button>
+              </div>
+              <div class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                ${state.calendars.map(c => {
+                  const checked = selectedCalIds.includes(c.id);
+                  return `
+                    <label class="flex items-center gap-2.5 p-2 rounded-xl border ${checked ? 'border-brand-300 dark:border-brand-800 bg-brand-50/50 dark:bg-brand-950/30' : 'border-slate-200 dark:border-slate-800'} text-xs cursor-pointer">
+                      <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleCalendarSelection('${c.id.replace(/'/g, "\\'")}', this.checked)" class="accent-brand-600 shrink-0" />
+                      <span class="font-semibold truncate">${c.summary}</span>
+                    </label>
+                  `;
                 }).join('')}
+              </div>
+            </div>
+
+            <div class="pt-3 border-t border-slate-200 dark:border-slate-800">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold uppercase text-slate-500">Filtres UE & Groupes</span>
+                <button onclick="toggleBypassFilters()" class="text-[11px] font-bold ${state.filters.bypassFilters ? 'text-emerald-600' : 'text-brand-600'} hover:underline">
+                  ${state.filters.bypassFilters ? '✓ Tout affiché' : 'Tout afficher'}
+                </button>
+              </div>
+              ${allGroups.length > 0 ? `
+                <div class="flex flex-wrap gap-1.5 mb-3">
+                  ${allGroups.map(grp => {
+                    const active = state.filters.bypassFilters || !state.filters.blockedGroups.includes(grp);
+                    return `<button onclick="toggleGroupFilter('${grp.replace(/'/g, "\\'")}')" class="px-2.5 py-1 rounded-lg text-xs font-bold border ${active ? 'bg-brand-600 text-white border-brand-600' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 line-through'}">${grp}</button>`;
+                  }).join('')}
+                </div>
+              ` : ''}
+              <div class="space-y-1 max-h-56 overflow-y-auto pr-1">
+                ${allUEs.map(ue => `
+                  <label class="flex items-center gap-2 py-1 text-xs cursor-pointer">
+                    <input type="checkbox" ${state.filters.bypassFilters || !state.filters.disabledUEs.includes(ue) ? 'checked' : ''} onchange="toggleUEFilter('${ue.replace(/'/g, "\\'")}', this.checked)" class="accent-brand-600 shrink-0" />
+                    <span class="truncate">${ue}</span>
+                  </label>
+                `).join('')}
               </div>
             </div>
           </div>
 
-          <div class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-3">
-            <h3 class="font-bold text-base">Créneaux filtrés (${visibleEvents.length})</h3>
-            ${visibleEvents.map(ev => `
-              <div class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
-                <div>
-                  <div class="text-xs text-brand-600 dark:text-brand-400 font-bold">${new Date(ev.start).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })} • ${new Date(ev.start).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })} • 📍 ${ev.location}</div>
-                  <div class="font-bold text-sm">${ev.title}</div>
-                </div>
-                <span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-xs font-bold">${ev.group}</span>
+          <div class="lg:col-span-2 space-y-5">
+            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 flex flex-wrap items-center justify-between gap-3">
+              <div class="flex items-center gap-2 text-xs font-bold">
+                <span class="px-2.5 py-1 rounded-lg bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300">CM</span>
+                <span class="px-2.5 py-1 rounded-lg bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300">TD</span>
+                <span class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">TP</span>
+                <span class="text-slate-400 ml-1">• ${visibleEvents.length} séance(s)</span>
               </div>
-            `).join('')}
+              <div class="flex gap-1.5">
+                ${[7, 14, 30].map(d => `
+                  <button onclick="calendarHorizonDays = ${d}; renderCalendarView();" class="px-2.5 py-1 rounded-lg text-xs font-bold ${calendarHorizonDays === d ? 'bg-slate-900 dark:bg-brand-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}">${d} jours</button>
+                `).join('')}
+              </div>
+            </div>
+
+            ${groupedByDay.size === 0 ? `
+              <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 text-center space-y-2">
+                <p class="text-sm font-semibold">Aucune séance affichée sur cette période.</p>
+                <p class="text-xs text-slate-500">Vérifie à gauche que ton agenda ADE est bien coché et clique sur <strong>Actualiser ADE & Google</strong>.</p>
+              </div>
+            ` : Array.from(groupedByDay.entries()).map(([dayKey, dayEvents]) => {
+              const header = formatDayHeaderLabel(dayKey);
+              return `
+                <div class="space-y-2.5">
+                  <div class="flex items-center justify-between px-1">
+                    <h3 class="text-sm font-extrabold tracking-tight ${header.isToday ? 'text-brand-600 dark:text-brand-400' : 'text-slate-700 dark:text-slate-200'}">${header.title}</h3>
+                    <span class="text-xs font-semibold text-slate-400">${dayEvents.length} séance(s)</span>
+                  </div>
+                  <div class="space-y-2">
+                    ${dayEvents.map(ev => renderEventCardHtml(ev, false)).join('')}
+                  </div>
+                </div>
+              `;
+            }).join('')}
           </div>
         </div>
       `;
     }
 
-    function changeSelectedCalendar(calId) {
-      const found = state.calendars.find(c => c.id === calId);
-      state.settings.selectedCalendarId = calId;
-      state.settings.selectedCalendarName = found ? found.summary : calId;
+    async function toggleCalendarSelection(calId, checked) {
+      let list = [...(state.settings.selectedCalendarIds || [])];
+      if (checked) {
+        if (!list.includes(calId)) list.push(calId);
+      } else {
+        list = list.filter(x => x !== calId);
+      }
+      state.settings.selectedCalendarIds = list;
+      state.settings.selectedCalendarId = list[0] || 'primary';
+      await saveStateToDB();
+      if (googleToken) await syncSelectedGoogleCalendar();
+      else renderCalendarView();
+    }
+
+    function toggleBypassFilters() {
+      state.filters.bypassFilters = !state.filters.bypassFilters;
       saveStateToDB();
-      if (googleToken) syncSelectedGoogleCalendar();
+      renderCalendarView();
     }
 
     function toggleUEFilter(ue, enabled) {
+      state.filters.bypassFilters = false;
       if (enabled) state.filters.disabledUEs = state.filters.disabledUEs.filter(x => x !== ue);
       else if (!state.filters.disabledUEs.includes(ue)) state.filters.disabledUEs.push(ue);
       saveStateToDB();
@@ -1702,6 +1844,7 @@ document.getElementById('sendBtn').addEventListener('click', () => {
     }
 
     function toggleGroupFilter(grp) {
+      state.filters.bypassFilters = false;
       if (state.filters.blockedGroups.includes(grp)) state.filters.blockedGroups = state.filters.blockedGroups.filter(x => x !== grp);
       else state.filters.blockedGroups.push(grp);
       saveStateToDB();
@@ -1770,8 +1913,8 @@ document.getElementById('sendBtn').addEventListener('click', () => {
 
     async function listDriveFolderContents(folderId) {
       selectedDriveFileIds.clear();
-      const q = encodeURIComponent(`'${folderId}' in parents and trashed=false and (mimeType='application/vnd.google-apps.folder' or mimeType='application/pdf' or mimeType='application/vnd.google-apps.document')`);
-      const res = await googleFetch(`https://www.googleapis.com/drive/v3/files?q=${q}&orderBy=folder,name&fields=files(id,name,mimeType)`);
+      const q = encodeURIComponent("'" + folderId + "' in parents and trashed=false and (mimeType='application/vnd.google-apps.folder' or mimeType='application/pdf' or mimeType='application/vnd.google-apps.document')");
+      const res = await googleFetch('https://www.googleapis.com/drive/v3/files?q=' + q + '&orderBy=folder,name&fields=files(id,name,mimeType)');
       driveListedFiles = res.files || [];
       renderDriveView();
     }
@@ -1806,8 +1949,8 @@ document.getElementById('sendBtn').addEventListener('click', () => {
       for (const fileId of selectedDriveFileIds) {
         const meta = driveListedFiles.find(f => f.id === fileId);
         if (!meta) continue;
-        const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
-          headers: { Authorization: `Bearer ${googleToken}` }
+        const res = await fetch('https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media', {
+          headers: { Authorization: 'Bearer ' + googleToken }
         });
         const text = await extractPdfTextFromArrayBuffer(await res.arrayBuffer());
         await createCourseFromText(meta.name.replace(/\.pdf$/i, ''), currentUe, text || meta.name);
@@ -1885,8 +2028,8 @@ document.getElementById('sendBtn').addEventListener('click', () => {
       let generated = null;
       if (apiKey) {
         try {
-          const prompt = `Analyse ce cours d'ingénieur (formate toutes les formules mathématiques en LaTeX $...$ ou $$...$$) et réponds en JSON valide avec les clés "summary" (markdown), "memo" (markdown), "quiz" ([{question, options, answer, explanation}]) et "flashcards" ([{front, back}]). Texte : ${rawText.slice(0, 14000)}`;
-          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`, {
+          const prompt = 'Analyse ce cours d\'ingénieur (formate toutes les formules mathématiques en LaTeX $...$ ou $$...$$) et réponds en JSON valide avec les clés "summary" (markdown), "memo" (markdown), "quiz" ([{question, options, answer, explanation}]) et "flashcards" ([{front, back}]). Texte : ' + rawText.slice(0, 14000);
+          const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + encodeURIComponent(apiKey), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: 'application/json' } })
@@ -1900,10 +2043,10 @@ document.getElementById('sendBtn').addEventListener('click', () => {
       if (!generated) {
         const sentences = rawText.split(/[.!?]\s+/).filter(s => s.length > 20).slice(0, 4);
         generated = {
-          summary: `### Synthèse : ${title}\n` + (sentences.length ? sentences.map(s => `- ${s.trim()}.`).join('\n') : `- ${rawText.slice(0, 350)}`),
-          memo: `- **À retenir** : Vérifie les formules clés et hypothèses de **${title}**.`,
-          quiz: [{ question: `Quel est le sujet principal de « ${title} » ?`, options: [sentences[0]?.slice(0, 60) || title, "Histoire de l'art", 'Droit civil', 'Aucune réponse'], answer: 0, explanation: 'Notion extraite du support.' }],
-          flashcards: [{ front: `Notion clé : ${title}`, back: sentences[0] || rawText.slice(0, 160) }]
+          summary: '### Synthèse : ' + title + '\n' + (sentences.length ? sentences.map(s => '- ' + s.trim() + '.').join('\n') : '- ' + rawText.slice(0, 350)),
+          memo: '- **À retenir** : Vérifie les formules clés et hypothèses de **' + title + '**.',
+          quiz: [{ question: 'Quel est le sujet principal de « ' + title + ' » ?', options: [sentences[0]?.slice(0, 60) || title, "Histoire de l'art", 'Droit civil', 'Aucune réponse'], answer: 0, explanation: 'Notion extraite du support.' }],
+          flashcards: [{ front: 'Notion clé : ' + title, back: sentences[0] || rawText.slice(0, 160) }]
         };
       }
 
@@ -1924,7 +2067,7 @@ document.getElementById('sendBtn').addEventListener('click', () => {
           sm2: { interval: 0, repetition: 0, efactor: 2.5, nextReview: now }
         }))
       });
-      showToast(`Support « ${title} » généré !`, 'success');
+      showToast('Support « ' + title + ' » généré !', 'success');
     }
 
     function openCourseDetail(courseId, tab = 'summary') {
@@ -2053,8 +2196,8 @@ document.getElementById('sendBtn').addEventListener('click', () => {
       colleModeActive = true;
       const ueCourses = state.courses.filter(c => c.ue === colleSelectedUE);
       const refCourse = ueCourses[0] || state.courses[0];
-      const prompt = `Mode Colle Orale activé sur l'UE **${colleSelectedUE}**. Pose-moi une première question orale précise et technique issue du cours « ${refCourse?.title || colleSelectedUE} » (avec une équation ou un cas concret si pertinent), et attends ma réponse avant de me noter sur 20.`;
-      state.chatHistory.push({ role: 'user', text: `🎙️ Démarrer une colle orale sur : ${colleSelectedUE}` });
+      const prompt = "Mode Colle Orale activé sur l'UE **" + colleSelectedUE + "**. Pose-moi une première question orale précise et technique issue du cours « " + (refCourse?.title || colleSelectedUE) + " » (avec une équation ou un cas concret si pertinent), et attends ma réponse avant de me noter sur 20.";
+      state.chatHistory.push({ role: 'user', text: '🎙️ Démarrer une colle orale sur : ' + colleSelectedUE });
       await generateTutorReply(prompt, true);
     }
 
@@ -2109,7 +2252,7 @@ document.getElementById('sendBtn').addEventListener('click', () => {
       if (!ev) return;
       colleModeActive = false;
       switchView('tutor');
-      document.getElementById('tutorInput').value = `Explique-moi ma séance « ${ev.title} » (${ev.ue}) en salle ${ev.location}.`;
+      document.getElementById('tutorInput').value = 'Explique-moi ma séance « ' + ev.title + ' » (' + ev.ue + ') en salle ' + ev.location + '.';
       sendTutorMessage();
     }
 
@@ -2128,14 +2271,14 @@ document.getElementById('sendBtn').addEventListener('click', () => {
       let reply = '';
       if (apiKey) {
         try {
-          const coursesContext = state.courses.map(c => `[${c.ue}] ${c.title}: ${c.summary}`).join('\n').slice(0, 9000);
+          const coursesContext = state.courses.map(c => '[' + c.ue + '] ' + c.title + ': ' + c.summary).join('\n').slice(0, 9000);
           const systemRole = colleModeActive
-            ? `Tu es un professeur examinateur de colle orale à Grenoble INP sur l'UE ${colleSelectedUE}. Évalue la réponse de l'étudiant avec bienveillance et rigueur (note indicative /20 si applicable), corrige les imprécisions avec des formules LaTeX $...$ et pose une question de relance.`
-            : `Tu es le tuteur pédagogique IA de Grenoble INP. Utilise LaTeX $...$ et $$...$$ pour les formules.`;
-          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`, {
+            ? "Tu es un professeur examinateur de colle orale à Grenoble INP sur l'UE " + colleSelectedUE + ". Évalue la réponse de l'étudiant avec bienveillance et rigueur (note indicative /20 si applicable), corrige les imprécisions avec des formules LaTeX $...$ et pose une question de relance."
+            : 'Tu es le tuteur pédagogique IA de Grenoble INP. Utilise LaTeX $...$ et $$...$$ pour les formules.';
+          const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + encodeURIComponent(apiKey), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ contents: [{ parts: [{ text: `${systemRole}\nSupports:\n${coursesContext}\nMessage: ${userPrompt}` }] }] })
+            body: JSON.stringify({ contents: [{ parts: [{ text: systemRole + '\nSupports:\n' + coursesContext + '\nMessage: ' + userPrompt }] }] })
           });
           const data = await res.json();
           reply = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
@@ -2143,9 +2286,9 @@ document.getElementById('sendBtn').addEventListener('click', () => {
       }
       if (!reply) {
         if (colleModeActive) {
-          reply = `**Question de Colle (${colleSelectedUE})** : Peux-tu expliquer les hypothèses principales du modèle étudié dans ton cours et écrire la relation mathématique fondamentale associée (par exemple $Q^* = \\sqrt{\\frac{2 D C_l}{C_p}}$ en gestion des stocks ou $a = \\frac{m(Z_1+Z_2)}{2}$ en transmission) ?`;
+          reply = '**Question de Colle (' + colleSelectedUE + ')** : Peux-tu expliquer les hypothèses principales du modèle étudié dans ton cours et écrire la relation mathématique fondamentale associée (par exemple $Q^* = \\sqrt{\\frac{2 D C_l}{C_p}}$ en gestion des stocks ou $a = \\frac{m(Z_1+Z_2)}{2}$ en transmission) ?';
         } else {
-          reply = `Voici les éléments clés basés sur tes supports (**${state.courses.map(c => c.ue).join(', ')}**) : vérifie les formules principales et les hypothèses de ton polycopié correspondant.`;
+          reply = 'Voici les éléments clés basés sur tes supports (**' + state.courses.map(c => c.ue).join(', ') + '**) : vérifie les formules principales et les hypothèses de ton polycopié correspondant.';
         }
       }
       state.chatHistory.push({ role: 'assistant', text: reply });
