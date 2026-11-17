@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="StudyFlow IA" />
   <link id="pwaManifestLink" rel="manifest" />
   <link id="pwaAppleIcon" rel="apple-touch-icon" />
-  <title>StudyFlow IA — Édition Complète (PWA, KaTeX, SM-2 & Colle Orale)</title>
+  <title>StudyFlow IA — Édition Complète (Relais CAS, PWA, KaTeX, SM-2 & Colle)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -58,7 +58,7 @@
         <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-600 to-indigo-600 flex items-center justify-center text-white font-extrabold text-lg shadow-md">SF</div>
         <div>
           <h1 class="font-bold text-base tracking-tight leading-none">StudyFlow IA</h1>
-          <span class="text-[11px] font-semibold text-brand-600 dark:text-brand-400">PWA • KaTeX • SM-2 • Colle</span>
+          <span class="text-[11px] font-semibold text-brand-600 dark:text-brand-400">Relais CAS • PWA • SM-2</span>
         </div>
       </div>
       <button onclick="toggleTheme()" title="Changer de thème" class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
@@ -93,12 +93,13 @@
       <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-600 to-indigo-600 flex items-center justify-center text-white font-bold text-sm">SF</div>
       <div>
         <span class="font-bold text-sm block leading-none">StudyFlow IA</span>
-        <span id="mobileSyncBadge" class="text-[10px] text-slate-500 dark:text-slate-400">PWA • IndexedDB</span>
+        <span id="mobileSyncBadge" class="text-[10px] text-slate-500 dark:text-slate-400">Relais CAS • PWA</span>
       </div>
     </div>
     <div class="flex items-center gap-1.5">
       <button id="btnInstallPwaMobile" onclick="triggerPwaInstall()" class="hidden p-2 rounded-lg bg-indigo-600 text-white text-xs font-semibold">📲 Installer</button>
-      <button onclick="syncDriveDatabase()" class="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 text-xs font-semibold">🔄</button>
+      <button onclick="syncAdeFromRelay(false)" class="p-2 rounded-lg bg-brand-50 dark:bg-brand-950 text-brand-600 dark:text-brand-400 text-xs font-semibold" title="Actualiser ADE">📅</button>
+      <button onclick="syncDriveDatabase()" class="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 text-xs font-semibold" title="Sync Drive">🔄</button>
       <button onclick="toggleTheme()" class="p-2 rounded-lg text-slate-600 dark:text-slate-300 text-sm">🌓</button>
       <button onclick="openSettingsModal()" class="p-2 rounded-lg text-slate-600 dark:text-slate-300 text-sm">⚙️</button>
     </div>
@@ -126,21 +127,32 @@
   <div id="settingsModal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-        <h2 class="text-lg font-bold">⚙️ Configuration, PWA & Identifiants</h2>
+        <h2 class="text-lg font-bold">⚙️ Configuration, Relais CAS & Cloud</h2>
         <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
       </div>
 
       <div class="space-y-4 text-sm">
+        <div class="p-3.5 rounded-xl bg-brand-50/70 dark:bg-brand-950/30 border border-brand-200 dark:border-brand-800 space-y-3">
+          <div class="font-bold text-xs uppercase tracking-wider text-brand-700 dark:text-brand-300">🔐 Relais CAS Cloudflare (PC + Mobile)</div>
+          <div>
+            <label class="block font-semibold text-xs mb-1">URL du Worker Cloudflare</label>
+            <input id="inputRelayUrl" type="text" placeholder="https://studyflow-cas-relay.phoenix-et-phoenix.workers.dev" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-brand-500 outline-none" />
+          </div>
+          <div>
+            <label class="block font-semibold text-xs mb-1">Secret du Relais (API_SECRET)</label>
+            <input id="inputRelaySecret" type="password" placeholder="Ton secret API_SECRET Cloudflare" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-brand-500 outline-none" />
+          </div>
+        </div>
+
         <div>
           <label class="block font-semibold mb-1">ID Client OAuth 2.0 Google Cloud</label>
           <input id="inputClientId" type="text" placeholder="123456789-abc.apps.googleusercontent.com" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-brand-500 outline-none" />
-          <p class="text-xs text-slate-500 mt-1">Requis pour Google Drive (sync cloud + dépôt Clipper v2) et Google Agenda personnel.</p>
+          <p class="text-xs text-slate-500 mt-1">Synchronise tes réglages (dont le relais CAS) et tes cours entre Opera GX et Brave mobile.</p>
         </div>
 
         <div>
           <label class="block font-semibold mb-1">Clé API Gemini (Optionnelle — Mode Démo intégré)</label>
           <input id="inputGeminiKey" type="password" placeholder="AIzaSy..." class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-brand-500 outline-none" />
-          <p class="text-xs text-slate-500 mt-1">Alimente l'analyse des PDF (avec équations LaTeX), l'extracteur Mail → Action et le mode Colle orale.</p>
         </div>
 
         <div class="p-3.5 rounded-xl bg-slate-100 dark:bg-slate-800/70 space-y-2">
@@ -158,7 +170,7 @@
 
       <div class="flex justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
         <button onclick="closeSettingsModal()" class="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm font-medium">Annuler</button>
-        <button onclick="saveSettings()" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold">Enregistrer</button>
+        <button onclick="saveSettings()" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold">Enregistrer & Synchroniser</button>
       </div>
     </div>
   </div>
@@ -181,7 +193,7 @@
       const manifest = {
         name: 'StudyFlow IA — Grenoble INP',
         short_name: 'StudyFlow IA',
-        description: "Hub d'études IA : ADE auto-sync CAS, Chamilo/Moodle Clipper v2, Webmail IA, KaTeX, SM-2 et Colle orale.",
+        description: "Hub d'études IA : ADE auto-sync CAS via relais personnel, Chamilo/Moodle, Webmail IA, KaTeX, SM-2 et Colle orale.",
         start_url: window.location.href,
         display: 'standalone',
         background_color: '#0f172a',
@@ -208,7 +220,7 @@
 
     async function triggerPwaInstall() {
       if (!deferredPwaPrompt) {
-        showToast("Utilise le menu de ton navigateur : Installer l'application / Sur l'écran d'accueil.", 'info');
+        showToast("Utilise le menu de ton navigateur : Installer l'application / Ajouter à l'écran d'accueil.", 'info');
         return;
       }
       deferredPwaPrompt.prompt();
@@ -238,8 +250,8 @@
     const GOOGLE_SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/calendar.readonly';
 
     const MODULE_DEFINITIONS = [
-      { id: 'calendar', name: 'Planning ADE (Sync URL + CAS)', desc: 'Synchronisation automatique par URL ADE via le pont CAS de Clipper v2 + agendas Google.', icon: '📅', category: 'Sources & Flux' },
-      { id: 'clipper', name: 'Pont Chamilo / Moodle / ADE (Clipper v2)', desc: "Aspiration PDF, session CAS et synchronisation automatique de l'URL ADE sans blocage CORS.", icon: '🧩', category: 'Sources & Flux' },
+      { id: 'calendar', name: 'Planning ADE (Relais CAS)', desc: 'Synchronisation automatique de ton emploi du temps ADE sur PC et téléphone via ton Worker Cloudflare.', icon: '📅', category: 'Sources & Flux' },
+      { id: 'clipper', name: 'Pont Chamilo / Moodle (Relais CAS + Clipper)', desc: 'Aspiration des supports PDF depuis Chamilo/Moodle via ton relais CAS ou extension.', icon: '🧩', category: 'Sources & Flux' },
       { id: 'webmail', name: 'Automate Webmail → Action', desc: 'Analyse IA des e-mails Zimbra/Partage pour détecter deadlines et changements de salle.', icon: '✉️', category: 'Sources & Flux' },
       { id: 'drive', name: 'Google Drive & Cloud Sync', desc: 'Exploration de dossiers UE, import PDF sélectif et fusion studyflow_db.json.', icon: '☁️', category: 'Sources & Flux' },
       { id: 'deadlines', name: 'Deadlines & Rapports', desc: 'Suivi des rendus, projets, comptes-rendus de TP et sous-tâches.', icon: '⏰', category: 'Organisation' },
@@ -265,7 +277,9 @@
           geminiApiKey: '',
           selectedCalendarId: 'primary',
           selectedCalendarIds: ['primary'],
-          adeIcalUrl: '',
+          casRelayUrl: 'https://studyflow-cas-relay.phoenix-et-phoenix.workers.dev',
+          casRelaySecret: '',
+          adeCustomOverrideUrl: '',
           adeLastSyncAt: 0,
           selectedCalendarName: 'Agenda Principal'
         },
@@ -470,7 +484,6 @@
     let driveFolderBreadcrumbs = [{ id: 'root', name: 'Mon Drive' }];
     let driveListedFiles = [];
     let selectedDriveFileIds = new Set();
-    let activeExtensionTab = 'manifest';
     let sm2Flipped = false;
     let sm2SelectedUE = 'ALL';
     let colleModeActive = false;
@@ -478,7 +491,7 @@
     let speechRecognition = null;
     let isListeningMic = false;
     let calendarHorizonDays = 14;
-    let extensionBridgeConnected = false;
+    let isSyncingAde = false;
 
     function openIndexedDB() {
       return new Promise((resolve, reject) => {
@@ -593,7 +606,7 @@
         .trim();
     }
 
-    function parseIcsContent(icsText, sourceLabel = 'ADE Grenoble INP (Auto)') {
+    function parseIcsContent(icsText, sourceLabel = 'ADE Grenoble INP (Relais CAS)') {
       const unfolded = icsText.replace(/\r\n[ \t]/g, '').replace(/\n[ \t]/g, '');
       const lines = unfolded.split(/\r?\n/);
       const parsed = [];
@@ -636,51 +649,150 @@
       return parsed;
     }
 
-    async function syncAdeFromUrl(silent = false) {
-      const inputEl = document.getElementById('inputAdeUrl');
-      const rawUrl = (inputEl ? inputEl.value : state.settings.adeIcalUrl || '').trim();
-      if (!rawUrl) {
-        if (!silent) showToast("Colle d'abord ton lien d'abonnement ADE (https:// ou webcal://).", 'warn');
+    async function syncAdeFromRelay(silent = false) {
+      const relayInput = document.getElementById('inlineRelayUrl');
+      const secretInput = document.getElementById('inlineRelaySecret');
+      const overrideInput = document.getElementById('inlineAdeOverrideUrl');
+
+      const baseUrl = (relayInput ? relayInput.value : state.settings.casRelayUrl || '').trim().replace(/\/+$/, '');
+      const secret = (secretInput ? secretInput.value : state.settings.casRelaySecret || '').trim();
+      const customOverride = (overrideInput ? overrideInput.value : state.settings.adeCustomOverrideUrl || '').trim();
+
+      if (!baseUrl || !secret) {
+        if (!silent) showToast('Renseigne l’URL de ton Worker Cloudflare et ton Secret API_SECRET.', 'warn');
         return;
       }
-      const normalizedUrl = rawUrl.replace(/^webcal:\/\//i, 'https://');
-      state.settings.adeIcalUrl = normalizedUrl;
+
+      state.settings.casRelayUrl = baseUrl;
+      state.settings.casRelaySecret = secret;
+      state.settings.adeCustomOverrideUrl = customOverride;
       await saveStateToDB();
 
-      if (!silent) showToast('Synchronisation automatique ADE via le pont CAS Clipper v2...', 'info');
+      if (isSyncingAde) return;
+      isSyncingAde = true;
+      if (currentView === 'calendar') renderCalendarView();
+      if (!silent) showToast('Synchronisation ADE via ton relais CAS...', 'info');
 
-      window.postMessage({
-        type: 'STUDYFLOW_FETCH_ADE_URL',
-        url: normalizedUrl,
-        silent
-      }, '*');
+      try {
+        const endpoint = new URL(baseUrl + '/ade');
+        if (customOverride) endpoint.searchParams.set('url', customOverride);
 
-      clearTimeout(window._adeBridgeTimeout);
-      window._adeBridgeTimeout = setTimeout(() => {
-        if (!extensionBridgeConnected && !silent) {
-          showToast("Extension StudyFlow Clipper v2 non détectée sur cet onglet. Télécharge/mets à jour les 5 fichiers de l'extension dans l'onglet Clipper v2 pour activer le pont CAS & sans-CORS.", 'warn');
+        const res = await fetch(endpoint.toString(), {
+          method: 'GET',
+          headers: {
+            'X-StudyFlow-Secret': secret
+          }
+        });
+
+        const rawText = await res.text();
+        if (!res.ok) {
+          let errMsg = 'Erreur relais (' + res.status + ')';
+          try {
+            const parsedErr = JSON.parse(rawText);
+            if (parsedErr.error) errMsg = parsedErr.error;
+          } catch (e) {}
+          throw new Error(errMsg);
         }
-      }, 3000);
+
+        if (!rawText.includes('BEGIN:VCALENDAR')) {
+          throw new Error("Réponse inattendue : le serveur n'a pas renvoyé de flux iCal valide.");
+        }
+
+        const events = parseIcsContent(rawText, 'ADE Grenoble INP (Relais CAS)');
+        state.adeImportedEvents = events;
+        state.settings.adeLastSyncAt = Date.now();
+        await saveStateToDB();
+
+        isSyncingAde = false;
+        renderCurrentView();
+        if (!silent) showToast(events.length + ' créneau(x) ADE synchronisé(s) en direct !', 'success');
+      } catch (err) {
+        isSyncingAde = false;
+        renderCurrentView();
+        if (!silent) showToast('Échec sync ADE : ' + err.message, 'error');
+      }
     }
 
-    async function handleAdeRawPayloadFromExtension(icsText, silent = false) {
-      if (!icsText || !icsText.includes('BEGIN:VCALENDAR')) {
-        if (!silent) showToast("Le flux renvoyé par ADE n'est pas un calendrier valide (vérifie ta connexion CAS sur un onglet Grenoble INP ou l'URL d'abonnement).", 'warn');
+    async function fetchProtectedUrlViaRelay(targetUrl) {
+      const baseUrl = (state.settings.casRelayUrl || '').trim().replace(/\/+$/, '');
+      const secret = (state.settings.casRelaySecret || '').trim();
+      if (!baseUrl || !secret) {
+        throw new Error('Configure ton relais CAS Cloudflare dans les Paramètres.');
+      }
+      const endpoint = new URL(baseUrl + '/fetch');
+      endpoint.searchParams.set('target', targetUrl);
+      const res = await fetch(endpoint.toString(), {
+        headers: { 'X-StudyFlow-Secret': secret }
+      });
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error('Erreur relais CAS (' + res.status + ') : ' + txt.slice(0, 120));
+      }
+      return res;
+    }
+
+    async function scanCoursePageViaRelay() {
+      const urlInput = document.getElementById('relayCoursePageUrl');
+      const ueInput = document.getElementById('relayCoursePageUE');
+      const targetUrl = (urlInput?.value || '').trim();
+      const targetUe = (ueInput?.value || '').trim() || 'UE Grenoble INP';
+
+      if (!targetUrl) {
+        showToast('Colle l’URL d’une page de cours Chamilo ou Moodle Grenoble INP.', 'warn');
         return;
       }
-      const events = parseIcsContent(icsText, 'ADE Grenoble INP (Auto)');
-      state.adeImportedEvents = events;
-      state.settings.adeLastSyncAt = Date.now();
-      await saveStateToDB();
-      renderCurrentView();
-      if (!silent) showToast(events.length + ' créneau(x) ADE mis à jour automatiquement !', 'success');
+
+      showToast('Connexion CAS et analyse de la page Chamilo/Moodle...', 'info');
+      try {
+        const res = await fetchProtectedUrlViaRelay(targetUrl);
+        const html = await res.text();
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const anchors = Array.from(doc.querySelectorAll('a[href]'));
+        const found = [];
+        const seen = new Set();
+
+        anchors.forEach(a => {
+          const rawHref = a.getAttribute('href');
+          if (!rawHref || rawHref.startsWith('#') || rawHref.startsWith('javascript:')) return;
+          let fullUrl = '';
+          try {
+            fullUrl = new URL(rawHref, targetUrl).toString();
+          } catch (e) {
+            return;
+          }
+          if (seen.has(fullUrl)) return;
+          if (/\.pdf(\?|$)/i.test(fullUrl) || fullUrl.includes('mod_resource') || fullUrl.includes('/document/')) {
+            seen.add(fullUrl);
+            const label = (a.textContent || '').trim() || fullUrl.split('/').pop().split('?')[0] || 'Support.pdf';
+            found.push({
+              source: targetUrl.includes('chamilo') ? 'Chamilo (Relais CAS)' : 'Moodle (Relais CAS)',
+              ue: targetUe,
+              title: label,
+              url: fullUrl,
+              snippet: 'Détecté automatiquement via le relais CAS Cloudflare'
+            });
+          }
+        });
+
+        if (found.length === 0) {
+          showToast('Aucun lien PDF détecté sur cette page (vérifie le lien du dossier ou du cours).', 'warn');
+          return;
+        }
+
+        ingestClipperPayload(found);
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
     }
 
     function getAllCombinedEvents() {
-      const map = new Map();
-      (state.events || []).forEach(ev => map.set(ev.id, ev));
-      (state.adeImportedEvents || []).forEach(ev => map.set(ev.id, ev));
-      return Array.from(map.values());
+      if (state.adeImportedEvents && state.adeImportedEvents.length > 0) {
+        const map = new Map();
+        state.adeImportedEvents.forEach(ev => map.set(ev.id, ev));
+        (state.events || []).filter(e => !e.id.startsWith('evt-')).forEach(ev => map.set(ev.id, ev));
+        return Array.from(map.values());
+      }
+      return [...(state.events || [])];
     }
 
     function getDueSm2Cards() {
@@ -831,44 +943,6 @@
       renderSm2View();
     }
 
-    function setupExtensionBridgeListeners() {
-      window.addEventListener('message', async (event) => {
-        const msg = event.data;
-        if (!msg || typeof msg !== 'object') return;
-        if (msg.type === 'STUDYFLOW_EXTENSION_READY') {
-          extensionBridgeConnected = true;
-          if (currentView === 'calendar') renderCalendarView();
-          if (state.settings.adeIcalUrl) {
-            syncAdeFromUrl(true);
-          }
-        } else if (msg.type === 'STUDYFLOW_ADE_ICS_RESULT') {
-          extensionBridgeConnected = true;
-          clearTimeout(window._adeBridgeTimeout);
-          if (msg.error) {
-            if (!msg.silent) showToast('Erreur ADE : ' + msg.error, 'error');
-          } else {
-            await handleAdeRawPayloadFromExtension(msg.icsText, msg.silent);
-          }
-        } else if (msg.type === 'STUDYFLOW_CLIPPER_FILES' && Array.isArray(msg.items)) {
-          ingestClipperPayload(msg.items);
-        } else if (msg.type === 'STUDYFLOW_CLIPPER_MAIL' && msg.mail) {
-          await ingestWebmailPayload(msg.mail);
-        }
-      });
-
-      window.addEventListener('storage', async (event) => {
-        if (event.key === 'studyflow_clipper_bridge' && event.newValue) {
-          try {
-            const payload = JSON.parse(event.newValue);
-            if (payload.files) ingestClipperPayload(payload.files);
-            if (payload.mail) await ingestWebmailPayload(payload.mail);
-          } catch (e) {}
-        }
-      });
-
-      window.postMessage({ type: 'STUDYFLOW_PING_EXTENSION' }, '*');
-    }
-
     function ingestClipperPayload(items) {
       let added = 0;
       items.forEach(item => {
@@ -882,7 +956,6 @@
           url: item.url,
           capturedAt: Date.now(),
           snippet: item.snippet || '',
-          base64Pdf: item.base64Pdf || null,
           selected: true
         });
         added++;
@@ -891,7 +964,7 @@
         saveStateToDB();
         renderNavigation();
         renderCurrentView();
-        showToast(added + ' support(s) reçu(s) depuis StudyFlow Clipper v2 !', 'success');
+        showToast(added + ' support(s) détecté(s) et ajouté(s) à la boîte de tri !', 'success');
       }
     }
 
@@ -921,7 +994,7 @@
       const items = [
         { id: 'dashboard', label: "Aujourd'hui", icon: '🏠', visible: true },
         { id: 'calendar', label: 'Planning ADE', icon: '📅', visible: m.calendar },
-        { id: 'clipper', label: 'Clipper v2', icon: '🧩', visible: m.clipper, badge: pendingClipper },
+        { id: 'clipper', label: 'Chamilo & Moodle', icon: '🧩', visible: m.clipper, badge: pendingClipper },
         { id: 'webmail', label: 'Webmail IA', icon: '✉️', visible: m.webmail, badge: pendingMails },
         { id: 'courses', label: 'Mes Cours', icon: '📚', visible: true },
         { id: 'sm2', label: 'Révision SM-2', icon: '🧠', visible: m.sm2, badge: dueSm2 },
@@ -1081,7 +1154,7 @@
         dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-500';
         txt.textContent = 'Non connecté';
         btnSync.classList.add('hidden');
-        if (mobileBadge) mobileBadge.textContent = 'PWA • IndexedDB';
+        if (mobileBadge) mobileBadge.textContent = 'Relais CAS • PWA';
       }
     }
 
@@ -1125,15 +1198,10 @@
     }
 
     async function syncSelectedGoogleCalendar() {
-      if (state.settings.adeIcalUrl) {
-        await syncAdeFromUrl(true);
+      if (state.settings.casRelayUrl && state.settings.casRelaySecret) {
+        await syncAdeFromRelay(false);
       }
-      if (!googleToken) {
-        if (!state.settings.adeIcalUrl) {
-          showToast('Connecte ton compte Google ou configure ton URL ADE ci-dessous.', 'warn');
-        }
-        return;
-      }
+      if (!googleToken) return;
       try {
         await fetchGoogleCalendars();
         const idsToFetch = state.settings.selectedCalendarIds || ['primary'];
@@ -1170,7 +1238,6 @@
         state.events = mergedEvents;
         await saveStateToDB();
         renderCurrentView();
-        showToast(getAllCombinedEvents().length + ' créneau(x) synchronisé(s).', 'success');
       } catch (err) {
         showToast(err.message, 'error');
       }
@@ -1210,7 +1277,7 @@
 
     async function syncDriveDatabase() {
       if (!googleToken) {
-        showToast('Connecte Google Drive pour synchroniser PC et smartphone.', 'warn');
+        showToast('Connecte Google Drive pour synchroniser Opera GX et Brave mobile.', 'warn');
         return;
       }
       try {
@@ -1257,11 +1324,12 @@
       (state.deadlines || []).forEach(d => dlMap.set(d.id, d));
       state.deadlines = Array.from(dlMap.values());
 
+      if (remote.settings?.casRelayUrl && !state.settings.casRelayUrl) state.settings.casRelayUrl = remote.settings.casRelayUrl;
+      if (remote.settings?.casRelaySecret && !state.settings.casRelaySecret) state.settings.casRelaySecret = remote.settings.casRelaySecret;
+
       if (remote.adeImportedEvents?.length && (remote.settings?.adeLastSyncAt || 0) >= (state.settings.adeLastSyncAt || 0)) {
         state.adeImportedEvents = remote.adeImportedEvents;
-      }
-      if (remote.settings?.adeIcalUrl && !state.settings.adeIcalUrl) {
-        state.settings.adeIcalUrl = remote.settings.adeIcalUrl;
+        state.settings.adeLastSyncAt = remote.settings.adeLastSyncAt;
       }
 
       state.ignoredDriveIds = Array.from(new Set([...(state.ignoredDriveIds || []), ...(remote.ignoredDriveIds || [])]));
@@ -1321,6 +1389,7 @@
       const pendingClipper = state.clipperInbox.filter(x => !state.ignoredClipperUrls.includes(x.url));
       const pendingMails = state.webmailInbox.filter(x => x.status === 'pending');
       const dueSm2 = getDueSm2Cards();
+      const relayReady = !!(state.settings.casRelayUrl && state.settings.casRelaySecret);
 
       el.innerHTML = `
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -1334,6 +1403,16 @@
             ${state.modules.drive ? `<button onclick="syncDriveDatabase()" class="px-3.5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold shadow-sm transition">☁️ Sync Drive</button>` : ''}
           </div>
         </div>
+
+        ${!relayReady ? `
+          <div class="p-4 rounded-2xl bg-brand-50 dark:bg-brand-950/40 border border-brand-200 dark:border-brand-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <div class="text-xs font-bold uppercase text-brand-700 dark:text-brand-300">🔐 Relais CAS Cloudflare détecté</div>
+              <div class="font-bold text-sm mt-0.5">Entre ton Secret API_SECRET pour activer la mise à jour automatique ADE sur Opera GX & Brave mobile.</div>
+            </div>
+            <button onclick="switchView('calendar')" class="px-3.5 py-2 rounded-xl bg-brand-600 text-white text-xs font-semibold shrink-0">Configurer maintenant →</button>
+          </div>
+        ` : ''}
 
         ${(state.modules.webmail && pendingMails.length > 0) || (state.modules.clipper && pendingClipper.length > 0) ? `
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1350,7 +1429,7 @@
           ${state.modules.clipper && pendingClipper.length > 0 ? `
           <div class="p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 flex items-center justify-between gap-3">
             <div>
-              <div class="text-xs font-bold uppercase text-indigo-700 dark:text-indigo-400">🧩 Clipper v2 (Chamilo / Moodle)</div>
+              <div class="text-xs font-bold uppercase text-indigo-700 dark:text-indigo-400">🧩 Chamilo / Moodle (Relais CAS)</div>
               <div class="font-bold text-sm mt-0.5">${pendingClipper.length} support(s) en attente de tri & dépôt Drive</div>
             </div>
             <button onclick="switchView('clipper')" class="px-3 py-1.5 rounded-xl bg-indigo-600 text-white text-xs font-semibold shrink-0">Trier →</button>
@@ -1364,10 +1443,10 @@
           <div class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4">
             <div class="flex items-center justify-between">
               <h3 class="font-bold text-base">📅 Séances du jour (${todayEvents.length})</h3>
-              <button onclick="switchView('calendar')" class="text-xs font-semibold text-brand-600 hover:underline">Planning complet & URL ADE →</button>
+              <button onclick="switchView('calendar')" class="text-xs font-semibold text-brand-600 hover:underline">Planning complet & Relais CAS →</button>
             </div>
             <div class="space-y-3">
-              ${todayEvents.map(ev => renderEventCardHtml(ev, true)).join('') || "<p class='text-sm text-slate-500'>Aucun créneau aujourd'hui. Configure ton URL d'abonnement ADE dans <strong>Planning ADE</strong>.</p>"}
+              ${todayEvents.map(ev => renderEventCardHtml(ev, true)).join('') || "<p class='text-sm text-slate-500'>Aucun créneau aujourd'hui (ou clique sur <strong>Planning ADE</strong> pour actualiser ton emploi du temps).</p>"}
             </div>
           </div>
           ` : ''}
@@ -1404,12 +1483,12 @@
       el.innerHTML = `
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h2 class="text-2xl font-extrabold">🧩 Pont Chamilo / Moodle / ADE (Clipper v2)</h2>
-            <p class="text-sm text-slate-500">Gère tes supports PDF aspirés et assure le relais automatique (CAS + sans-CORS) pour ton URL d'agenda ADE.</p>
+            <h2 class="text-2xl font-extrabold">🧩 Chamilo & Moodle via Relais CAS</h2>
+            <p class="text-sm text-slate-500">Aspire automatiquement les supports PDF d'une page de cours Chamilo/Moodle (sans extension, sur PC et mobile).</p>
           </div>
           <div class="flex flex-wrap gap-2">
             <button onclick="processSelectedClipperItems(false)" class="px-3.5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold ${selectedCount === 0 ? 'opacity-50 pointer-events-none' : ''}">
-              ✨ Importer dans StudyFlow (${selectedCount})
+              ✨ Analyser dans StudyFlow (${selectedCount})
             </button>
             <button onclick="processSelectedClipperItems(true)" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold ${selectedCount === 0 ? 'opacity-50 pointer-events-none' : ''}">
               ☁️ Déposer sur Drive + StudyFlow (${selectedCount})
@@ -1417,14 +1496,28 @@
           </div>
         </div>
 
+        <div class="bg-gradient-to-r from-indigo-50 to-brand-50 dark:from-indigo-950/40 dark:to-brand-950/40 border border-indigo-200 dark:border-indigo-800 rounded-2xl p-5 space-y-3">
+          <div>
+            <h3 class="font-bold text-sm text-indigo-900 dark:text-indigo-200">🔗 Aspirateur automatique de cours Chamilo / Moodle (authentifié CAS)</h3>
+            <p class="text-xs text-slate-600 dark:text-slate-300">Colle l'URL d'une page de cours Chamilo ou Moodle : ton Worker Cloudflare se connecte avec tes identifiants CAS et liste tous les PDF disponibles.</p>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+            <input id="relayCoursePageUrl" type="text" placeholder="https://chamilo.grenoble-inp.fr/courses/..." class="md:col-span-2 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs" />
+            <div class="flex gap-2">
+              <input id="relayCoursePageUE" type="text" placeholder="Nom de l'UE" class="flex-1 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs" />
+              <button onclick="scanCoursePageViaRelay()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shrink-0">🔍 Scanner</button>
+            </div>
+          </div>
+        </div>
+
         <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4">
           <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-            <h3 class="font-bold text-base">📥 Boîte de réception Clipper (${items.length} support(s) détecté(s))</h3>
+            <h3 class="font-bold text-base">📥 Supports détectés (${items.length})</h3>
             ${state.ignoredClipperUrls.length > 0 ? `<button onclick="clearIgnoredClipper()" class="text-xs text-slate-500 hover:underline">Réafficher ${state.ignoredClipperUrls.length} masqué(s)</button>` : ''}
           </div>
 
           ${items.length === 0 ? `
-            <p class="text-sm text-slate-500 py-6 text-center">Aucun support en attente. Ouvre une page de cours sur Chamilo ou Moodle Grenoble INP et clique sur l'icône de l'extension StudyFlow Clipper v2.</p>
+            <p class="text-sm text-slate-500 py-6 text-center">Aucun support en attente. Colle le lien d'un espace de cours Chamilo ou Moodle ci-dessus.</p>
           ` : `
             <div class="divide-y divide-slate-200 dark:divide-slate-800">
               ${items.map(item => `
@@ -1449,203 +1542,7 @@
             </div>
           `}
         </div>
-
-        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <h3 class="font-bold text-base">🛠️ Extension Navigateur : StudyFlow Clipper v2 (avec Pont ADE & CAS)</h3>
-              <p class="text-xs text-slate-500">Télécharge ces 5 fichiers dans un dossier local, puis charge-le via <code>chrome://extensions</code> (Mode développeur → Charger l'extension non empaquetée).</p>
-            </div>
-            <button onclick="downloadExtensionBundle()" class="px-3.5 py-2 rounded-xl bg-slate-900 dark:bg-slate-800 text-white text-xs font-semibold hover:bg-brand-600 transition shrink-0">📦 Télécharger les 5 fichiers</button>
-          </div>
-
-          <div class="flex gap-2 border-b border-slate-200 dark:border-slate-800 overflow-x-auto no-scrollbar">
-            ${['manifest', 'background', 'content', 'popup_html', 'popup_js'].map(tab => {
-              const labels = { manifest: 'manifest.json', background: 'background.js', content: 'content.js', popup_html: 'popup.html', popup_js: 'popup.js' };
-              return `<button onclick="switchExtensionTab('${tab}')" class="pb-2 px-3 text-xs font-bold border-b-2 whitespace-nowrap ${activeExtensionTab === tab ? 'border-brand-600 text-brand-600 dark:text-brand-400' : 'border-transparent text-slate-500'}">${labels[tab]}</button>`;
-            }).join('')}
-          </div>
-
-          <div class="relative">
-            <button onclick="copyActiveExtensionCode()" class="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-slate-800 text-white text-[11px] font-semibold hover:bg-brand-600">📋 Copier</button>
-            <pre id="extensionCodeBlock" class="p-4 rounded-xl bg-slate-950 text-slate-100 text-xs overflow-x-auto max-h-80 leading-relaxed"></pre>
-          </div>
-        </div>
       `;
-
-      document.getElementById('extensionCodeBlock').textContent = getExtensionFilesCode()[activeExtensionTab];
-    }
-
-    function switchExtensionTab(tab) {
-      activeExtensionTab = tab;
-      renderClipperView();
-    }
-
-    function copyActiveExtensionCode() {
-      navigator.clipboard.writeText(getExtensionFilesCode()[activeExtensionTab]);
-      showToast('Code copié dans le presse-papiers !', 'success');
-    }
-
-    function getExtensionFilesCode() {
-      const manifest = JSON.stringify({
-        manifest_version: 3,
-        name: 'StudyFlow Clipper v2 — Grenoble INP',
-        version: '2.1.0',
-        description: 'Synchronisation automatique ADE (via session CAS), extraction PDF Chamilo/Moodle et mails Zimbra/Partage vers StudyFlow IA.',
-        permissions: ['activeTab', 'scripting', 'storage'],
-        host_permissions: [
-          'https://*.grenoble-inp.fr/*',
-          'https://*.grenet.fr/*',
-          'https://*.univ-grenoble-alpes.fr/*'
-        ],
-        background: {
-          service_worker: 'background.js'
-        },
-        action: { default_popup: 'popup.html', default_title: 'StudyFlow Clipper v2' },
-        content_scripts: [
-          {
-            matches: [
-              'https://chamilo.grenoble-inp.fr/*',
-              'https://moodle.grenoble-inp.fr/*',
-              'https://webmail.grenoble-inp.fr/*',
-              'https://partage.grenet.fr/*'
-            ],
-            js: ['content.js'],
-            run_at: 'document_idle'
-          },
-          {
-            matches: ['http://localhost/*', 'https://*.github.io/*'],
-            js: ['content.js'],
-            run_at: 'document_idle'
-          }
-        ]
-      }, null, 2);
-
-      const background = [
-        'chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {',
-        "  if (msg && msg.type === 'FETCH_ADE_ICS_BG' && msg.url) {",
-        "    fetch(msg.url, { credentials: 'include' })",
-        '      .then(async (res) => {',
-        "        if (!res.ok) throw new Error('HTTP ' + res.status);",
-        '        const text = await res.text();',
-        '        sendResponse({ icsText: text });',
-        '      })',
-        '      .catch((err) => {',
-        '        sendResponse({ error: err.message });',
-        '      });',
-        '    return true;',
-        '  }',
-        '});'
-      ].join('\n');
-
-      const content = [
-        '(() => {',
-        '  const host = window.location.hostname;',
-        '  function detectUE() {',
-        "    const h1 = document.querySelector('h1, .page-header-headings h1, .breadcrumb li:nth-child(2)');",
-        "    return h1 ? h1.textContent.trim().slice(0, 60) : 'UE Grenoble INP';",
-        '  }',
-        '  function scanEducationalLinks() {',
-        '    const ue = detectUE();',
-        "    const source = host.includes('chamilo') ? 'Chamilo Grenoble INP' : 'Moodle Grenoble INP';",
-        "    const anchors = Array.from(document.querySelectorAll('a[href]'));",
-        '    const results = [];',
-        '    const seen = new Set();',
-        '    anchors.forEach(a => {',
-        '      const href = a.href;',
-        "      const text = (a.textContent || '').trim();",
-        '      if (!href || seen.has(href)) return;',
-        "      if (/\\.pdf(\\?|$)/i.test(href) || href.includes('mod_resource') || href.includes('/document/')) {",
-        '        seen.add(href);',
-        "        results.push({ source, ue, title: text || href.split('/').pop().split('?')[0] || 'Support.pdf', url: href, snippet: 'Support extrait depuis ' + source });",
-        '      }',
-        '    });',
-        '    return results;',
-        '  }',
-        '  function extractVisibleWebmail() {',
-        "    const subjEl = document.querySelector('.ZmMailMsgView .Subject, [role=\"heading\"], h2');",
-        "    const fromEl = document.querySelector('.ZmMailMsgView .Address, .sender');",
-        "    const bodyEl = document.querySelector('.ZmMailMsgView .MsgBody, iframe');",
-        "    let bodyText = '';",
-        "    if (bodyEl && bodyEl.tagName === 'IFRAME' && bodyEl.contentDocument) bodyText = bodyEl.contentDocument.body.innerText || '';",
-        "    else if (bodyEl) bodyText = bodyEl.innerText || '';",
-        '    else bodyText = document.body.innerText.slice(0, 2500);',
-        "    return { sender: fromEl ? fromEl.textContent.trim() : 'Webmail Grenoble INP', subject: subjEl ? subjEl.textContent.trim() : document.title, body: bodyText.trim().slice(0, 3500) };",
-        '  }',
-        '  chrome.runtime.onMessage.addListener((req, _sender, sendResponse) => {',
-        "    if (req.action === 'SCAN_PAGE') {",
-        "      if (host.includes('webmail') || host.includes('partage')) sendResponse({ mode: 'webmail', mail: extractVisibleWebmail() });",
-        "      else sendResponse({ mode: 'courses', items: scanEducationalLinks() });",
-        '    }',
-        '  });',
-        "  if (host === 'localhost' || host.endsWith('.github.io')) {",
-        "    window.postMessage({ type: 'STUDYFLOW_EXTENSION_READY' }, '*');",
-        "    window.addEventListener('message', (event) => {",
-        '      const msg = event.data;',
-        '      if (!msg || typeof msg !== "object") return;',
-        "      if (msg.type === 'STUDYFLOW_PING_EXTENSION') {",
-        "        window.postMessage({ type: 'STUDYFLOW_EXTENSION_READY' }, '*');",
-        "      } else if (msg.type === 'STUDYFLOW_FETCH_ADE_URL' && msg.url) {",
-        "        chrome.runtime.sendMessage({ type: 'FETCH_ADE_ICS_BG', url: msg.url }, (resp) => {",
-        "          window.postMessage({ type: 'STUDYFLOW_ADE_ICS_RESULT', icsText: resp?.icsText || '', error: resp?.error || null, silent: !!msg.silent }, '*');",
-        '        });',
-        '      }',
-        '    });',
-        "    chrome.storage.local.get(['studyflow_pending_payload'], (res) => {",
-        '      if (res.studyflow_pending_payload) {',
-        "        window.postMessage(res.studyflow_pending_payload, '*');",
-        "        chrome.storage.local.remove('studyflow_pending_payload');",
-        '      }',
-        '    });',
-        '  }',
-        '})();'
-      ].join('\n');
-
-      const popup_html = '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8" /><style>body{font-family:Arial,sans-serif;width:340px;padding:12px;background:#0f172a;color:#f8fafc}h2{font-size:15px;margin:0 0 8px;color:#60a5fa}.item{display:flex;align-items:center;gap:6px;font-size:12px;padding:5px 0;border-bottom:1px solid #1e293b}button{width:100%;margin-top:10px;padding:8px;border:none;border-radius:8px;background:#2563eb;color:#fff;font-weight:700;cursor:pointer}#status{font-size:11px;color:#94a3b8;margin-top:6px}</style></head><body><h2>StudyFlow Clipper v2</h2><div id="list">Analyse de la page...</div><button id="sendBtn">Envoyer vers StudyFlow IA</button><div id="status"></div><' + 'script src="popup.js"><' + '/script></body></html>';
-
-      const popup_js = [
-        'let scannedData = null;',
-        'chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {',
-        "  chrome.tabs.sendMessage(tabs[0].id, { action: 'SCAN_PAGE' }, (resp) => {",
-        "    const listEl = document.getElementById('list');",
-        "    if (!resp) { listEl.textContent = 'Ouvre Chamilo, Moodle ou Webmail.'; return; }",
-        '    scannedData = resp;',
-        "    if (resp.mode === 'webmail') listEl.innerHTML = '<strong>Mail :</strong><br/>' + resp.mail.subject;",
-        "    else listEl.innerHTML = resp.items.map((it, idx) => '<label class=\"item\"><input type=\"checkbox\" checked data-idx=\"' + idx + '\" /><span>[' + it.ue + '] ' + it.title + '</span></label>').join('') || 'Aucun PDF détecté.';",
-        '  });',
-        '});',
-        "document.getElementById('sendBtn').addEventListener('click', () => {",
-        '  if (!scannedData) return;',
-        "  const statusEl = document.getElementById('status');",
-        "  if (scannedData.mode === 'webmail') {",
-        "    chrome.storage.local.set({ studyflow_pending_payload: { type: 'STUDYFLOW_CLIPPER_MAIL', mail: scannedData.mail } }, () => { statusEl.textContent = 'Mail prêt pour StudyFlow IA !'; });",
-        '  } else {',
-        "    const selected = Array.from(document.querySelectorAll('input[type=\"checkbox\"]:checked')).map(c => scannedData.items[Number(c.dataset.idx)]);",
-        "    chrome.storage.local.set({ studyflow_pending_payload: { type: 'STUDYFLOW_CLIPPER_FILES', items: selected } }, () => { statusEl.textContent = selected.length + ' support(s) prêts !'; });",
-        '  }',
-        '});'
-      ].join('\n');
-
-      return { manifest, background, content, popup_html, popup_js };
-    }
-
-    function downloadExtensionBundle() {
-      const files = getExtensionFilesCode();
-      [
-        { name: 'manifest.json', content: files.manifest },
-        { name: 'background.js', content: files.background },
-        { name: 'content.js', content: files.content },
-        { name: 'popup.html', content: files.popup_html },
-        { name: 'popup.js', content: files.popup_js }
-      ].forEach((f, idx) => {
-        setTimeout(() => {
-          const a = document.createElement('a');
-          a.href = URL.createObjectURL(new Blob([f.content], { type: 'text/plain;charset=utf-8' }));
-          a.download = f.name;
-          a.click();
-        }, idx * 250);
-      });
-      showToast('Téléchargement des 5 fichiers de StudyFlow Clipper v2 lancé.', 'success');
     }
 
     function toggleClipperItemSelection(id, checked) {
@@ -1684,22 +1581,23 @@
         return;
       }
 
+      showToast('Téléchargement authentifié CAS et génération IA en cours...', 'info');
       for (const item of selected) {
         let extractedText = item.snippet || ('Support importé depuis ' + item.source + ' : ' + item.title);
-        let pdfBlob = new Blob([extractedText], { type: 'text/plain;charset=utf-8' });
+        let fileBlob = new Blob([extractedText], { type: 'text/plain;charset=utf-8' });
 
-        if (item.base64Pdf) {
+        if (item.url && state.settings.casRelayUrl && state.settings.casRelaySecret) {
           try {
-            const res = await fetch(item.base64Pdf);
-            pdfBlob = await res.blob();
-            const parsedText = await extractPdfTextFromArrayBuffer(await pdfBlob.arrayBuffer());
+            const res = await fetchProtectedUrlViaRelay(item.url);
+            fileBlob = await res.blob();
+            const parsedText = await extractPdfTextFromArrayBuffer(await fileBlob.arrayBuffer());
             if (parsedText) extractedText = parsedText;
           } catch (e) {}
         }
 
         if (alsoUploadDrive && googleToken) {
           try {
-            await uploadBinaryOrTextToDriveUE(item.ue, item.title, pdfBlob);
+            await uploadBinaryOrTextToDriveUE(item.ue, item.title.endsWith('.pdf') ? item.title : item.title + '.pdf', fileBlob);
           } catch (err) {
             showToast('Erreur dépôt Drive (' + item.title + ') : ' + err.message, 'error');
           }
@@ -1854,39 +1752,50 @@
       });
 
       const selectedCalIds = state.settings.selectedCalendarIds || [];
+      const relayReady = !!(state.settings.casRelayUrl && state.settings.casRelaySecret);
       const lastSyncLabel = state.settings.adeLastSyncAt
-        ? 'Dernière sync : ' + new Date(state.settings.adeLastSyncAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
-        : '';
+        ? 'Synchronisé à ' + new Date(state.settings.adeLastSyncAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+        : 'Jamais synchronisé';
 
       el.innerHTML = `
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h2 class="text-2xl font-extrabold">📅 Planning ADE (Mise à jour automatique par URL)</h2>
-            <p class="text-sm text-slate-500">Ton URL d'abonnement ADE est synchronisée automatiquement via le pont CAS + sans-CORS de StudyFlow Clipper v2.</p>
+            <h2 class="text-2xl font-extrabold">📅 Planning ADE (Mise à jour automatique via Relais CAS)</h2>
+            <p class="text-sm text-slate-500">Synchronisation automatique à l'ouverture sur Opera GX (PC) et Brave (Téléphone), sans fichier .ics manuel.</p>
           </div>
           <div class="flex flex-wrap gap-2">
-            <button onclick="syncSelectedGoogleCalendar()" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold shadow-sm">🔄 Actualiser maintenant</button>
+            <button onclick="syncAdeFromRelay(false)" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold shadow-sm ${isSyncingAde ? 'opacity-60 pointer-events-none' : ''}">
+              ${isSyncingAde ? '⏳ Connexion CAS en cours...' : '🔄 Actualiser ADE maintenant'}
+            </button>
           </div>
         </div>
 
         <div class="bg-gradient-to-r from-brand-50 to-indigo-50 dark:from-brand-950/40 dark:to-indigo-950/40 border border-brand-200 dark:border-brand-800 rounded-2xl p-5 space-y-3">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <h3 class="font-bold text-sm text-brand-900 dark:text-brand-200">🎓 URL d'abonnement ADE Grenoble INP (Auto-Sync CAS & sans-CORS)</h3>
-              <p class="text-xs text-slate-600 dark:text-slate-300">Colle une seule fois ton URL ADE : StudyFlow IA la rafraîchit automatiquement à chaque ouverture grâce à l'extension Clipper v2.</p>
+              <h3 class="font-bold text-sm text-brand-900 dark:text-brand-200">🔐 Connexion directe à ton Worker Cloudflare CAS</h3>
+              <p class="text-xs text-slate-600 dark:text-slate-300">Ton Worker utilise les variables <code>CAS_USER</code>, <code>CAS_PASS</code> et <code>ADE_URL</code> enregistrées sur Cloudflare.</p>
             </div>
             <div class="flex items-center gap-2">
-              <span class="px-2.5 py-1 rounded-full text-[11px] font-bold ${extensionBridgeConnected ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'}">
-                ${extensionBridgeConnected ? '✓ Pont CAS Clipper v2 actif' : '⚠️ Extension Clipper v2 requise'}
+              <span class="px-2.5 py-1 rounded-full text-[11px] font-bold ${relayReady ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'}">
+                ${relayReady ? '✓ Relais CAS configuré' : '⚠️ Secret requis'}
               </span>
               ${state.adeImportedEvents.length > 0 ? `<span class="px-2.5 py-1 rounded-full bg-brand-600 text-white text-[11px] font-bold">${state.adeImportedEvents.length} créneaux • ${lastSyncLabel}</span>` : ''}
             </div>
           </div>
-          <div class="flex flex-col sm:flex-row gap-2">
-            <input id="inputAdeUrl" type="text" value="${state.settings.adeIcalUrl || ''}" placeholder="https://ade-web-consult.grenoble-inp.fr/jsp/custom/modules/plannings/anonymous_cal.jsp?..." class="flex-1 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs" />
-            <button onclick="syncAdeFromUrl(false)" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold shrink-0">🔄 Synchroniser l'URL ADE</button>
-            ${!extensionBridgeConnected ? `<button onclick="switchView('clipper')" class="px-3.5 py-2 rounded-xl bg-slate-900 dark:bg-slate-800 text-white text-xs font-semibold shrink-0">Installer Clipper v2 →</button>` : ''}
+
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-2">
+            <input id="inlineRelayUrl" type="text" value="${state.settings.casRelayUrl || ''}" placeholder="https://studyflow-cas-relay.phoenix-et-phoenix.workers.dev" class="md:col-span-5 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs" />
+            <input id="inlineRelaySecret" type="password" value="${state.settings.casRelaySecret || ''}" placeholder="Secret API_SECRET Cloudflare" class="md:col-span-4 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs" />
+            <button onclick="syncAdeFromRelay(false)" class="md:col-span-3 px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold">
+              ⚡ Connecter & Synchroniser
+            </button>
           </div>
+
+          <details class="text-xs text-slate-500">
+            <summary class="cursor-pointer font-semibold hover:text-brand-600">Optionnel : surcharger l'URL ADE configurée sur Cloudflare</summary>
+            <input id="inlineAdeOverrideUrl" type="text" value="${state.settings.adeCustomOverrideUrl || ''}" placeholder="Laisser vide pour utiliser la variable ADE_URL de Cloudflare..." class="mt-2 w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs" />
+          </details>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -1953,7 +1862,7 @@
             ${groupedByDay.size === 0 ? `
               <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 text-center space-y-2">
                 <p class="text-sm font-semibold">Aucune séance affichée sur cette période.</p>
-                <p class="text-xs text-slate-500">Colle ton URL d'abonnement ADE dans le cadre bleu en haut de cette page et clique sur <strong>Synchroniser l'URL ADE</strong>.</p>
+                <p class="text-xs text-slate-500">Entre ton Secret <code>API_SECRET</code> dans le cadre bleu ci-dessus et clique sur <strong>Connecter & Synchroniser</strong>.</p>
               </div>
             ` : Array.from(groupedByDay.entries()).map(([dayKey, dayEvents]) => {
               const header = formatDayHeaderLabel(dayKey);
@@ -2017,7 +1926,7 @@
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h2 class="text-2xl font-extrabold">☁️ Google Drive & Synchronisation Cloud</h2>
-            <p class="text-sm text-slate-500">Parcours tes dossiers d'UE et fusionne ta base studyflow_db.json entre PC et smartphone.</p>
+            <p class="text-sm text-slate-500">Parcours tes dossiers d'UE et fusionne ta base studyflow_db.json entre Opera GX et Brave mobile.</p>
           </div>
           <div class="flex gap-2">
             <button onclick="openStudyFlowDriveRoot()" class="px-3.5 py-2 rounded-xl bg-slate-800 text-white text-xs font-semibold">📂 Dossier StudyFlow_GrenobleINP</button>
@@ -2483,6 +2392,8 @@
     }
 
     function openSettingsModal() {
+      document.getElementById('inputRelayUrl').value = state.settings.casRelayUrl || '';
+      document.getElementById('inputRelaySecret').value = state.settings.casRelaySecret || '';
       document.getElementById('inputClientId').value = state.settings.googleClientId || '';
       document.getElementById('inputGeminiKey').value = state.settings.geminiApiKey || '';
       document.getElementById('settingsModal').classList.remove('hidden');
@@ -2493,11 +2404,16 @@
     }
 
     async function saveSettings() {
+      state.settings.casRelayUrl = document.getElementById('inputRelayUrl').value.trim().replace(/\/+$/, '');
+      state.settings.casRelaySecret = document.getElementById('inputRelaySecret').value.trim();
       state.settings.googleClientId = document.getElementById('inputClientId').value.trim();
       state.settings.geminiApiKey = document.getElementById('inputGeminiKey').value.trim();
       await saveStateToDB();
       closeSettingsModal();
       showToast('Paramètres enregistrés.', 'success');
+      if (state.settings.casRelayUrl && state.settings.casRelaySecret) {
+        await syncAdeFromRelay(false);
+      }
     }
 
     function exportJsonBackup() {
@@ -2543,9 +2459,11 @@
       initPwaManifestAndIcons();
       await loadStateFromDB();
       applyTheme();
-      setupExtensionBridgeListeners();
       renderNavigation();
       renderCurrentView();
+      if (state.settings.casRelayUrl && state.settings.casRelaySecret) {
+        syncAdeFromRelay(true);
+      }
     })();
   </script>
 </body>
