@@ -186,7 +186,7 @@
       const manifest = {
         name: 'StudyFlow IA — Grenoble INP',
         short_name: 'StudyFlow IA',
-        description: 'Hub d études IA : ADE, Chamilo/Moodle Clipper v2, Webmail IA, KaTeX, SM-2 et Colle orale.',
+        description: "Hub d'études IA : ADE, Chamilo/Moodle Clipper v2, Webmail IA, KaTeX, SM-2 et Colle orale.",
         start_url: window.location.href,
         display: 'standalone',
         background_color: '#0f172a',
@@ -213,7 +213,7 @@
 
     async function triggerPwaInstall() {
       if (!deferredPwaPrompt) {
-        showToast('Utilise le menu de ton navigateur : Installer l application / Sur l écran d accueil.', 'info');
+        showToast("Utilise le menu de ton navigateur : Installer l'application / Sur l'écran d'accueil.", 'info');
         return;
       }
       deferredPwaPrompt.prompt();
@@ -228,8 +228,8 @@
           delimiters: [
             { left: '$$', right: '$$', display: true },
             { left: '$', right: '$', display: false },
-            { left: '\(', right: '\)', display: false },
-            { left: '\[', right: '\]', display: true }
+            { left: '\\(', right: '\\)', display: false },
+            { left: '\\[', right: '\\]', display: true }
           ],
           throwOnError: false
         });
@@ -244,7 +244,7 @@
 
     const MODULE_DEFINITIONS = [
       { id: 'calendar', name: 'Google Agenda (Pont ADE)', desc: 'Synchronisation des créneaux ADE via Google Calendar et filtrage UE/Groupes.', icon: '📅', category: 'Sources & Flux' },
-      { id: 'clipper', name: 'Pont Chamilo / Moodle (Clipper v2)', desc: 'Réception sélective des supports aspirés par l extension navigateur et dépôt Drive.', icon: '🧩', category: 'Sources & Flux' },
+      { id: 'clipper', name: 'Pont Chamilo / Moodle (Clipper v2)', desc: "Réception sélective des supports aspirés par l'extension navigateur et dépôt Drive.", icon: '🧩', category: 'Sources & Flux' },
       { id: 'webmail', name: 'Automate Webmail → Action', desc: 'Analyse IA des e-mails Zimbra/Partage pour détecter deadlines et changements de salle.', icon: '✉️', category: 'Sources & Flux' },
       { id: 'drive', name: 'Google Drive & Cloud Sync', desc: 'Exploration de dossiers UE, import PDF sélectif et fusion studyflow_db.json.', icon: '☁️', category: 'Sources & Flux' },
       { id: 'deadlines', name: 'Deadlines & Rapports', desc: 'Suivi des rendus, projets, comptes-rendus de TP et sous-tâches.', icon: '⏰', category: 'Organisation' },
@@ -310,7 +310,7 @@
             title: 'TD1_Enonce_Reducteur_35NCD6.pdf',
             url: 'https://moodle.grenoble-inp.fr/pluginfile.php/1420/mod_resource/TD1_Reducteur.pdf',
             capturedAt: now - 3600000,
-            snippet: 'Dimensionnement d un train d engrenages cylindriques à denture droite en acier 35NCD6 : contrainte de flexion de Lewis.',
+            snippet: "Dimensionnement d'un train d'engrenages cylindriques à denture droite en acier 35NCD6 : contrainte de flexion de Lewis.",
             selected: true
           }
         ],
@@ -318,9 +318,9 @@
           {
             id: 'mail-demo-1',
             sender: 'scolarite.gi@grenoble-inp.fr',
-            subject: '[GI 2A] Changement de salle TD1 Systèmes Mécaniques aujourd hui',
+            subject: "[GI 2A] Changement de salle TD1 Systèmes Mécaniques aujourd'hui",
             receivedAt: now - 2400000,
-            body: 'Bonjour, en raison d une maintenance sur le vidéoprojecteur de la salle D102, le TD1 Systèmes Mécaniques & Transmissions de ce jour (14h00 - 16h00) est déplacé en Salle E304 (Bâtiment Bergès). Cordialement.',
+            body: "Bonjour, en raison d'une maintenance sur le vidéoprojecteur de la salle D102, le TD1 Systèmes Mécaniques & Transmissions de ce jour (14h00 - 16h00) est déplacé en Salle E304 (Bâtiment Bergès). Cordialement.",
             status: 'pending',
             proposedActions: [
               {
@@ -339,7 +339,7 @@
             sender: 'responsable.acv@grenoble-inp.fr',
             subject: 'Rendu obligatoire : Synthèse ACV Comparative avant le ' + inFiveDays,
             receivedAt: now - 7200000,
-            body: 'Bonjour à tous, merci de déposer votre rapport d analyse de cycle de vie (format PDF, 6 pages max) sur l espace Chamilo de l UE Écoconception & ACV au plus tard le ' + inFiveDays + ' à 23h59.',
+            body: "Bonjour à tous, merci de déposer votre rapport d'analyse de cycle de vie (format PDF, 6 pages max) sur l'espace Chamilo de l'UE Écoconception & ACV au plus tard le " + inFiveDays + ' à 23h59.',
             status: 'pending',
             proposedActions: [
               {
@@ -379,7 +379,7 @@
             location: 'Salle Informatique B204',
             start: `${todayStr}T10:45:00`,
             end: `${todayStr}T12:45:00`,
-            description: 'Bilan énergétique et impact carbone d un assemblage soudé.'
+            description: "Bilan énergétique et impact carbone d'un assemblage soudé."
           },
           {
             id: 'evt-4',
@@ -390,7 +390,7 @@
             location: 'Salle D102',
             start: `${todayStr}T14:00:00`,
             end: `${todayStr}T16:00:00`,
-            description: 'Dimensionnement d un réducteur à engrenages droits et vérification à la fatigue.'
+            description: "Dimensionnement d'un réducteur à engrenages droits et vérification à la fatigue."
           },
           {
             id: 'evt-6',
@@ -401,7 +401,7 @@
             location: 'Amphi Gosse',
             start: `${tomorrowStr}T09:00:00`,
             end: `${tomorrowStr}T11:00:00`,
-            description: 'Cotation RULA/REBA et flux physiques en ligne d assemblage.'
+            description: "Cotation RULA/REBA et flux physiques en ligne d'assemblage."
           }
         ],
         courses: [
@@ -410,27 +410,27 @@
             title: 'CM3 — Pilotage PIC/PDP, MRP & Modèle de Wilson',
             ue: 'Supply Chain & MRP',
             updatedAt: now - 3600000,
-            rawText: 'Le Plan Industriel et Commercial (PIC) assure l adéquation globale charge-capacité sur 6 à 18 mois. La quantité économique de commande (EOQ / Wilson) minimise la somme des coûts de lancement et de possession.',
+            rawText: "Le Plan Industriel et Commercial (PIC) assure l'adéquation globale charge-capacité sur 6 à 18 mois. La quantité économique de commande (EOQ / Wilson) minimise la somme des coûts de lancement et de possession.",
             summary: `### Pilotage Industriel & Gestion des Stocks
 - **PIC (Plan Industriel et Commercial)** : horizon tactique (6 à 18 mois) par familles de produits.
 - **PDP (Programme Directeur de Production)** : échéancier des produits finis semaine par semaine.
 - **Formule de Wilson (EOQ)** : quantité optimale $Q^*$ minimisant le coût total annuel de gestion des stocks :
-$$Q^* = \sqrt{\frac{2 \cdot D \cdot C_l}{C_p}}$$
-avec $D$ la demande annuelle, $C_l$ le coût unitaire de lancement d une commande et $C_p = t \cdot P_u$ le coût annuel de possession d une unité en stock.`,
-            memo: '- **Piège classique d examen** : vérifier l homogénéité des unités de temps entre $D$ (annuelle) et $C_p$ (coût de stockage par an).',
+$$Q^* = \\sqrt{\\frac{2 \\cdot D \\cdot C_l}{C_p}}$$
+avec $D$ la demande annuelle, $C_l$ le coût unitaire de lancement d'une commande et $C_p = t \\cdot P_u$ le coût annuel de possession d'une unité en stock.`,
+            memo: "- **Piège classique d'examen** : vérifier l'homogénéité des unités de temps entre $D$ (annuelle) et $C_p$ (coût de stockage par an).",
             quiz: [
               {
-                question: 'Dans la formule de Wilson $Q^* = \sqrt{\frac{2 D C_l}{C_p}}$, comment évolue $Q^*$ si la demande $D$ est multipliée par 4 ?',
+                question: 'Dans la formule de Wilson $Q^* = \\sqrt{\\frac{2 D C_l}{C_p}}$, comment évolue $Q^*$ si la demande $D$ est multipliée par 4 ?',
                 options: ['Elle est multipliée par 4', 'Elle est multipliée par 2', 'Elle est divisée par 2', 'Elle reste constante'],
                 answer: 1,
-                explanation: 'Puisque $Q^*$ est proportionnelle à $\sqrt{D}$, multiplier $D$ par 4 multiplie $Q^*$ par $\sqrt{4} = 2$.'
+                explanation: 'Puisque $Q^*$ est proportionnelle à $\\sqrt{D}$, multiplier $D$ par 4 multiplie $Q^*$ par $\\sqrt{4} = 2$.'
               }
             ],
             flashcards: [
               {
                 id: 'fc-1',
                 front: 'Donner la formule de la quantité économique de commande de Wilson $Q^*$.',
-                back: '$$Q^* = \sqrt{\frac{2 \cdot D \cdot C_l}{C_p}}$$ où $D$ est la demande annuelle, $C_l$ le coût de lancement et $C_p$ le coût de possession annuel.',
+                back: '$$Q^* = \\sqrt{\\frac{2 \\cdot D \\cdot C_l}{C_p}}$$ où $D$ est la demande annuelle, $C_l$ le coût de lancement et $C_p$ le coût de possession annuel.',
                 sm2: { interval: 0, repetition: 0, efactor: 2.5, nextReview: now - 60000 }
               },
               {
@@ -446,27 +446,27 @@ avec $D$ la demande annuelle, $C_l$ le coût unitaire de lancement d une command
             title: 'Systèmes Mécaniques — Engrenages Droits & Critère de Lewis',
             ue: 'Systèmes Mécaniques',
             updatedAt: now - 7200000,
-            rawText: 'Dimensionnement d un engrenage cylindrique à denture droite. Entraxe a = m*(Z1+Z2)/2. Contrainte en pied de dent par la formule de Lewis.',
+            rawText: "Dimensionnement d'un engrenage cylindrique à denture droite. Entraxe a = m*(Z1+Z2)/2. Contrainte en pied de dent par la formule de Lewis.",
             summary: `### Géométrie & Résistance des Engrenages Droits
-- **Entraxe théorique** d un engrenage extérieur à denture droite de module $m$ :
-$$a = \frac{m \cdot (Z_1 + Z_2)}{2}$$
+- **Entraxe théorique** d'un engrenage extérieur à denture droite de module $m$ :
+$$a = \\frac{m \\cdot (Z_1 + Z_2)}{2}$$
 - **Contrainte de flexion en pied de dent (Formule de Lewis)** :
-$$\sigma_f = \frac{F_t}{b \cdot m \cdot Y} \le \sigma_{\text{adm}}$$
-où $F_t = \frac{2 \cdot C_1}{m \cdot Z_1}$ est l effort tangentiel, $b$ la largeur de denture et $Y$ le facteur de forme de Lewis.`,
-            memo: '- **Condition de non-interférence** : pour un angle de pression $\alpha = 20^\circ$, le nombre minimal de dents d un pignon sans déport est $Z_{\min} = 17$.',
+$$\\sigma_f = \\frac{F_t}{b \\cdot m \\cdot Y} \\le \\sigma_{\\text{adm}}$$
+où $F_t = \\frac{2 \\cdot C_1}{m \\cdot Z_1}$ est l'effort tangentiel, $b$ la largeur de denture et $Y$ le facteur de forme de Lewis.`,
+            memo: "- **Condition de non-interférence** : pour un angle de pression $\\alpha = 20^\\circ$, le nombre minimal de dents d'un pignon sans déport est $Z_{\\min} = 17$.",
             quiz: [
               {
-                question: 'Quel est le nombre minimal de dents $Z_{\min}$ sans déport pour éviter l interférence de taille avec $\alpha = 20^\circ$ ?',
+                question: "Quel est le nombre minimal de dents $Z_{\\min}$ sans déport pour éviter l'interférence de taille avec $\\alpha = 20^\\circ$ ?",
                 options: ['12 dents', '14 dents', '17 dents', '24 dents'],
                 answer: 2,
-                explanation: 'Pour un angle de pression normalisé $\alpha = 20^\circ$, $Z_{\min} = \frac{2}{\sin^2(20^\circ)} \approx 17,1$, soit 17 dents.'
+                explanation: 'Pour un angle de pression normalisé $\\alpha = 20^\\circ$, $Z_{\\min} = \\frac{2}{\\sin^2(20^\\circ)} \\approx 17,1$, soit 17 dents.'
               }
             ],
             flashcards: [
               {
                 id: 'fc-3',
-                front: 'Formule de l entraxe $a$ d un engrenage droit extérieur en fonction du module $m$ et des nombres de dents $Z_1, Z_2$ ?',
-                back: '$$a = \frac{m \cdot (Z_1 + Z_2)}{2}$$',
+                front: "Formule de l'entraxe $a$ d'un engrenage droit extérieur en fonction du module $m$ et des nombres de dents $Z_1, Z_2$ ?",
+                back: '$$a = \\frac{m \\cdot (Z_1 + Z_2)}{2}$$',
                 sm2: { interval: 0, repetition: 0, efactor: 2.5, nextReview: now - 10000 }
               }
             ]
@@ -493,7 +493,7 @@ où $F_t = \frac{2 \cdot C_1}{m \cdot Z_1}$ est l effort tangentiel, $b$ la larg
         chatHistory: [
           {
             role: 'assistant',
-            text: 'Bonjour ! Je suis ton Tuteur IA. Tu peux m interroger à l écrit ou lancer une **Colle Orale vocale** sur n importe quelle UE.'
+            text: "Bonjour ! Je suis ton Tuteur IA. Tu peux m'interroger à l'écrit ou lancer une **Colle Orale vocale** sur n'importe quelle UE."
           }
         ]
       };
@@ -661,7 +661,7 @@ où $F_t = \frac{2 \cdot C_1}{m \cdot Z_1}$ est l effort tangentiel, $b$ la larg
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h2 class="text-2xl font-extrabold">🧠 Répétition Espacée (Algorithme SM-2)</h2>
-            <p class="text-sm text-slate-500">Révise tes flashcards au moment optimal avant l oubli. Rendu mathématique LaTeX / KaTeX activé.</p>
+            <p class="text-sm text-slate-500">Révise tes flashcards au moment optimal avant l'oubli. Rendu mathématique LaTeX / KaTeX activé.</p>
           </div>
           <div class="flex items-center gap-2">
             <select onchange="sm2SelectedUE = this.value; sm2Flipped = false; renderSm2View();" class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-semibold">
@@ -689,8 +689,8 @@ où $F_t = \frac{2 \cdot C_1}{m \cdot Z_1}$ est l effort tangentiel, $b$ la larg
         ${dueList.length === 0 ? `
           <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-10 text-center space-y-3">
             <div class="text-4xl">🎉</div>
-            <h3 class="text-lg font-bold">Session SM-2 terminée pour aujourd hui !</h3>
-            <p class="text-sm text-slate-500 max-w-md mx-auto">Toutes tes cartes dues ont été planifiées selon leur facteur de facilité. Tu peux réinitialiser les échéances si tu veux t entraîner à blanc avant un partiel.</p>
+            <h3 class="text-lg font-bold">Session SM-2 terminée pour aujourd'hui !</h3>
+            <p class="text-sm text-slate-500 max-w-md mx-auto">Toutes tes cartes dues ont été planifiées selon leur facteur de facilité. Tu peux réinitialiser les échéances si tu veux t'entraîner à blanc avant un partiel.</p>
             <button onclick="forceReviewAllSm2()" class="px-4 py-2 rounded-xl bg-slate-900 dark:bg-slate-800 text-white text-xs font-semibold">🔁 Réviser tout le paquet maintenant</button>
           </div>
         ` : (() => {
@@ -905,12 +905,12 @@ où $F_t = \frac{2 \cdot C_1}{m \cdot Z_1}$ est l effort tangentiel, $b$ la larg
     function parseEventMetadata(rawTitle, rawDesc = '') {
       const combined = `${rawTitle} ${rawDesc}`;
       let type = 'Cours';
-      if (/CM/i.test(rawTitle)) type = 'CM';
-      else if (/TD\d*/i.test(rawTitle)) type = 'TD';
-      else if (/TP\d*/i.test(rawTitle)) type = 'TP';
-      const grpMatch = combined.match(/(CM|TD\d+|TP\d+|G\d+|Groupe\s*\d+)/i);
+      if (/\bCM\b/i.test(rawTitle)) type = 'CM';
+      else if (/\bTD\d*\b/i.test(rawTitle)) type = 'TD';
+      else if (/\bTP\d*\b/i.test(rawTitle)) type = 'TP';
+      const grpMatch = combined.match(/\b(CM|TD\d+|TP\d+|G\d+|Groupe\s*\d+)\b/i);
       const group = grpMatch ? grpMatch[1].toUpperCase().replace(/\s+/g, '') : type;
-      let ue = rawTitle.replace(/(CM|TD\d*|TP\d*|G\d+|Groupe\s*\d+)/gi, '').replace(/^[\s\-–—:]+|[\s\-–—:]+$/g, '').trim();
+      let ue = rawTitle.replace(/\b(CM|TD\d*|TP\d*|G\d+|Groupe\s*\d+)\b/gi, '').replace(/^[\s\-–—:]+|[\s\-–—:]+$/g, '').trim();
       return { ue: ue || rawTitle, type, group };
     }
 
@@ -1026,7 +1026,7 @@ où $F_t = \frac{2 \cdot C_1}{m \cdot Z_1}$ est l effort tangentiel, $b$ la larg
 
     async function ensureDriveFolder(folderName, parentId = null) {
       const parentClause = parentId ? `and '${parentId}' in parents` : '';
-      const q = encodeURIComponent(`name='${folderName.replace(/'/g, "\'")}' and mimeType='application/vnd.google-apps.folder' ${parentClause} and trashed=false`);
+      const q = encodeURIComponent(`name='${folderName.replace(/'/g, "\\'")}' and mimeType='application/vnd.google-apps.folder' ${parentClause} and trashed=false`);
       const res = await googleFetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`);
       if (res.files?.length > 0) return res.files[0].id;
       const body = { name: folderName, mimeType: 'application/vnd.google-apps.folder' };
@@ -1114,16 +1114,8 @@ où $F_t = \frac{2 \cdot C_1}{m \cdot Z_1}$ est l effort tangentiel, $b$ la larg
       const metadata = existingFileId ? { name: DRIVE_DB_FILENAME } : { name: DRIVE_DB_FILENAME, parents: [folderId] };
       const boundary = '-------studyflow_boundary_final';
       const body =
-        `--${boundary}
-Content-Type: application/json; charset=UTF-8
-
-${JSON.stringify(metadata)}
-` +
-        `--${boundary}
-Content-Type: application/json
-
-${payload}
-` +
+        `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n` +
+        `--${boundary}\r\nContent-Type: application/json\r\n\r\n${payload}\r\n` +
         `--${boundary}--`;
       const url = existingFileId
         ? `https://www.googleapis.com/upload/drive/v3/files/${existingFileId}?uploadType=multipart`
@@ -1205,7 +1197,7 @@ ${payload}
                     ${state.modules.tutor ? `<button onclick="askTutorAboutEvent('${ev.id}')" class="px-3 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold shrink-0">🤖 Expliquer</button>` : ''}
                   </div>
                 `;
-              }).join('') || '<p class="text-sm text-slate-500">Aucun créneau retenu aujourd hui.</p>'}
+              }).join('') || "<p class='text-sm text-slate-500'>Aucun créneau retenu aujourd'hui.</p>"}
             </div>
           </div>
           ` : ''}
@@ -1373,7 +1365,7 @@ ${payload}
       const href = a.href;
       const text = (a.textContent || '').trim();
       if (!href || seen.has(href)) return;
-      if (/\.pdf(\?|$)/i.test(href) || href.includes('mod_resource') || href.includes('/document/')) {
+      if (/\\.pdf(\\?|$)/i.test(href) || href.includes('mod_resource') || href.includes('/document/')) {
         seen.add(href);
         results.push({ source, ue, title: text || href.split('/').pop().split('?')[0] || 'Support.pdf', url: href, snippet: 'Support extrait depuis ' + source });
       }
@@ -1662,7 +1654,7 @@ document.getElementById('sendBtn').addEventListener('click', () => {
               <div class="text-xs font-bold uppercase text-slate-500 mb-2">Mes UE</div>
               ${allUEs.map(ue => `
                 <label class="flex items-center gap-2 py-1 text-xs cursor-pointer">
-                  <input type="checkbox" ${!state.filters.disabledUEs.includes(ue) ? 'checked' : ''} onchange="toggleUEFilter('${ue.replace(/'/g, "\'")}', this.checked)" class="accent-brand-600" />
+                  <input type="checkbox" ${!state.filters.disabledUEs.includes(ue) ? 'checked' : ''} onchange="toggleUEFilter('${ue.replace(/'/g, "\\'")}', this.checked)" class="accent-brand-600" />
                   <span class="truncate">${ue}</span>
                 </label>
               `).join('')}
@@ -1672,7 +1664,7 @@ document.getElementById('sendBtn').addEventListener('click', () => {
               <div class="flex flex-wrap gap-1.5">
                 ${allGroups.map(grp => {
                   const active = !state.filters.blockedGroups.includes(grp);
-                  return `<button onclick="toggleGroupFilter('${grp.replace(/'/g, "\'")}')" class="px-2.5 py-1 rounded-lg text-xs font-bold border ${active ? 'bg-brand-600 text-white border-brand-600' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 line-through'}">${grp}</button>`;
+                  return `<button onclick="toggleGroupFilter('${grp.replace(/'/g, "\\'")}')" class="px-2.5 py-1 rounded-lg text-xs font-bold border ${active ? 'bg-brand-600 text-white border-brand-600' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 line-through'}">${grp}</button>`;
                 }).join('')}
               </div>
             </div>
@@ -1746,7 +1738,7 @@ document.getElementById('sendBtn').addEventListener('click', () => {
                     <div class="flex items-center gap-2.5">
                       ${!isFolder ? `<input type="checkbox" ${selectedDriveFileIds.has(file.id) ? 'checked' : ''} onchange="toggleDriveFileSelection('${file.id}', this.checked)" class="accent-brand-600" />` : ''}
                       <span>${isFolder ? '📁' : '📄'}</span>
-                      ${isFolder ? `<button onclick="openDriveFolder('${file.id}', '${file.name.replace(/'/g, "\'")}')" class="font-semibold text-sm hover:text-brand-600">${file.name}</button>` : `<span class="text-sm">${file.name}</span>`}
+                      ${isFolder ? `<button onclick="openDriveFolder('${file.id}', '${file.name.replace(/'/g, "\\'")}')" class="font-semibold text-sm hover:text-brand-600">${file.name}</button>` : `<span class="text-sm">${file.name}</span>`}
                     </div>
                     ${!isFolder ? `<button onclick="ignoreDriveFile('${file.id}')" class="text-xs text-slate-400 hover:text-rose-600">Ignorer</button>` : ''}
                   </div>
@@ -1804,8 +1796,7 @@ document.getElementById('sendBtn').addEventListener('click', () => {
       for (let p = 1; p <= Math.min(pdf.numPages, 25); p++) {
         const page = await pdf.getPage(p);
         const content = await page.getTextContent();
-        fullText += content.items.map(i => i.str).join(' ') + '
-';
+        fullText += content.items.map(i => i.str).join(' ') + '\n';
       }
       return fullText.trim();
     }
@@ -1894,7 +1885,7 @@ document.getElementById('sendBtn').addEventListener('click', () => {
       let generated = null;
       if (apiKey) {
         try {
-          const prompt = `Analyse ce cours d ingénieur (formate toutes les formules mathématiques en LaTeX $...$ ou $$...$$) et réponds en JSON valide avec les clés "summary" (markdown), "memo" (markdown), "quiz" ([{question, options, answer, explanation}]) et "flashcards" ([{front, back}]). Texte : ${rawText.slice(0, 14000)}`;
+          const prompt = `Analyse ce cours d'ingénieur (formate toutes les formules mathématiques en LaTeX $...$ ou $$...$$) et réponds en JSON valide avec les clés "summary" (markdown), "memo" (markdown), "quiz" ([{question, options, answer, explanation}]) et "flashcards" ([{front, back}]). Texte : ${rawText.slice(0, 14000)}`;
           const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1909,11 +1900,9 @@ document.getElementById('sendBtn').addEventListener('click', () => {
       if (!generated) {
         const sentences = rawText.split(/[.!?]\s+/).filter(s => s.length > 20).slice(0, 4);
         generated = {
-          summary: `### Synthèse : ${title}
-` + (sentences.length ? sentences.map(s => `- ${s.trim()}.`).join('
-') : `- ${rawText.slice(0, 350)}`),
+          summary: `### Synthèse : ${title}\n` + (sentences.length ? sentences.map(s => `- ${s.trim()}.`).join('\n') : `- ${rawText.slice(0, 350)}`),
           memo: `- **À retenir** : Vérifie les formules clés et hypothèses de **${title}**.`,
-          quiz: [{ question: `Quel est le sujet principal de « ${title} » ?`, options: [sentences[0]?.slice(0, 60) || title, 'Histoire de l art', 'Droit civil', 'Aucune réponse'], answer: 0, explanation: 'Notion extraite du support.' }],
+          quiz: [{ question: `Quel est le sujet principal de « ${title} » ?`, options: [sentences[0]?.slice(0, 60) || title, "Histoire de l'art", 'Droit civil', 'Aucune réponse'], answer: 0, explanation: 'Notion extraite du support.' }],
           flashcards: [{ front: `Notion clé : ${title}`, back: sentences[0] || rawText.slice(0, 160) }]
         };
       }
@@ -2009,7 +1998,7 @@ document.getElementById('sendBtn').addEventListener('click', () => {
     function speakTextFrench(rawText) {
       if (!('speechSynthesis' in window)) return;
       window.speechSynthesis.cancel();
-      const clean = rawText.replace(/[\$\*#`\]/g, ' ').replace(/\s+/g, ' ').trim();
+      const clean = rawText.replace(/[\$\*#`\\]/g, ' ').replace(/\s+/g, ' ').trim();
       const utter = new SpeechSynthesisUtterance(clean);
       utter.lang = 'fr-FR';
       utter.rate = 1.05;
@@ -2064,7 +2053,7 @@ document.getElementById('sendBtn').addEventListener('click', () => {
       colleModeActive = true;
       const ueCourses = state.courses.filter(c => c.ue === colleSelectedUE);
       const refCourse = ueCourses[0] || state.courses[0];
-      const prompt = `Mode Colle Orale activé sur l UE **${colleSelectedUE}**. Pose-moi une première question orale précise et technique issue du cours « ${refCourse?.title || colleSelectedUE} » (avec une équation ou un cas concret si pertinent), et attends ma réponse avant de me noter sur 20.`;
+      const prompt = `Mode Colle Orale activé sur l'UE **${colleSelectedUE}**. Pose-moi une première question orale précise et technique issue du cours « ${refCourse?.title || colleSelectedUE} » (avec une équation ou un cas concret si pertinent), et attends ma réponse avant de me noter sur 20.`;
       state.chatHistory.push({ role: 'user', text: `🎙️ Démarrer une colle orale sur : ${colleSelectedUE}` });
       await generateTutorReply(prompt, true);
     }
@@ -2078,7 +2067,7 @@ document.getElementById('sendBtn').addEventListener('click', () => {
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h2 class="text-2xl font-extrabold">🎙️ Tuteur IA & Mode Colle Orale</h2>
-            <p class="text-sm text-slate-500">Pose tes questions à l écrit ou passe en interrogation orale vocale (micro + synthèse vocale).</p>
+            <p class="text-sm text-slate-500">Pose tes questions à l'écrit ou passe en interrogation orale vocale (micro + synthèse vocale).</p>
           </div>
           <div class="flex flex-wrap items-center gap-2">
             <select onchange="colleSelectedUE = this.value" class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-semibold">
@@ -2103,7 +2092,7 @@ document.getElementById('sendBtn').addEventListener('click', () => {
             <button onclick="toggleVoiceRecognition()" title="Répondre au micro" class="p-2.5 rounded-xl border ${isListeningMic ? 'bg-rose-600 text-white border-rose-600 animate-pulse' : 'border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'} text-sm">
               🎤
             </button>
-            <input id="tutorInput" type="text" onkeydown="if(event.key==='Enter') sendTutorMessage()" placeholder="${colleModeActive ? 'Réponds à l examinateur à l écrit ou au micro...' : 'Pose ta question sur tes cours du jour...'}" class="flex-1 px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm" />
+            <input id="tutorInput" type="text" onkeydown="if(event.key==='Enter') sendTutorMessage()" placeholder="${colleModeActive ? "Réponds à l'examinateur à l'écrit ou au micro..." : 'Pose ta question sur tes cours du jour...'}" class="flex-1 px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm" />
             <button onclick="sendTutorMessage()" class="px-4 py-2 rounded-xl bg-brand-600 text-white text-xs font-bold">Envoyer</button>
           </div>
         </div>
@@ -2139,18 +2128,14 @@ document.getElementById('sendBtn').addEventListener('click', () => {
       let reply = '';
       if (apiKey) {
         try {
-          const coursesContext = state.courses.map(c => `[${c.ue}] ${c.title}: ${c.summary}`).join('
-').slice(0, 9000);
+          const coursesContext = state.courses.map(c => `[${c.ue}] ${c.title}: ${c.summary}`).join('\n').slice(0, 9000);
           const systemRole = colleModeActive
-            ? `Tu es un professeur examinateur de colle orale à Grenoble INP sur l UE ${colleSelectedUE}. Évalue la réponse de l étudiant avec bienveillance et rigueur (note indicative /20 si applicable), corrige les imprécisions avec des formules LaTeX $...$ et pose une question de relance.`
+            ? `Tu es un professeur examinateur de colle orale à Grenoble INP sur l'UE ${colleSelectedUE}. Évalue la réponse de l'étudiant avec bienveillance et rigueur (note indicative /20 si applicable), corrige les imprécisions avec des formules LaTeX $...$ et pose une question de relance.`
             : `Tu es le tuteur pédagogique IA de Grenoble INP. Utilise LaTeX $...$ et $$...$$ pour les formules.`;
           const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ contents: [{ parts: [{ text: `${systemRole}
-Supports:
-${coursesContext}
-Message: ${userPrompt}` }] }] })
+            body: JSON.stringify({ contents: [{ parts: [{ text: `${systemRole}\nSupports:\n${coursesContext}\nMessage: ${userPrompt}` }] }] })
           });
           const data = await res.json();
           reply = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
@@ -2158,7 +2143,7 @@ Message: ${userPrompt}` }] }] })
       }
       if (!reply) {
         if (colleModeActive) {
-          reply = `**Question de Colle (${colleSelectedUE})** : Peux-tu expliquer les hypothèses principales du modèle étudié dans ton cours et écrire la relation mathématique fondamentale associée (par exemple $Q^* = \sqrt{\frac{2 D C_l}{C_p}}$ en gestion des stocks ou $a = \frac{m(Z_1+Z_2)}{2}$ en transmission) ?`;
+          reply = `**Question de Colle (${colleSelectedUE})** : Peux-tu expliquer les hypothèses principales du modèle étudié dans ton cours et écrire la relation mathématique fondamentale associée (par exemple $Q^* = \\sqrt{\\frac{2 D C_l}{C_p}}$ en gestion des stocks ou $a = \\frac{m(Z_1+Z_2)}{2}$ en transmission) ?`;
         } else {
           reply = `Voici les éléments clés basés sur tes supports (**${state.courses.map(c => c.ue).join(', ')}**) : vérifie les formules principales et les hypothèses de ton polycopié correspondant.`;
         }
@@ -2245,8 +2230,7 @@ Message: ${userPrompt}` }] }] })
     }
 
     function downloadStandaloneApp() {
-      const html = '<!DOCTYPE html>
-' + document.documentElement.outerHTML;
+      const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
       const a = document.createElement('a');
       a.href = URL.createObjectURL(new Blob([html], { type: 'text/html;charset=utf-8' }));
       a.download = 'index.html';
