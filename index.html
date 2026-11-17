@@ -1,0 +1,2266 @@
+<!DOCTYPE html>
+<html lang="fr" class="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#2563eb" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="StudyFlow IA" />
+  <link id="pwaManifestLink" rel="manifest" />
+  <link id="pwaAppleIcon" rel="apple-touch-icon" />
+  <title>StudyFlow IA — Édition Complète (PWA, KaTeX, SM-2 & Colle Orale)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              900: '#1e3a8a'
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .prose h1, .prose h2, .prose h3 { font-weight: 700; margin-top: 1em; margin-bottom: 0.4em; }
+    .prose ul { list-style-type: disc; padding-left: 1.25rem; margin-bottom: 0.75rem; }
+    .prose ol { list-style-type: decimal; padding-left: 1.25rem; margin-bottom: 0.75rem; }
+    .prose p { margin-bottom: 0.65rem; line-height: 1.6; }
+    .prose strong { font-weight: 700; }
+    .prose code { background: rgba(148, 163, 184, 0.2); padding: 0.15rem 0.35rem; border-radius: 0.25rem; font-size: 0.875em; }
+    .katex-display { overflow-x: auto; overflow-y: hidden; padding: 0.4rem 0; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col md:flex-row selection:bg-brand-500 selection:text-white">
+
+  <aside class="hidden md:flex md:w-72 md:flex-col md:fixed md:inset-y-0 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 z-30">
+    <div class="p-5 flex items-center justify-between border-b border-slate-200 dark:border-slate-800">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-600 to-indigo-600 flex items-center justify-center text-white font-extrabold text-lg shadow-md">SF</div>
+        <div>
+          <h1 class="font-bold text-base tracking-tight leading-none">StudyFlow IA</h1>
+          <span class="text-[11px] font-semibold text-brand-600 dark:text-brand-400">PWA • KaTeX • SM-2 • Colle</span>
+        </div>
+      </div>
+      <button onclick="toggleTheme()" title="Changer de thème" class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
+        <span id="themeIconDesktop">🌙</span>
+      </button>
+    </div>
+
+    <nav id="desktopNav" class="flex-1 p-3 space-y-1 overflow-y-auto"></nav>
+
+    <div class="p-4 border-t border-slate-200 dark:border-slate-800 space-y-2.5">
+      <div id="googleStatusCard" class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs">
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="font-semibold text-slate-700 dark:text-slate-200">Google Cloud Sync</span>
+          <span id="googleDot" class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+        </div>
+        <p id="googleStatusText" class="text-slate-500 dark:text-slate-400 mb-2">Non connecté</p>
+        <div class="flex gap-1.5">
+          <button onclick="connectGoogle()" class="flex-1 py-1.5 px-2 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-semibold transition">Connecter</button>
+          <button id="btnQuickSync" onclick="syncDriveDatabase()" class="hidden py-1.5 px-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold transition" title="Fusionner IndexedDB et Drive">🔄 Sync</button>
+        </div>
+      </div>
+      <div class="flex gap-1.5">
+        <button onclick="openSettingsModal()" class="flex-1 py-2 px-3 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition">⚙️ Paramètres</button>
+        <button id="btnInstallPwaDesktop" onclick="triggerPwaInstall()" class="hidden py-2 px-3 rounded-lg bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition" title="Installer l'application">📲</button>
+        <button onclick="downloadStandaloneApp()" class="py-2 px-3 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Exporter index.html">💾</button>
+      </div>
+    </div>
+  </aside>
+
+  <header class="md:hidden sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-600 to-indigo-600 flex items-center justify-center text-white font-bold text-sm">SF</div>
+      <div>
+        <span class="font-bold text-sm block leading-none">StudyFlow IA</span>
+        <span id="mobileSyncBadge" class="text-[10px] text-slate-500 dark:text-slate-400">PWA • IndexedDB</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-1.5">
+      <button id="btnInstallPwaMobile" onclick="triggerPwaInstall()" class="hidden p-2 rounded-lg bg-indigo-600 text-white text-xs font-semibold">📲 Installer</button>
+      <button onclick="syncDriveDatabase()" class="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 text-xs font-semibold">🔄</button>
+      <button onclick="toggleTheme()" class="p-2 rounded-lg text-slate-600 dark:text-slate-300 text-sm">🌓</button>
+      <button onclick="openSettingsModal()" class="p-2 rounded-lg text-slate-600 dark:text-slate-300 text-sm">⚙️</button>
+    </div>
+  </header>
+
+  <main class="flex-1 md:pl-72 pb-24 md:pb-10">
+    <div id="toastBanner" class="hidden fixed bottom-20 md:bottom-6 right-4 left-4 md:left-auto md:w-96 z-50 p-3.5 rounded-xl shadow-xl border text-sm font-medium transition-all"></div>
+
+    <div class="max-w-6xl mx-auto p-4 md:p-8">
+      <section id="view-dashboard" class="space-y-6"></section>
+      <section id="view-calendar" class="hidden space-y-6"></section>
+      <section id="view-clipper" class="hidden space-y-6"></section>
+      <section id="view-webmail" class="hidden space-y-6"></section>
+      <section id="view-courses" class="hidden space-y-6"></section>
+      <section id="view-sm2" class="hidden space-y-6"></section>
+      <section id="view-drive" class="hidden space-y-6"></section>
+      <section id="view-deadlines" class="hidden space-y-6"></section>
+      <section id="view-tutor" class="hidden space-y-6"></section>
+      <section id="view-modules" class="hidden space-y-6"></section>
+    </div>
+  </main>
+
+  <nav id="mobileNav" class="md:hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-t border-slate-200 dark:border-slate-800 flex justify-around py-1.5 px-1"></nav>
+
+  <div id="settingsModal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+        <h2 class="text-lg font-bold">⚙️ Configuration, PWA & Identifiants</h2>
+        <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+      </div>
+
+      <div class="space-y-4 text-sm">
+        <div>
+          <label class="block font-semibold mb-1">ID Client OAuth 2.0 Google Cloud</label>
+          <input id="inputClientId" type="text" placeholder="123456789-abc.apps.googleusercontent.com" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-brand-500 outline-none" />
+          <p class="text-xs text-slate-500 mt-1">Requis pour Google Drive (sync cloud + dépôt Clipper v2) et Google Agenda (pont ADE).</p>
+        </div>
+
+        <div>
+          <label class="block font-semibold mb-1">Clé API Gemini (Optionnelle — Mode Démo intégré)</label>
+          <input id="inputGeminiKey" type="password" placeholder="AIzaSy..." class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-brand-500 outline-none" />
+          <p class="text-xs text-slate-500 mt-1">Alimente l'analyse des PDF (avec équations LaTeX), l'extracteur Mail → Action et le mode Colle orale.</p>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 space-y-1.5 text-xs">
+          <div class="font-bold text-indigo-700 dark:text-indigo-300">📲 Installation Progressive Web App (PC & Mobile)</div>
+          <p class="text-slate-600 dark:text-slate-300">Sur Chrome/Edge PC : clique sur l'icône <strong>Installer StudyFlow IA</strong> dans la barre d'adresse. Sur iOS/Android : <strong>Partager → Sur l'écran d'accueil</strong>.</p>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-slate-100 dark:bg-slate-800/70 space-y-2">
+          <div class="font-semibold text-xs uppercase tracking-wider text-slate-500">Sauvegarde & Portabilité</div>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="exportJsonBackup()" class="px-3 py-1.5 rounded-lg bg-slate-800 dark:bg-slate-700 text-white text-xs font-medium hover:opacity-90">📤 Exporter JSON</button>
+            <label class="px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-slate-700 text-xs font-medium cursor-pointer hover:opacity-90">
+              📥 Importer JSON
+              <input type="file" accept=".json" onchange="importJsonBackup(event)" class="hidden" />
+            </label>
+            <button onclick="resetDemoData()" class="px-3 py-1.5 rounded-lg bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 text-xs font-medium hover:opacity-90">♻️ Réinitialiser Démo</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+        <button onclick="closeSettingsModal()" class="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm font-medium">Annuler</button>
+        <button onclick="saveSettings()" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="courseDetailModal" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-2 md:p-6">
+    <div id="courseDetailContent" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden"></div>
+  </div>
+
+  <script>
+    if (window.pdfjsLib) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+
+    function initPwaManifestAndIcons() {
+      const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#2563eb"/><stop offset="100%" stop-color="#4f46e5"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#g)"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" fill="#ffffff" font-family="Inter,Arial,sans-serif" font-weight="800" font-size="220">SF</text></svg>`;
+      const iconUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgIcon);
+      const appleLink = document.getElementById('pwaAppleIcon');
+      if (appleLink) appleLink.href = iconUrl;
+
+      const manifest = {
+        name: 'StudyFlow IA — Grenoble INP',
+        short_name: 'StudyFlow IA',
+        description: 'Hub d études IA : ADE, Chamilo/Moodle Clipper v2, Webmail IA, KaTeX, SM-2 et Colle orale.',
+        start_url: window.location.href,
+        display: 'standalone',
+        background_color: '#0f172a',
+        theme_color: '#2563eb',
+        icons: [
+          { src: iconUrl, sizes: '192x192', type: 'image/svg+xml', purpose: 'any maskable' },
+          { src: iconUrl, sizes: '512x512', type: 'image/svg+xml', purpose: 'any maskable' }
+        ]
+      };
+      const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+      const manifestLink = document.getElementById('pwaManifestLink');
+      if (manifestLink) manifestLink.href = URL.createObjectURL(manifestBlob);
+    }
+
+    let deferredPwaPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPwaPrompt = e;
+      const b1 = document.getElementById('btnInstallPwaDesktop');
+      const b2 = document.getElementById('btnInstallPwaMobile');
+      if (b1) b1.classList.remove('hidden');
+      if (b2) b2.classList.remove('hidden');
+    });
+
+    async function triggerPwaInstall() {
+      if (!deferredPwaPrompt) {
+        showToast('Utilise le menu de ton navigateur : Installer l application / Sur l écran d accueil.', 'info');
+        return;
+      }
+      deferredPwaPrompt.prompt();
+      await deferredPwaPrompt.userChoice;
+      deferredPwaPrompt = null;
+    }
+
+    function renderMathInContainer(container) {
+      if (!container || !window.renderMathInElement) return;
+      try {
+        renderMathInElement(container, {
+          delimiters: [
+            { left: '$$', right: '$$', display: true },
+            { left: '$', right: '$', display: false },
+            { left: '\(', right: '\)', display: false },
+            { left: '\[', right: '\]', display: true }
+          ],
+          throwOnError: false
+        });
+      } catch (e) {}
+    }
+
+    const DB_NAME = 'StudyFlowDB_Final';
+    const DB_STORE = 'appState';
+    const DRIVE_FOLDER_NAME = 'StudyFlow_GrenobleINP';
+    const DRIVE_DB_FILENAME = 'studyflow_db.json';
+    const GOOGLE_SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/calendar.readonly';
+
+    const MODULE_DEFINITIONS = [
+      { id: 'calendar', name: 'Google Agenda (Pont ADE)', desc: 'Synchronisation des créneaux ADE via Google Calendar et filtrage UE/Groupes.', icon: '📅', category: 'Sources & Flux' },
+      { id: 'clipper', name: 'Pont Chamilo / Moodle (Clipper v2)', desc: 'Réception sélective des supports aspirés par l extension navigateur et dépôt Drive.', icon: '🧩', category: 'Sources & Flux' },
+      { id: 'webmail', name: 'Automate Webmail → Action', desc: 'Analyse IA des e-mails Zimbra/Partage pour détecter deadlines et changements de salle.', icon: '✉️', category: 'Sources & Flux' },
+      { id: 'drive', name: 'Google Drive & Cloud Sync', desc: 'Exploration de dossiers UE, import PDF sélectif et fusion studyflow_db.json.', icon: '☁️', category: 'Sources & Flux' },
+      { id: 'deadlines', name: 'Deadlines & Rapports', desc: 'Suivi des rendus, projets, comptes-rendus de TP et sous-tâches.', icon: '⏰', category: 'Organisation' },
+      { id: 'sm2', name: 'Répétition Espacée SM-2', desc: 'Planification cognitive des révisions de flashcards selon ta qualité de rappel (0 à 5).', icon: '🧠', category: 'Outils IA' },
+      { id: 'summaries', name: 'Résumés, Fiches Mémo & KaTeX', desc: 'Synthèses structurées avec rendu mathématique LaTeX haute précision.', icon: '📝', category: 'Outils IA' },
+      { id: 'quizzes', name: 'Quiz QCM Interactifs', desc: 'Évaluation rapide à 4 questions avec explications détaillées.', icon: '🎯', category: 'Outils IA' },
+      { id: 'tutor', name: 'Tuteur IA & Mode Colle Orale', desc: 'Assistant écrit et examinateur oral interactif (synthèse vocale + micro).', icon: '🎙️', category: 'Outils IA' }
+    ];
+
+    function getDefaultState() {
+      const now = Date.now();
+      const todayStr = new Date().toISOString().split('T')[0];
+      const tomorrowStr = new Date(now + 86400000).toISOString().split('T')[0];
+      const inThreeDays = new Date(now + 3 * 86400000).toISOString().split('T')[0];
+      const inFiveDays = new Date(now + 5 * 86400000).toISOString().split('T')[0];
+      const inSixDays = new Date(now + 6 * 86400000).toISOString().split('T')[0];
+
+      return {
+        updatedAt: now,
+        theme: 'light',
+        settings: {
+          googleClientId: '',
+          geminiApiKey: '',
+          selectedCalendarId: 'primary',
+          selectedCalendarName: 'ADE Grenoble INP — Génie Industriel (Sync)'
+        },
+        modules: {
+          calendar: true,
+          clipper: true,
+          webmail: true,
+          drive: true,
+          deadlines: true,
+          sm2: true,
+          summaries: true,
+          quizzes: true,
+          tutor: true
+        },
+        filters: {
+          enabledUEs: ['Supply Chain & MRP', 'Écoconception & ACV', 'Systèmes Mécaniques', 'Ergonomie & Postes'],
+          disabledUEs: ['Option Anglais Renforcé G2', 'Réunion BDE / Hors-cursus'],
+          allowedGroups: ['CM', 'TD1', 'TP2', 'G1'],
+          blockedGroups: ['TD2', 'TD3', 'TP1', 'TP3', 'G2'],
+          excludeKeywords: ['annulé', 'option', 'g2', 'tp1'],
+          bypassFilters: false
+        },
+        ignoredDriveIds: [],
+        ignoredClipperUrls: [],
+        clipperInbox: [
+          {
+            id: 'clip-demo-1',
+            source: 'Chamilo Grenoble INP',
+            ue: 'Supply Chain & MRP',
+            title: 'CM4_Calcul_Charges_RCCP_2026.pdf',
+            url: 'https://chamilo.grenoble-inp.fr/courses/GI4A/document/CM4_RCCP.pdf',
+            capturedAt: now - 1800000,
+            snippet: 'Méthode de vérification globale des capacités (RCCP) et formule de la quantité économique de commande de Wilson.',
+            selected: true
+          },
+          {
+            id: 'clip-demo-2',
+            source: 'Moodle Grenoble INP',
+            ue: 'Systèmes Mécaniques',
+            title: 'TD1_Enonce_Reducteur_35NCD6.pdf',
+            url: 'https://moodle.grenoble-inp.fr/pluginfile.php/1420/mod_resource/TD1_Reducteur.pdf',
+            capturedAt: now - 3600000,
+            snippet: 'Dimensionnement d un train d engrenages cylindriques à denture droite en acier 35NCD6 : contrainte de flexion de Lewis.',
+            selected: true
+          }
+        ],
+        webmailInbox: [
+          {
+            id: 'mail-demo-1',
+            sender: 'scolarite.gi@grenoble-inp.fr',
+            subject: '[GI 2A] Changement de salle TD1 Systèmes Mécaniques aujourd hui',
+            receivedAt: now - 2400000,
+            body: 'Bonjour, en raison d une maintenance sur le vidéoprojecteur de la salle D102, le TD1 Systèmes Mécaniques & Transmissions de ce jour (14h00 - 16h00) est déplacé en Salle E304 (Bâtiment Bergès). Cordialement.',
+            status: 'pending',
+            proposedActions: [
+              {
+                id: 'act-101',
+                kind: 'room_change',
+                ue: 'Systèmes Mécaniques',
+                targetEventTitle: 'TD1 Systèmes Mécaniques & Transmissions',
+                newLocation: 'Salle E304 (Bâtiment Bergès)',
+                summary: 'Déplacer TD1 Systèmes Mécaniques → Salle E304 (Bâtiment Bergès)',
+                applied: false
+              }
+            ]
+          },
+          {
+            id: 'mail-demo-2',
+            sender: 'responsable.acv@grenoble-inp.fr',
+            subject: 'Rendu obligatoire : Synthèse ACV Comparative avant le ' + inFiveDays,
+            receivedAt: now - 7200000,
+            body: 'Bonjour à tous, merci de déposer votre rapport d analyse de cycle de vie (format PDF, 6 pages max) sur l espace Chamilo de l UE Écoconception & ACV au plus tard le ' + inFiveDays + ' à 23h59.',
+            status: 'pending',
+            proposedActions: [
+              {
+                id: 'act-102',
+                kind: 'deadline',
+                ue: 'Écoconception & ACV',
+                title: 'Rapport ACV Comparative (PDF 6 pages max sur Chamilo)',
+                dueDate: inFiveDays,
+                summary: `Ajouter la deadline « Rapport ACV Comparative » pour le ${inFiveDays}`,
+                applied: false
+              }
+            ]
+          }
+        ],
+        calendars: [
+          { id: 'primary', summary: 'ADE Grenoble INP — Génie Industriel (Sync)', primary: true },
+          { id: 'perso_demo', summary: 'Agenda Personnel', primary: false }
+        ],
+        events: [
+          {
+            id: 'evt-1',
+            title: 'CM Supply Chain & Planification MRP',
+            ue: 'Supply Chain & MRP',
+            type: 'CM',
+            group: 'CM',
+            location: 'Amphi Bergès — Viallet',
+            start: `${todayStr}T08:30:00`,
+            end: `${todayStr}T10:30:00`,
+            description: 'Dimensionnement du Plan Directeur de Production (PDP) et calcul des besoins nets (MRP2).'
+          },
+          {
+            id: 'evt-2',
+            title: 'TP2 Écoconception & Analyse de Cycle de Vie',
+            ue: 'Écoconception & ACV',
+            type: 'TP',
+            group: 'TP2',
+            location: 'Salle Informatique B204',
+            start: `${todayStr}T10:45:00`,
+            end: `${todayStr}T12:45:00`,
+            description: 'Bilan énergétique et impact carbone d un assemblage soudé.'
+          },
+          {
+            id: 'evt-4',
+            title: 'TD1 Systèmes Mécaniques & Transmissions',
+            ue: 'Systèmes Mécaniques',
+            type: 'TD',
+            group: 'TD1',
+            location: 'Salle D102',
+            start: `${todayStr}T14:00:00`,
+            end: `${todayStr}T16:00:00`,
+            description: 'Dimensionnement d un réducteur à engrenages droits et vérification à la fatigue.'
+          },
+          {
+            id: 'evt-6',
+            title: 'CM Ergonomie & Analyse de Poste',
+            ue: 'Ergonomie & Postes',
+            type: 'CM',
+            group: 'CM',
+            location: 'Amphi Gosse',
+            start: `${tomorrowStr}T09:00:00`,
+            end: `${tomorrowStr}T11:00:00`,
+            description: 'Cotation RULA/REBA et flux physiques en ligne d assemblage.'
+          }
+        ],
+        courses: [
+          {
+            id: 'crs-1',
+            title: 'CM3 — Pilotage PIC/PDP, MRP & Modèle de Wilson',
+            ue: 'Supply Chain & MRP',
+            updatedAt: now - 3600000,
+            rawText: 'Le Plan Industriel et Commercial (PIC) assure l adéquation globale charge-capacité sur 6 à 18 mois. La quantité économique de commande (EOQ / Wilson) minimise la somme des coûts de lancement et de possession.',
+            summary: `### Pilotage Industriel & Gestion des Stocks
+- **PIC (Plan Industriel et Commercial)** : horizon tactique (6 à 18 mois) par familles de produits.
+- **PDP (Programme Directeur de Production)** : échéancier des produits finis semaine par semaine.
+- **Formule de Wilson (EOQ)** : quantité optimale $Q^*$ minimisant le coût total annuel de gestion des stocks :
+$$Q^* = \sqrt{\frac{2 \cdot D \cdot C_l}{C_p}}$$
+avec $D$ la demande annuelle, $C_l$ le coût unitaire de lancement d une commande et $C_p = t \cdot P_u$ le coût annuel de possession d une unité en stock.`,
+            memo: '- **Piège classique d examen** : vérifier l homogénéité des unités de temps entre $D$ (annuelle) et $C_p$ (coût de stockage par an).',
+            quiz: [
+              {
+                question: 'Dans la formule de Wilson $Q^* = \sqrt{\frac{2 D C_l}{C_p}}$, comment évolue $Q^*$ si la demande $D$ est multipliée par 4 ?',
+                options: ['Elle est multipliée par 4', 'Elle est multipliée par 2', 'Elle est divisée par 2', 'Elle reste constante'],
+                answer: 1,
+                explanation: 'Puisque $Q^*$ est proportionnelle à $\sqrt{D}$, multiplier $D$ par 4 multiplie $Q^*$ par $\sqrt{4} = 2$.'
+              }
+            ],
+            flashcards: [
+              {
+                id: 'fc-1',
+                front: 'Donner la formule de la quantité économique de commande de Wilson $Q^*$.',
+                back: '$$Q^* = \sqrt{\frac{2 \cdot D \cdot C_l}{C_p}}$$ où $D$ est la demande annuelle, $C_l$ le coût de lancement et $C_p$ le coût de possession annuel.',
+                sm2: { interval: 0, repetition: 0, efactor: 2.5, nextReview: now - 60000 }
+              },
+              {
+                id: 'fc-2',
+                front: 'Différence fondamentale entre PIC et PDP ?',
+                back: 'Le **PIC** raisonne par familles de produits sur 6 à 18 mois (maille mensuelle), tandis que le **PDP** raisonne par références de produits finis (maille hebdomadaire).',
+                sm2: { interval: 1, repetition: 1, efactor: 2.5, nextReview: now - 30000 }
+              }
+            ]
+          },
+          {
+            id: 'crs-2',
+            title: 'Systèmes Mécaniques — Engrenages Droits & Critère de Lewis',
+            ue: 'Systèmes Mécaniques',
+            updatedAt: now - 7200000,
+            rawText: 'Dimensionnement d un engrenage cylindrique à denture droite. Entraxe a = m*(Z1+Z2)/2. Contrainte en pied de dent par la formule de Lewis.',
+            summary: `### Géométrie & Résistance des Engrenages Droits
+- **Entraxe théorique** d un engrenage extérieur à denture droite de module $m$ :
+$$a = \frac{m \cdot (Z_1 + Z_2)}{2}$$
+- **Contrainte de flexion en pied de dent (Formule de Lewis)** :
+$$\sigma_f = \frac{F_t}{b \cdot m \cdot Y} \le \sigma_{\text{adm}}$$
+où $F_t = \frac{2 \cdot C_1}{m \cdot Z_1}$ est l effort tangentiel, $b$ la largeur de denture et $Y$ le facteur de forme de Lewis.`,
+            memo: '- **Condition de non-interférence** : pour un angle de pression $\alpha = 20^\circ$, le nombre minimal de dents d un pignon sans déport est $Z_{\min} = 17$.',
+            quiz: [
+              {
+                question: 'Quel est le nombre minimal de dents $Z_{\min}$ sans déport pour éviter l interférence de taille avec $\alpha = 20^\circ$ ?',
+                options: ['12 dents', '14 dents', '17 dents', '24 dents'],
+                answer: 2,
+                explanation: 'Pour un angle de pression normalisé $\alpha = 20^\circ$, $Z_{\min} = \frac{2}{\sin^2(20^\circ)} \approx 17,1$, soit 17 dents.'
+              }
+            ],
+            flashcards: [
+              {
+                id: 'fc-3',
+                front: 'Formule de l entraxe $a$ d un engrenage droit extérieur en fonction du module $m$ et des nombres de dents $Z_1, Z_2$ ?',
+                back: '$$a = \frac{m \cdot (Z_1 + Z_2)}{2}$$',
+                sm2: { interval: 0, repetition: 0, efactor: 2.5, nextReview: now - 10000 }
+              }
+            ]
+          }
+        ],
+        deadlines: [
+          {
+            id: 'dl-1',
+            title: 'Compte-rendu TP2 — Bilan énergétique assemblage soudé',
+            ue: 'Écoconception & ACV',
+            type: 'TP',
+            dueDate: inThreeDays,
+            done: false
+          },
+          {
+            id: 'dl-2',
+            title: 'Projet MRP — Paramétrage sous tableur et rapport',
+            ue: 'Supply Chain & MRP',
+            type: 'Projet',
+            dueDate: inSixDays,
+            done: false
+          }
+        ],
+        chatHistory: [
+          {
+            role: 'assistant',
+            text: 'Bonjour ! Je suis ton Tuteur IA. Tu peux m interroger à l écrit ou lancer une **Colle Orale vocale** sur n importe quelle UE.'
+          }
+        ]
+      };
+    }
+
+    let state = getDefaultState();
+    let currentView = 'dashboard';
+    let googleToken = null;
+    let tokenClient = null;
+    let driveFolderBreadcrumbs = [{ id: 'root', name: 'Mon Drive' }];
+    let driveListedFiles = [];
+    let selectedDriveFileIds = new Set();
+    let activeExtensionTab = 'manifest';
+    let sm2Flipped = false;
+    let sm2SelectedUE = 'ALL';
+    let colleModeActive = false;
+    let colleSelectedUE = 'Supply Chain & MRP';
+    let speechRecognition = null;
+    let isListeningMic = false;
+
+    function openIndexedDB() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open(DB_NAME, 1);
+        req.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains(DB_STORE)) {
+            db.createObjectStore(DB_STORE);
+          }
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    async function loadStateFromDB() {
+      try {
+        const db = await openIndexedDB();
+        return new Promise((resolve) => {
+          const tx = db.transaction(DB_STORE, 'readonly');
+          const req = tx.objectStore(DB_STORE).get('mainState');
+          req.onsuccess = () => {
+            if (req.result) {
+              const def = getDefaultState();
+              state = {
+                ...def,
+                ...req.result,
+                settings: { ...def.settings, ...(req.result.settings || {}) },
+                modules: { ...def.modules, ...(req.result.modules || {}) },
+                filters: { ...def.filters, ...(req.result.filters || {}) }
+              };
+            }
+            ensureSm2MetadataOnAllCards();
+            resolve();
+          };
+          req.onerror = () => resolve();
+        });
+      } catch (err) {}
+    }
+
+    function ensureSm2MetadataOnAllCards() {
+      const now = Date.now();
+      (state.courses || []).forEach(c => {
+        (c.flashcards || []).forEach(fc => {
+          if (!fc.sm2) {
+            fc.sm2 = { interval: 0, repetition: 0, efactor: 2.5, nextReview: now };
+          }
+        });
+      });
+    }
+
+    async function saveStateToDB() {
+      state.updatedAt = Date.now();
+      try {
+        const db = await openIndexedDB();
+        const tx = db.transaction(DB_STORE, 'readwrite');
+        tx.objectStore(DB_STORE).put(state, 'mainState');
+      } catch (err) {}
+    }
+
+    function showToast(msg, type = 'info') {
+      const el = document.getElementById('toastBanner');
+      const colors = {
+        info: 'bg-slate-900 text-white border-slate-700',
+        success: 'bg-emerald-600 text-white border-emerald-500',
+        warn: 'bg-amber-500 text-slate-950 border-amber-400',
+        error: 'bg-rose-600 text-white border-rose-500'
+      };
+      el.className = `fixed bottom-20 md:bottom-6 right-4 left-4 md:left-auto md:w-96 z-50 p-3.5 rounded-xl shadow-xl border text-sm font-medium transition-all ${colors[type] || colors.info}`;
+      el.textContent = msg;
+      el.classList.remove('hidden');
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => el.classList.add('hidden'), 4200);
+    }
+
+    function applyTheme() {
+      const isDark = state.theme === 'dark';
+      document.documentElement.classList.toggle('dark', isDark);
+      const icon = document.getElementById('themeIconDesktop');
+      if (icon) icon.textContent = isDark ? '☀️' : '🌙';
+    }
+
+    function toggleTheme() {
+      state.theme = state.theme === 'dark' ? 'light' : 'dark';
+      applyTheme();
+      saveStateToDB();
+    }
+
+    function getDueSm2Cards() {
+      const now = Date.now();
+      const due = [];
+      state.courses.forEach(c => {
+        if (sm2SelectedUE !== 'ALL' && c.ue !== sm2SelectedUE) return;
+        (c.flashcards || []).forEach(fc => {
+          const sm2 = fc.sm2 || { interval: 0, repetition: 0, efactor: 2.5, nextReview: 0 };
+          if ((sm2.nextReview || 0) <= now) {
+            due.push({ courseId: c.id, courseTitle: c.title, ue: c.ue, card: fc });
+          }
+        });
+      });
+      return due.sort((a, b) => (a.card.sm2?.nextReview || 0) - (b.card.sm2?.nextReview || 0));
+    }
+
+    function computeNextSm2(sm2, quality) {
+      let { interval, repetition, efactor } = sm2 || { interval: 0, repetition: 0, efactor: 2.5 };
+      if (quality >= 3) {
+        if (repetition === 0) interval = 1;
+        else if (repetition === 1) interval = 6;
+        else interval = Math.round(interval * efactor);
+        repetition += 1;
+      } else {
+        repetition = 0;
+        interval = 1;
+      }
+      efactor = efactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
+      if (efactor < 1.3) efactor = 1.3;
+      const delayMs = quality < 3 ? 10 * 60 * 1000 : interval * 86400000;
+      return {
+        interval,
+        repetition,
+        efactor: Number(efactor.toFixed(2)),
+        nextReview: Date.now() + delayMs
+      };
+    }
+
+    function rateCurrentSm2Card(courseId, cardId, quality) {
+      const course = state.courses.find(c => c.id === courseId);
+      const card = course?.flashcards?.find(f => f.id === cardId);
+      if (!card) return;
+      card.sm2 = computeNextSm2(card.sm2, quality);
+      sm2Flipped = false;
+      saveStateToDB();
+      renderNavigation();
+      renderSm2View();
+      const label = quality < 3 ? 'Reprogrammée dans 10 min' : `Prochaine révision dans ${card.sm2.interval} jour(s)`;
+      showToast(`SM-2 enregistré : ${label}`, 'success');
+    }
+
+    function renderSm2View() {
+      const el = document.getElementById('view-sm2');
+      const allUEs = Array.from(new Set(state.courses.map(c => c.ue)));
+      const dueList = getDueSm2Cards();
+      const totalCards = state.courses.reduce((acc, c) => acc + (c.flashcards?.length || 0), 0);
+
+      el.innerHTML = `
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-2xl font-extrabold">🧠 Répétition Espacée (Algorithme SM-2)</h2>
+            <p class="text-sm text-slate-500">Révise tes flashcards au moment optimal avant l oubli. Rendu mathématique LaTeX / KaTeX activé.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <select onchange="sm2SelectedUE = this.value; sm2Flipped = false; renderSm2View();" class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-semibold">
+              <option value="ALL" ${sm2SelectedUE === 'ALL' ? 'selected' : ''}>Toutes les UE (${totalCards} cartes)</option>
+              ${allUEs.map(ue => `<option value="${ue}" ${sm2SelectedUE === ue ? 'selected' : ''}>${ue}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+            <div class="text-xs font-bold uppercase text-slate-400">À réviser maintenant</div>
+            <div class="text-2xl font-extrabold text-brand-600 mt-1">${dueList.length}</div>
+          </div>
+          <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+            <div class="text-xs font-bold uppercase text-slate-400">Paquet total</div>
+            <div class="text-2xl font-extrabold mt-1">${totalCards} cartes</div>
+          </div>
+          <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+            <div class="text-xs font-bold uppercase text-slate-400">Algorithme actif</div>
+            <div class="text-sm font-bold text-emerald-600 mt-2">SuperMemo-2 (EF adaptatif)</div>
+          </div>
+        </div>
+
+        ${dueList.length === 0 ? `
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-10 text-center space-y-3">
+            <div class="text-4xl">🎉</div>
+            <h3 class="text-lg font-bold">Session SM-2 terminée pour aujourd hui !</h3>
+            <p class="text-sm text-slate-500 max-w-md mx-auto">Toutes tes cartes dues ont été planifiées selon leur facteur de facilité. Tu peux réinitialiser les échéances si tu veux t entraîner à blanc avant un partiel.</p>
+            <button onclick="forceReviewAllSm2()" class="px-4 py-2 rounded-xl bg-slate-900 dark:bg-slate-800 text-white text-xs font-semibold">🔁 Réviser tout le paquet maintenant</button>
+          </div>
+        ` : (() => {
+          const current = dueList[0];
+          const sm2 = current.card.sm2 || { interval: 0, repetition: 0, efactor: 2.5 };
+          return `
+            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 md:p-8 max-w-2xl mx-auto space-y-6 shadow-sm">
+              <div class="flex items-center justify-between text-xs">
+                <span class="px-2.5 py-1 rounded-full bg-brand-50 dark:bg-brand-950 text-brand-700 dark:text-brand-300 font-bold">${current.ue} • ${current.courseTitle}</span>
+                <span class="text-slate-400 font-semibold">EF ${sm2.efactor} • Rép. ${sm2.repetition}</span>
+              </div>
+
+              <div onclick="sm2Flipped = !sm2Flipped; renderSm2View();" class="min-h-[200px] p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center text-center cursor-pointer transition hover:border-brand-500">
+                <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-3">${sm2Flipped ? 'Réponse & Démonstration' : 'Question (Clique pour retourner)'}</div>
+                <div class="prose dark:prose-invert max-w-none text-base font-semibold">
+                  ${marked.parse(sm2Flipped ? current.card.back : current.card.front)}
+                </div>
+              </div>
+
+              ${!sm2Flipped ? `
+                <button onclick="sm2Flipped = true; renderSm2View();" class="w-full py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold transition">Afficher la réponse</button>
+              ` : `
+                <div class="space-y-2">
+                  <div class="text-center text-xs font-semibold text-slate-500">Évalue ta qualité de mémorisation (SM-2) :</div>
+                  <div class="grid grid-cols-4 gap-2">
+                    <button onclick="rateCurrentSm2Card('${current.courseId}', '${current.card.id}', 1)" class="py-2.5 px-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold">
+                      À revoir<span class="block text-[10px] opacity-80">10 min</span>
+                    </button>
+                    <button onclick="rateCurrentSm2Card('${current.courseId}', '${current.card.id}', 3)" class="py-2.5 px-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold">
+                      Difficile<span class="block text-[10px] opacity-80">1 jour</span>
+                    </button>
+                    <button onclick="rateCurrentSm2Card('${current.courseId}', '${current.card.id}', 4)" class="py-2.5 px-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold">
+                      Correct<span class="block text-[10px] opacity-80">${computeNextSm2(sm2, 4).interval} j</span>
+                    </button>
+                    <button onclick="rateCurrentSm2Card('${current.courseId}', '${current.card.id}', 5)" class="py-2.5 px-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold">
+                      Facile<span class="block text-[10px] opacity-80">${computeNextSm2(sm2, 5).interval} j</span>
+                    </button>
+                  </div>
+                </div>
+              `}
+            </div>
+          `;
+        })()}
+      `;
+      renderMathInContainer(el);
+    }
+
+    function forceReviewAllSm2() {
+      const now = Date.now() - 1000;
+      state.courses.forEach(c => (c.flashcards || []).forEach(fc => {
+        if (!fc.sm2) fc.sm2 = { interval: 0, repetition: 0, efactor: 2.5, nextReview: now };
+        else fc.sm2.nextReview = now;
+      }));
+      saveStateToDB();
+      renderNavigation();
+      renderSm2View();
+    }
+
+    function setupExtensionBridgeListeners() {
+      window.addEventListener('message', async (event) => {
+        const msg = event.data;
+        if (!msg || typeof msg !== 'object') return;
+        if (msg.type === 'STUDYFLOW_CLIPPER_FILES' && Array.isArray(msg.items)) {
+          ingestClipperPayload(msg.items);
+        } else if (msg.type === 'STUDYFLOW_CLIPPER_MAIL' && msg.mail) {
+          await ingestWebmailPayload(msg.mail);
+        }
+      });
+
+      window.addEventListener('storage', async (event) => {
+        if (event.key === 'studyflow_clipper_bridge' && event.newValue) {
+          try {
+            const payload = JSON.parse(event.newValue);
+            if (payload.files) ingestClipperPayload(payload.files);
+            if (payload.mail) await ingestWebmailPayload(payload.mail);
+          } catch (e) {}
+        }
+      });
+    }
+
+    function ingestClipperPayload(items) {
+      let added = 0;
+      items.forEach(item => {
+        if (state.ignoredClipperUrls.includes(item.url)) return;
+        if (state.clipperInbox.some(x => x.url === item.url)) return;
+        state.clipperInbox.unshift({
+          id: 'clip-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+          source: item.source || 'Portail Grenoble INP',
+          ue: item.ue || 'UE Capturée',
+          title: item.title || 'Document sans titre',
+          url: item.url,
+          capturedAt: Date.now(),
+          snippet: item.snippet || '',
+          base64Pdf: item.base64Pdf || null,
+          selected: true
+        });
+        added++;
+      });
+      if (added > 0) {
+        saveStateToDB();
+        renderNavigation();
+        renderCurrentView();
+        showToast(`${added} support(s) reçu(s) depuis StudyFlow Clipper v2 !`, 'success');
+      }
+    }
+
+    async function ingestWebmailPayload(mail) {
+      const analyzed = await analyzeEmailWithAI(mail.sender || 'Scolarité', mail.subject || 'Information cours', mail.body || '');
+      state.webmailInbox.unshift({
+        id: 'mail-' + Date.now(),
+        sender: mail.sender || 'Webmail Grenoble INP',
+        subject: mail.subject || 'Notification',
+        receivedAt: Date.now(),
+        body: mail.body || '',
+        status: 'pending',
+        proposedActions: analyzed
+      });
+      await saveStateToDB();
+      renderNavigation();
+      renderCurrentView();
+      showToast('Nouveau mail analysé par Automate Webmail → Action !', 'success');
+    }
+
+    function getNavItems() {
+      const m = state.modules;
+      const pendingClipper = state.clipperInbox.filter(x => !state.ignoredClipperUrls.includes(x.url)).length;
+      const pendingMails = state.webmailInbox.filter(x => x.status === 'pending').length;
+      const dueSm2 = getDueSm2Cards().length;
+
+      const items = [
+        { id: 'dashboard', label: "Aujourd'hui", icon: '🏠', visible: true },
+        { id: 'calendar', label: 'Planning ADE', icon: '📅', visible: m.calendar },
+        { id: 'clipper', label: 'Clipper v2', icon: '🧩', visible: m.clipper, badge: pendingClipper },
+        { id: 'webmail', label: 'Webmail IA', icon: '✉️', visible: m.webmail, badge: pendingMails },
+        { id: 'courses', label: 'Mes Cours', icon: '📚', visible: true },
+        { id: 'sm2', label: 'Révision SM-2', icon: '🧠', visible: m.sm2, badge: dueSm2 },
+        { id: 'drive', label: 'Drive & Cloud', icon: '☁️', visible: m.drive },
+        { id: 'deadlines', label: 'Deadlines', icon: '⏰', visible: m.deadlines },
+        { id: 'tutor', label: 'Tuteur & Colle', icon: '🎙️', visible: m.tutor },
+        { id: 'modules', label: 'Modules', icon: '⚙️', visible: true }
+      ];
+      return items.filter(i => i.visible);
+    }
+
+    function renderNavigation() {
+      const items = getNavItems();
+      if (!items.some(i => i.id === currentView)) currentView = 'dashboard';
+
+      const desktopNav = document.getElementById('desktopNav');
+      desktopNav.innerHTML = items.map(item => {
+        const active = item.id === currentView;
+        return `
+          <button onclick="switchView('${item.id}')" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold transition ${active ? 'bg-brand-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'}">
+            <span class="flex items-center gap-3">
+              <span class="text-base">${item.icon}</span>
+              <span>${item.label}</span>
+            </span>
+            ${item.badge ? `<span class="px-2 py-0.5 rounded-full text-[11px] font-bold ${active ? 'bg-white text-brand-600' : 'bg-brand-100 dark:bg-brand-950 text-brand-700 dark:text-brand-300'}">${item.badge}</span>` : ''}
+          </button>
+        `;
+      }).join('');
+
+      const mobileNav = document.getElementById('mobileNav');
+      mobileNav.innerHTML = items.slice(0, 6).map(item => {
+        const active = item.id === currentView;
+        return `
+          <button onclick="switchView('${item.id}')" class="relative flex flex-col items-center justify-center py-1 px-2 rounded-xl text-[11px] font-semibold transition ${active ? 'text-brand-600 dark:text-brand-400' : 'text-slate-500 dark:text-slate-400'}">
+            <span class="text-lg leading-tight">${item.icon}</span>
+            <span class="truncate max-w-[60px]">${item.label}</span>
+            ${item.badge ? `<span class="absolute top-0.5 right-1 w-4 h-4 rounded-full bg-rose-600 text-white text-[9px] flex items-center justify-center font-bold">${item.badge}</span>` : ''}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function switchView(viewId) {
+      currentView = viewId;
+      document.querySelectorAll('main section[id^="view-"]').forEach(sec => {
+        sec.classList.toggle('hidden', sec.id !== `view-${viewId}`);
+      });
+      renderNavigation();
+      renderCurrentView();
+    }
+
+    function renderCurrentView() {
+      if (currentView === 'dashboard') renderDashboard();
+      else if (currentView === 'calendar') renderCalendarView();
+      else if (currentView === 'clipper') renderClipperView();
+      else if (currentView === 'webmail') renderWebmailView();
+      else if (currentView === 'courses') renderCoursesView();
+      else if (currentView === 'sm2') renderSm2View();
+      else if (currentView === 'drive') renderDriveView();
+      else if (currentView === 'deadlines') renderDeadlinesView();
+      else if (currentView === 'tutor') renderTutorView();
+      else if (currentView === 'modules') renderModulesView();
+    }
+
+    function isEventAccepted(ev) {
+      if (state.filters.bypassFilters) return true;
+      const f = state.filters;
+      const titleLower = (ev.title + ' ' + (ev.description || '')).toLowerCase();
+      if (f.excludeKeywords && f.excludeKeywords.some(kw => kw.trim() && titleLower.includes(kw.trim().toLowerCase()))) return false;
+      if (ev.ue && f.disabledUEs && f.disabledUEs.includes(ev.ue)) return false;
+      if (ev.group && f.blockedGroups && f.blockedGroups.includes(ev.group)) return false;
+      return true;
+    }
+
+    function getFilteredEvents() {
+      return state.events.filter(isEventAccepted).sort((a, b) => new Date(a.start) - new Date(b.start));
+    }
+
+    function parseEventMetadata(rawTitle, rawDesc = '') {
+      const combined = `${rawTitle} ${rawDesc}`;
+      let type = 'Cours';
+      if (/CM/i.test(rawTitle)) type = 'CM';
+      else if (/TD\d*/i.test(rawTitle)) type = 'TD';
+      else if (/TP\d*/i.test(rawTitle)) type = 'TP';
+      const grpMatch = combined.match(/(CM|TD\d+|TP\d+|G\d+|Groupe\s*\d+)/i);
+      const group = grpMatch ? grpMatch[1].toUpperCase().replace(/\s+/g, '') : type;
+      let ue = rawTitle.replace(/(CM|TD\d*|TP\d*|G\d+|Groupe\s*\d+)/gi, '').replace(/^[\s\-–—:]+|[\s\-–—:]+$/g, '').trim();
+      return { ue: ue || rawTitle, type, group };
+    }
+
+    function connectGoogle() {
+      const clientId = state.settings.googleClientId.trim();
+      if (!clientId) {
+        openSettingsModal();
+        showToast("Renseigne d'abord ton ID Client OAuth 2.0 Google Cloud.", 'warn');
+        return;
+      }
+      if (!window.google || !google.accounts || !google.accounts.oauth2) {
+        showToast('Module Google Identity en chargement, réessaie dans 2 secondes.', 'warn');
+        return;
+      }
+      tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: clientId,
+        scope: GOOGLE_SCOPES,
+        callback: async (resp) => {
+          if (resp.error) {
+            showToast('Erreur OAuth : ' + resp.error, 'error');
+            return;
+          }
+          googleToken = resp.access_token;
+          updateGoogleStatusUI(true);
+          showToast('Connecté à Google Drive & Agenda !', 'success');
+          await fetchGoogleCalendars();
+          await syncDriveDatabase();
+        }
+      });
+      tokenClient.requestAccessToken({ prompt: 'consent' });
+    }
+
+    function updateGoogleStatusUI(connected) {
+      const dot = document.getElementById('googleDot');
+      const txt = document.getElementById('googleStatusText');
+      const btnSync = document.getElementById('btnQuickSync');
+      const mobileBadge = document.getElementById('mobileSyncBadge');
+      if (connected) {
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500';
+        txt.textContent = 'Connecté (Drive + Agenda)';
+        btnSync.classList.remove('hidden');
+        if (mobileBadge) mobileBadge.textContent = 'Connecté • Cloud Sync prêt';
+      } else {
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-500';
+        txt.textContent = 'Non connecté';
+        btnSync.classList.add('hidden');
+        if (mobileBadge) mobileBadge.textContent = 'PWA • IndexedDB';
+      }
+    }
+
+    async function googleFetch(url, options = {}) {
+      if (!googleToken) throw new Error('Non authentifié auprès de Google.');
+      const res = await fetch(url, {
+        ...options,
+        headers: { Authorization: `Bearer ${googleToken}`, ...(options.headers || {}) }
+      });
+      if (res.status === 401) {
+        googleToken = null;
+        updateGoogleStatusUI(false);
+        throw new Error('Session Google expirée, reconnecte-toi.');
+      }
+      if (!res.ok) throw new Error(`Erreur API Google (${res.status})`);
+      return res.json();
+    }
+
+    async function fetchGoogleCalendars() {
+      if (!googleToken) return;
+      try {
+        const data = await googleFetch('https://www.googleapis.com/calendar/v3/users/me/calendarList');
+        if (data.items?.length) {
+          state.calendars = data.items.map(c => ({ id: c.id, summary: c.summary, primary: !!c.primary }));
+          await saveStateToDB();
+          renderCurrentView();
+        }
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function syncSelectedGoogleCalendar() {
+      if (!googleToken) {
+        showToast('Connecte ton compte Google pour synchroniser ton agenda ADE.', 'warn');
+        return;
+      }
+      try {
+        const calId = encodeURIComponent(state.settings.selectedCalendarId || 'primary');
+        const timeMin = new Date(Date.now() - 2 * 86400000).toISOString();
+        const timeMax = new Date(Date.now() + 14 * 86400000).toISOString();
+        const data = await googleFetch(`https://www.googleapis.com/calendar/v3/calendars/${calId}/events?singleEvents=true&orderBy=startTime&timeMin=${timeMin}&timeMax=${timeMax}&maxResults=150`);
+        state.events = (data.items || []).filter(item => item.start).map(item => {
+          const rawTitle = item.summary || 'Séance';
+          const rawDesc = item.description || '';
+          const meta = parseEventMetadata(rawTitle, rawDesc);
+          return {
+            id: item.id,
+            title: rawTitle,
+            ue: meta.ue,
+            type: meta.type,
+            group: meta.group,
+            location: item.location || 'Salle non précisée',
+            start: item.start.dateTime || `${item.start.date}T08:00:00`,
+            end: item.end?.dateTime || `${item.end?.date || item.start.date}T10:00:00`,
+            description: rawDesc
+          };
+        });
+        await saveStateToDB();
+        renderCurrentView();
+        showToast(`${state.events.length} créneaux synchronisés.`, 'success');
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function ensureDriveFolder(folderName, parentId = null) {
+      const parentClause = parentId ? `and '${parentId}' in parents` : '';
+      const q = encodeURIComponent(`name='${folderName.replace(/'/g, "\'")}' and mimeType='application/vnd.google-apps.folder' ${parentClause} and trashed=false`);
+      const res = await googleFetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`);
+      if (res.files?.length > 0) return res.files[0].id;
+      const body = { name: folderName, mimeType: 'application/vnd.google-apps.folder' };
+      if (parentId) body.parents = [parentId];
+      const created = await googleFetch('https://www.googleapis.com/drive/v3/files', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      return created.id;
+    }
+
+    async function uploadBinaryOrTextToDriveUE(ueName, fileName, contentBlob) {
+      const rootId = await ensureDriveFolder(DRIVE_FOLDER_NAME);
+      const ueFolderId = await ensureDriveFolder(ueName, rootId);
+      const metadata = { name: fileName, parents: [ueFolderId] };
+      const form = new FormData();
+      form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+      form.append('file', contentBlob, fileName);
+
+      const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${googleToken}` },
+        body: form
+      });
+      if (!res.ok) throw new Error(`Échec upload Drive (${res.status})`);
+      return res.json();
+    }
+
+    async function syncDriveDatabase() {
+      if (!googleToken) {
+        showToast('Connecte Google Drive pour synchroniser PC et smartphone.', 'warn');
+        return;
+      }
+      try {
+        showToast('Fusion cloud studyflow_db.json...', 'info');
+        const folderId = await ensureDriveFolder(DRIVE_FOLDER_NAME);
+        const q = encodeURIComponent(`name='${DRIVE_DB_FILENAME}' and '${folderId}' in parents and trashed=false`);
+        const search = await googleFetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`);
+
+        if (search.files?.length > 0) {
+          const fileId = search.files[0].id;
+          const dlRes = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+            headers: { Authorization: `Bearer ${googleToken}` }
+          });
+          if (dlRes.ok) {
+            const remoteData = await dlRes.json();
+            mergeStates(remoteData);
+          }
+          await uploadStateToDrive(folderId, fileId);
+        } else {
+          await uploadStateToDrive(folderId, null);
+        }
+        await saveStateToDB();
+        renderNavigation();
+        renderCurrentView();
+        showToast('Synchronisation Drive réussie (PC ↔ Mobile).', 'success');
+      } catch (err) {
+        showToast('Erreur sync Drive : ' + err.message, 'error');
+      }
+    }
+
+    function mergeStates(remote) {
+      if (!remote || typeof remote !== 'object') return;
+      const courseMap = new Map();
+      (remote.courses || []).forEach(c => courseMap.set(c.id, c));
+      (state.courses || []).forEach(c => {
+        const ex = courseMap.get(c.id);
+        if (!ex || (c.updatedAt || 0) >= (ex.updatedAt || 0)) courseMap.set(c.id, c);
+      });
+      state.courses = Array.from(courseMap.values());
+      ensureSm2MetadataOnAllCards();
+
+      const dlMap = new Map();
+      (remote.deadlines || []).forEach(d => dlMap.set(d.id, d));
+      (state.deadlines || []).forEach(d => dlMap.set(d.id, d));
+      state.deadlines = Array.from(dlMap.values());
+
+      state.ignoredDriveIds = Array.from(new Set([...(state.ignoredDriveIds || []), ...(remote.ignoredDriveIds || [])]));
+      state.ignoredClipperUrls = Array.from(new Set([...(state.ignoredClipperUrls || []), ...(remote.ignoredClipperUrls || [])]));
+    }
+
+    async function uploadStateToDrive(folderId, existingFileId) {
+      const payload = JSON.stringify({ ...state, updatedAt: Date.now() });
+      const metadata = existingFileId ? { name: DRIVE_DB_FILENAME } : { name: DRIVE_DB_FILENAME, parents: [folderId] };
+      const boundary = '-------studyflow_boundary_final';
+      const body =
+        `--${boundary}
+Content-Type: application/json; charset=UTF-8
+
+${JSON.stringify(metadata)}
+` +
+        `--${boundary}
+Content-Type: application/json
+
+${payload}
+` +
+        `--${boundary}--`;
+      const url = existingFileId
+        ? `https://www.googleapis.com/upload/drive/v3/files/${existingFileId}?uploadType=multipart`
+        : 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+      await fetch(url, {
+        method: existingFileId ? 'PATCH' : 'POST',
+        headers: { Authorization: `Bearer ${googleToken}`, 'Content-Type': `multipart/related; boundary=${boundary}` },
+        body
+      });
+    }
+
+    function renderDashboard() {
+      const el = document.getElementById('view-dashboard');
+      const todayStr = new Date().toISOString().split('T')[0];
+      const todayEvents = getFilteredEvents().filter(e => e.start.startsWith(todayStr));
+      const upcomingDeadlines = state.deadlines.filter(d => !d.done).sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+      const pendingClipper = state.clipperInbox.filter(x => !state.ignoredClipperUrls.includes(x.url));
+      const pendingMails = state.webmailInbox.filter(x => x.status === 'pending');
+      const dueSm2 = getDueSm2Cards();
+
+      el.innerHTML = `
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400">Tableau de bord • ${new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
+            <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight mt-0.5">Vue centralisée de ta journée</h2>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            ${state.modules.sm2 ? `<button onclick="switchView('sm2')" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-sm transition">🧠 Révision SM-2 (${dueSm2.length})</button>` : ''}
+            ${state.modules.tutor ? `<button onclick="startColleOraleFromDashboard()" class="px-3.5 py-2 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-brand-600 text-white text-xs font-semibold transition">🎙️ Colle Orale</button>` : ''}
+            ${state.modules.drive ? `<button onclick="syncDriveDatabase()" class="px-3.5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold shadow-sm transition">☁️ Sync Drive</button>` : ''}
+          </div>
+        </div>
+
+        ${(state.modules.webmail && pendingMails.length > 0) || (state.modules.clipper && pendingClipper.length > 0) ? `
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          ${state.modules.webmail && pendingMails.length > 0 ? `
+          <div class="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 flex items-center justify-between gap-3">
+            <div>
+              <div class="text-xs font-bold uppercase text-amber-700 dark:text-amber-400">✉️ Automate Webmail → Action</div>
+              <div class="font-bold text-sm mt-0.5">${pendingMails.length} mail(s) avec actions détectées (salle / deadline)</div>
+            </div>
+            <button onclick="switchView('webmail')" class="px-3 py-1.5 rounded-xl bg-amber-600 text-white text-xs font-semibold shrink-0">Valider →</button>
+          </div>
+          ` : ''}
+
+          ${state.modules.clipper && pendingClipper.length > 0 ? `
+          <div class="p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 flex items-center justify-between gap-3">
+            <div>
+              <div class="text-xs font-bold uppercase text-indigo-700 dark:text-indigo-400">🧩 Clipper v2 (Chamilo / Moodle)</div>
+              <div class="font-bold text-sm mt-0.5">${pendingClipper.length} support(s) en attente de tri & dépôt Drive</div>
+            </div>
+            <button onclick="switchView('clipper')" class="px-3 py-1.5 rounded-xl bg-indigo-600 text-white text-xs font-semibold shrink-0">Trier →</button>
+          </div>
+          ` : ''}
+        </div>
+        ` : ''}
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          ${state.modules.calendar ? `
+          <div class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-base">📅 Séances du jour (${todayEvents.length})</h3>
+              <button onclick="switchView('calendar')" class="text-xs font-semibold text-brand-600 hover:underline">Filtres UE/Groupes →</button>
+            </div>
+            <div class="space-y-3">
+              ${todayEvents.map(ev => {
+                const h1 = new Date(ev.start).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+                const h2 = new Date(ev.end).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+                return `
+                  <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <div class="flex flex-wrap items-center gap-2 text-xs mb-1">
+                        <span class="px-2 py-0.5 rounded bg-brand-100 dark:bg-brand-950 text-brand-700 dark:text-brand-300 font-bold">${h1} - ${h2}</span>
+                        <span class="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 font-semibold">${ev.group}</span>
+                        <span class="font-semibold ${ev.roomUpdated ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500'}">📍 ${ev.location} ${ev.roomUpdated ? '(Mis à jour via Mail)' : ''}</span>
+                      </div>
+                      <h4 class="font-bold text-sm">${ev.title}</h4>
+                    </div>
+                    ${state.modules.tutor ? `<button onclick="askTutorAboutEvent('${ev.id}')" class="px-3 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold shrink-0">🤖 Expliquer</button>` : ''}
+                  </div>
+                `;
+              }).join('') || '<p class="text-sm text-slate-500">Aucun créneau retenu aujourd hui.</p>'}
+            </div>
+          </div>
+          ` : ''}
+
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-base">⏰ Prochaines Deadlines</h3>
+              <button onclick="switchView('deadlines')" class="text-xs font-semibold text-brand-600 hover:underline">Tout voir</button>
+            </div>
+            <div class="space-y-2.5">
+              ${upcomingDeadlines.slice(0, 4).map(dl => {
+                const diffDays = Math.ceil((new Date(dl.dueDate) - new Date()) / 86400000);
+                return `
+                  <div class="p-3 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1">
+                    <div class="flex items-center justify-between text-xs">
+                      <span class="font-semibold text-brand-600 dark:text-brand-400">${dl.ue}</span>
+                      <span class="px-2 py-0.5 rounded-full font-bold bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300">J-${Math.max(0, diffDays)}</span>
+                    </div>
+                    <div class="font-semibold text-sm">${dl.title}</div>
+                  </div>
+                `;
+              }).join('') || '<p class="text-xs text-slate-500">Aucun rendu en attente.</p>'}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderClipperView() {
+      const el = document.getElementById('view-clipper');
+      const items = state.clipperInbox.filter(x => !state.ignoredClipperUrls.includes(x.url));
+      const selectedCount = items.filter(x => x.selected).length;
+
+      el.innerHTML = `
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-2xl font-extrabold">🧩 Pont Chamilo / Moodle & Extension Clipper v2</h2>
+            <p class="text-sm text-slate-500">Sélectionne uniquement les supports PDF qui te concernent, dépose-les automatiquement dans tes dossiers Drive par UE et génère leurs fiches IA.</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="processSelectedClipperItems(false)" class="px-3.5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold ${selectedCount === 0 ? 'opacity-50 pointer-events-none' : ''}">
+              ✨ Importer dans StudyFlow (${selectedCount})
+            </button>
+            <button onclick="processSelectedClipperItems(true)" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold ${selectedCount === 0 ? 'opacity-50 pointer-events-none' : ''}">
+              ☁️ Déposer sur Drive + StudyFlow (${selectedCount})
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+            <h3 class="font-bold text-base">📥 Boîte de réception Clipper (${items.length} support(s) détecté(s))</h3>
+            ${state.ignoredClipperUrls.length > 0 ? `<button onclick="clearIgnoredClipper()" class="text-xs text-slate-500 hover:underline">Réafficher ${state.ignoredClipperUrls.length} masqué(s)</button>` : ''}
+          </div>
+
+          ${items.length === 0 ? `
+            <p class="text-sm text-slate-500 py-6 text-center">Aucun support en attente. Ouvre une page de cours sur Chamilo ou Moodle Grenoble INP et clique sur l'icône de l'extension StudyFlow Clipper v2.</p>
+          ` : `
+            <div class="divide-y divide-slate-200 dark:divide-slate-800">
+              ${items.map(item => `
+                <div class="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div class="flex items-start gap-3 min-w-0">
+                    <input type="checkbox" ${item.selected ? 'checked' : ''} onchange="toggleClipperItemSelection('${item.id}', this.checked)" class="mt-1 w-4 h-4 accent-brand-600 shrink-0" />
+                    <div class="min-w-0 space-y-1">
+                      <div class="flex flex-wrap items-center gap-2 text-xs">
+                        <span class="px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-bold">${item.ue}</span>
+                        <span class="text-slate-400">${item.source}</span>
+                      </div>
+                      <div class="font-bold text-sm truncate">${item.title}</div>
+                      ${item.snippet ? `<p class="text-xs text-slate-500 line-clamp-1">${item.snippet}</p>` : ''}
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                    <input type="text" value="${item.ue}" onchange="updateClipperItemUE('${item.id}', this.value)" title="Modifier le dossier UE cible" class="w-36 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs" />
+                    <button onclick="ignoreClipperItem('${item.id}')" class="px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-500 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950">Ignorer</button>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          `}
+        </div>
+
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 class="font-bold text-base">🛠️ Extension Navigateur : StudyFlow Clipper v2 (Manifest V3)</h3>
+              <p class="text-xs text-slate-500">Aspire tes PDF sur Chamilo/Moodle (via ta session CAS active) et capture tes e-mails sur Webmail Zimbra/Partage.</p>
+            </div>
+            <button onclick="downloadExtensionBundle()" class="px-3.5 py-2 rounded-xl bg-slate-900 dark:bg-slate-800 text-white text-xs font-semibold hover:bg-brand-600 transition shrink-0">📦 Télécharger les 4 fichiers</button>
+          </div>
+
+          <div class="flex gap-2 border-b border-slate-200 dark:border-slate-800 overflow-x-auto no-scrollbar">
+            ${['manifest', 'content', 'popup_html', 'popup_js'].map(tab => {
+              const labels = { manifest: 'manifest.json', content: 'content.js', popup_html: 'popup.html', popup_js: 'popup.js' };
+              return `<button onclick="switchExtensionTab('${tab}')" class="pb-2 px-3 text-xs font-bold border-b-2 whitespace-nowrap ${activeExtensionTab === tab ? 'border-brand-600 text-brand-600 dark:text-brand-400' : 'border-transparent text-slate-500'}">${labels[tab]}</button>`;
+            }).join('')}
+          </div>
+
+          <div class="relative">
+            <button onclick="copyActiveExtensionCode()" class="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-slate-800 text-white text-[11px] font-semibold hover:bg-brand-600">📋 Copier</button>
+            <pre id="extensionCodeBlock" class="p-4 rounded-xl bg-slate-950 text-slate-100 text-xs overflow-x-auto max-h-80 leading-relaxed"></pre>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('extensionCodeBlock').textContent = getExtensionFilesCode()[activeExtensionTab];
+    }
+
+    function switchExtensionTab(tab) {
+      activeExtensionTab = tab;
+      renderClipperView();
+    }
+
+    function copyActiveExtensionCode() {
+      navigator.clipboard.writeText(getExtensionFilesCode()[activeExtensionTab]);
+      showToast('Code copié dans le presse-papiers !', 'success');
+    }
+
+    function getExtensionFilesCode() {
+      const manifest = JSON.stringify({
+        manifest_version: 3,
+        name: 'StudyFlow Clipper v2 — Grenoble INP',
+        version: '2.0.0',
+        description: 'Extrait les supports PDF Chamilo/Moodle (avec session CAS) et les mails Zimbra/Partage vers StudyFlow IA & Google Drive.',
+        permissions: ['activeTab', 'scripting', 'storage'],
+        host_permissions: [
+          'https://chamilo.grenoble-inp.fr/*',
+          'https://moodle.grenoble-inp.fr/*',
+          'https://webmail.grenoble-inp.fr/*',
+          'https://partage.grenet.fr/*'
+        ],
+        action: { default_popup: 'popup.html', default_title: 'StudyFlow Clipper v2' },
+        content_scripts: [
+          {
+            matches: [
+              'https://chamilo.grenoble-inp.fr/*',
+              'https://moodle.grenoble-inp.fr/*',
+              'https://webmail.grenoble-inp.fr/*',
+              'https://partage.grenet.fr/*'
+            ],
+            js: ['content.js'],
+            run_at: 'document_idle'
+          },
+          {
+            matches: ['http://localhost/*', 'https://*.github.io/*'],
+            js: ['content.js'],
+            run_at: 'document_idle'
+          }
+        ]
+      }, null, 2);
+
+      const content = `(() => {
+  const host = window.location.hostname;
+  function detectUE() {
+    const h1 = document.querySelector('h1, .page-header-headings h1, .breadcrumb li:nth-child(2)');
+    return h1 ? h1.textContent.trim().slice(0, 60) : 'UE Grenoble INP';
+  }
+  function scanEducationalLinks() {
+    const ue = detectUE();
+    const source = host.includes('chamilo') ? 'Chamilo Grenoble INP' : 'Moodle Grenoble INP';
+    const anchors = Array.from(document.querySelectorAll('a[href]'));
+    const results = [];
+    const seen = new Set();
+    anchors.forEach(a => {
+      const href = a.href;
+      const text = (a.textContent || '').trim();
+      if (!href || seen.has(href)) return;
+      if (/\.pdf(\?|$)/i.test(href) || href.includes('mod_resource') || href.includes('/document/')) {
+        seen.add(href);
+        results.push({ source, ue, title: text || href.split('/').pop().split('?')[0] || 'Support.pdf', url: href, snippet: 'Support extrait depuis ' + source });
+      }
+    });
+    return results;
+  }
+  function extractVisibleWebmail() {
+    const subjEl = document.querySelector('.ZmMailMsgView .Subject, [role="heading"], h2');
+    const fromEl = document.querySelector('.ZmMailMsgView .Address, .sender');
+    const bodyEl = document.querySelector('.ZmMailMsgView .MsgBody, iframe');
+    let bodyText = '';
+    if (bodyEl && bodyEl.tagName === 'IFRAME' && bodyEl.contentDocument) bodyText = bodyEl.contentDocument.body.innerText || '';
+    else if (bodyEl) bodyText = bodyEl.innerText || '';
+    else bodyText = document.body.innerText.slice(0, 2500);
+    return { sender: fromEl ? fromEl.textContent.trim() : 'Webmail Grenoble INP', subject: subjEl ? subjEl.textContent.trim() : document.title, body: bodyText.trim().slice(0, 3500) };
+  }
+  chrome.runtime.onMessage.addListener((req, _sender, sendResponse) => {
+    if (req.action === 'SCAN_PAGE') {
+      if (host.includes('webmail') || host.includes('partage')) sendResponse({ mode: 'webmail', mail: extractVisibleWebmail() });
+      else sendResponse({ mode: 'courses', items: scanEducationalLinks() });
+    }
+  });
+  if (host === 'localhost' || host.endsWith('.github.io')) {
+    chrome.storage.local.get(['studyflow_pending_payload'], (res) => {
+      if (res.studyflow_pending_payload) {
+        window.postMessage(res.studyflow_pending_payload, '*');
+        chrome.storage.local.remove('studyflow_pending_payload');
+      }
+    });
+  }
+})();`;
+
+      const popup_html = `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8" /><style>body{font-family:Arial,sans-serif;width:340px;padding:12px;background:#0f172a;color:#f8fafc}h2{font-size:15px;margin:0 0 8px;color:#60a5fa}.item{display:flex;align-items:center;gap:6px;font-size:12px;padding:5px 0;border-bottom:1px solid #1e293b}button{width:100%;margin-top:10px;padding:8px;border:none;border-radius:8px;background:#2563eb;color:#fff;font-weight:700;cursor:pointer}#status{font-size:11px;color:#94a3b8;margin-top:6px}</style></head><body><h2>StudyFlow Clipper v2</h2><div id="list">Analyse de la page...</div><button id="sendBtn">Envoyer vers StudyFlow IA</button><div id="status"></div><script src="popup.js"><\/script></body></html>`;
+
+      const popup_js = `let scannedData = null;
+chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+  chrome.tabs.sendMessage(tabs[0].id, { action: 'SCAN_PAGE' }, (resp) => {
+    const listEl = document.getElementById('list');
+    if (!resp) { listEl.textContent = 'Ouvre Chamilo, Moodle ou Webmail.'; return; }
+    scannedData = resp;
+    if (resp.mode === 'webmail') listEl.innerHTML = '<strong>Mail :</strong><br/>' + resp.mail.subject;
+    else listEl.innerHTML = resp.items.map((it, idx) => '<label class="item"><input type="checkbox" checked data-idx="' + idx + '" /><span>[' + it.ue + '] ' + it.title + '</span></label>').join('') || 'Aucun PDF détecté.';
+  });
+});
+document.getElementById('sendBtn').addEventListener('click', () => {
+  if (!scannedData) return;
+  const statusEl = document.getElementById('status');
+  if (scannedData.mode === 'webmail') {
+    chrome.storage.local.set({ studyflow_pending_payload: { type: 'STUDYFLOW_CLIPPER_MAIL', mail: scannedData.mail } }, () => { statusEl.textContent = 'Mail prêt pour StudyFlow IA !'; });
+  } else {
+    const selected = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(c => scannedData.items[Number(c.dataset.idx)]);
+    chrome.storage.local.set({ studyflow_pending_payload: { type: 'STUDYFLOW_CLIPPER_FILES', items: selected } }, () => { statusEl.textContent = selected.length + ' support(s) prêts !'; });
+  }
+});`;
+
+      return { manifest, content, popup_html, popup_js };
+    }
+
+    function downloadExtensionBundle() {
+      const files = getExtensionFilesCode();
+      [
+        { name: 'manifest.json', content: files.manifest },
+        { name: 'content.js', content: files.content },
+        { name: 'popup.html', content: files.popup_html },
+        { name: 'popup.js', content: files.popup_js }
+      ].forEach((f, idx) => {
+        setTimeout(() => {
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(new Blob([f.content], { type: 'text/plain;charset=utf-8' }));
+          a.download = f.name;
+          a.click();
+        }, idx * 250);
+      });
+      showToast('Téléchargement des 4 fichiers de StudyFlow Clipper v2 lancé.', 'success');
+    }
+
+    function toggleClipperItemSelection(id, checked) {
+      const it = state.clipperInbox.find(x => x.id === id);
+      if (it) it.selected = checked;
+      saveStateToDB();
+      renderClipperView();
+    }
+
+    function updateClipperItemUE(id, newUE) {
+      const it = state.clipperInbox.find(x => x.id === id);
+      if (it && newUE.trim()) it.ue = newUE.trim();
+      saveStateToDB();
+    }
+
+    function ignoreClipperItem(id) {
+      const it = state.clipperInbox.find(x => x.id === id);
+      if (it && !state.ignoredClipperUrls.includes(it.url)) state.ignoredClipperUrls.push(it.url);
+      saveStateToDB();
+      renderNavigation();
+      renderClipperView();
+    }
+
+    function clearIgnoredClipper() {
+      state.ignoredClipperUrls = [];
+      saveStateToDB();
+      renderNavigation();
+      renderClipperView();
+    }
+
+    async function processSelectedClipperItems(alsoUploadDrive) {
+      const selected = state.clipperInbox.filter(x => x.selected && !state.ignoredClipperUrls.includes(x.url));
+      if (!selected.length) return;
+      if (alsoUploadDrive && !googleToken) {
+        showToast('Connecte Google Drive pour activer le dépôt automatique par dossier UE.', 'warn');
+        return;
+      }
+
+      for (const item of selected) {
+        let extractedText = item.snippet || `Support importé depuis ${item.source} : ${item.title}`;
+        let pdfBlob = new Blob([extractedText], { type: 'text/plain;charset=utf-8' });
+
+        if (item.base64Pdf) {
+          try {
+            const res = await fetch(item.base64Pdf);
+            pdfBlob = await res.blob();
+            const parsedText = await extractPdfTextFromArrayBuffer(await pdfBlob.arrayBuffer());
+            if (parsedText) extractedText = parsedText;
+          } catch (e) {}
+        }
+
+        if (alsoUploadDrive && googleToken) {
+          try {
+            await uploadBinaryOrTextToDriveUE(item.ue, item.title, pdfBlob);
+          } catch (err) {
+            showToast(`Erreur dépôt Drive (${item.title}) : ${err.message}`, 'error');
+          }
+        }
+
+        await createCourseFromText(item.title.replace(/\.pdf$/i, ''), item.ue, extractedText);
+        state.clipperInbox = state.clipperInbox.filter(x => x.id !== item.id);
+      }
+
+      await saveStateToDB();
+      renderNavigation();
+      switchView('courses');
+    }
+
+    function renderWebmailView() {
+      const el = document.getElementById('view-webmail');
+      el.innerHTML = `
+        <div>
+          <h2 class="text-2xl font-extrabold">✉️ Automate Webmail → Action</h2>
+          <p class="text-sm text-slate-500">Transforme automatiquement les e-mails de scolarité ou d'enseignants en deadlines ou mises à jour de salle.</p>
+        </div>
+
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-3">
+          <h3 class="font-bold text-sm">🧪 Analyser un e-mail reçu (Zimbra / Partage Grenoble INP)</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <input id="manualMailSender" type="text" placeholder="Expéditeur (ex: enseignant@grenoble-inp.fr)" class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs" />
+            <input id="manualMailSubject" type="text" placeholder="Objet (ex: Report rendu TP2 ou changement salle)" class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs" />
+          </div>
+          <textarea id="manualMailBody" rows="3" placeholder="Colle le contenu de l'e-mail ici..." class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs"></textarea>
+          <div class="flex justify-end">
+            <button onclick="handleManualMailAnalyze()" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold">🔍 Extraire les actions</button>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          ${state.webmailInbox.map(mail => `
+            <div class="bg-white dark:bg-slate-900 rounded-2xl border ${mail.status === 'pending' ? 'border-amber-400/70' : 'border-slate-200 dark:border-slate-800 opacity-75'} p-5 space-y-3">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <span class="text-xs font-semibold text-slate-500">De : ${mail.sender}</span>
+                  <h4 class="font-bold text-base">${mail.subject}</h4>
+                </div>
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold ${mail.status === 'pending' ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300' : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'}">
+                  ${mail.status === 'pending' ? 'Action à valider' : 'Traité'}
+                </span>
+              </div>
+              <p class="text-xs text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl leading-relaxed">${mail.body}</p>
+              <div class="space-y-2">
+                ${(mail.proposedActions || []).map(act => `
+                  <div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-brand-50/40 dark:bg-brand-950/20">
+                    <div class="text-xs">
+                      <span class="font-bold uppercase text-brand-600 dark:text-brand-400 mr-1.5">${act.kind === 'room_change' ? '📍 Changement de salle' : '⏰ Nouvelle Deadline'}</span>
+                      <span class="font-semibold">${act.summary}</span>
+                    </div>
+                    ${act.applied
+                      ? '<span class="text-xs font-bold text-emerald-600">✓ Appliqué</span>'
+                      : `<button onclick="applyWebmailAction('${mail.id}', '${act.id}')" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shrink-0">Appliquer l'action</button>`}
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    async function handleManualMailAnalyze() {
+      const sender = document.getElementById('manualMailSender').value.trim() || 'Scolarité Grenoble INP';
+      const subject = document.getElementById('manualMailSubject').value.trim() || 'Information cours';
+      const body = document.getElementById('manualMailBody').value.trim();
+      if (!body) return;
+      document.getElementById('manualMailBody').value = '';
+      await ingestWebmailPayload({ sender, subject, body });
+    }
+
+    async function analyzeEmailWithAI(sender, subject, body) {
+      const apiKey = state.settings.geminiApiKey.trim();
+      if (apiKey) {
+        try {
+          const prompt = `Analyse cet e-mail universitaire et détecte changement de salle ou deadline. Réponds UNIQUEMENT en JSON [{kind: "room_change"|"deadline", ue, targetEventTitle, newLocation, title, dueDate, summary}]. Sujet: ${subject}. Corps: ${body}`;
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: 'application/json' } })
+          });
+          const data = await res.json();
+          const txt = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (txt) return JSON.parse(txt).map((p, idx) => ({ id: 'act-' + Date.now() + '-' + idx, applied: false, ...p }));
+        } catch (e) {}
+      }
+
+      const actions = [];
+      const roomMatch = body.match(/(?:salle|amphi)\s+([A-Z0-9éèêàâîïôûü\- ]{2,25})/i);
+      if (/salle|amphi|déplacé|reporté/i.test(subject + ' ' + body) && roomMatch) {
+        actions.push({ id: 'act-' + Date.now() + '-r', kind: 'room_change', ue: 'UE Détectée', targetEventTitle: subject, newLocation: roomMatch[0].trim(), summary: `Mettre à jour le lieu → ${roomMatch[0].trim()}`, applied: false });
+      }
+      if (/rendu|rapport|devoir|déposer|échéance|avant le/i.test(subject + ' ' + body) || !actions.length) {
+        actions.push({ id: 'act-' + Date.now() + '-d', kind: 'deadline', ue: 'UE Mail', title: subject, dueDate: new Date(Date.now() + 4 * 86400000).toISOString().split('T')[0], summary: `Créer la deadline « ${subject} »`, applied: false });
+      }
+      return actions;
+    }
+
+    function applyWebmailAction(mailId, actionId) {
+      const mail = state.webmailInbox.find(m => m.id === mailId);
+      const act = mail?.proposedActions?.find(a => a.id === actionId);
+      if (!act) return;
+
+      if (act.kind === 'room_change') {
+        const target = state.events.find(e => e.title.toLowerCase().includes((act.ue || '').toLowerCase())) || state.events[0];
+        if (target) {
+          target.location = act.newLocation;
+          target.roomUpdated = true;
+        }
+        showToast(`Salle mise à jour : ${act.newLocation}`, 'success');
+      } else {
+        state.deadlines.push({
+          id: 'dl-' + Date.now(),
+          title: act.title || mail.subject,
+          ue: act.ue || 'Mail Scolarité',
+          type: 'Rendu Mail',
+          dueDate: act.dueDate || new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0],
+          done: false
+        });
+        showToast('Deadline ajoutée depuis le webmail !', 'success');
+      }
+
+      act.applied = true;
+      if (mail.proposedActions.every(a => a.applied)) mail.status = 'done';
+      saveStateToDB();
+      renderNavigation();
+      renderWebmailView();
+    }
+
+    function renderCalendarView() {
+      const el = document.getElementById('view-calendar');
+      const allUEs = Array.from(new Set([...state.filters.enabledUEs, ...state.filters.disabledUEs, ...state.events.map(e => e.ue)]));
+      const allGroups = Array.from(new Set([...state.filters.allowedGroups, ...state.filters.blockedGroups, ...state.events.map(e => e.group)]));
+      const visibleEvents = getFilteredEvents();
+
+      el.innerHTML = `
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-2xl font-extrabold">📅 Google Agenda (Pont ADE) & Filtrage</h2>
+            <p class="text-sm text-slate-500">Sélectionne ton agenda synchronisé avec ADE et ne garde que tes UE et groupes.</p>
+          </div>
+          <button onclick="syncSelectedGoogleCalendar()" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold">🔄 Synchroniser l'agenda</button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4">
+            <div>
+              <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Agenda source</label>
+              <select onchange="changeSelectedCalendar(this.value)" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-semibold">
+                ${state.calendars.map(c => `<option value="${c.id}" ${c.id === state.settings.selectedCalendarId ? 'selected' : ''}>${c.summary}</option>`).join('')}
+              </select>
+            </div>
+            <div>
+              <div class="text-xs font-bold uppercase text-slate-500 mb-2">Mes UE</div>
+              ${allUEs.map(ue => `
+                <label class="flex items-center gap-2 py-1 text-xs cursor-pointer">
+                  <input type="checkbox" ${!state.filters.disabledUEs.includes(ue) ? 'checked' : ''} onchange="toggleUEFilter('${ue.replace(/'/g, "\'")}', this.checked)" class="accent-brand-600" />
+                  <span class="truncate">${ue}</span>
+                </label>
+              `).join('')}
+            </div>
+            <div>
+              <div class="text-xs font-bold uppercase text-slate-500 mb-2">Mes Groupes</div>
+              <div class="flex flex-wrap gap-1.5">
+                ${allGroups.map(grp => {
+                  const active = !state.filters.blockedGroups.includes(grp);
+                  return `<button onclick="toggleGroupFilter('${grp.replace(/'/g, "\'")}')" class="px-2.5 py-1 rounded-lg text-xs font-bold border ${active ? 'bg-brand-600 text-white border-brand-600' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 line-through'}">${grp}</button>`;
+                }).join('')}
+              </div>
+            </div>
+          </div>
+
+          <div class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-3">
+            <h3 class="font-bold text-base">Créneaux filtrés (${visibleEvents.length})</h3>
+            ${visibleEvents.map(ev => `
+              <div class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
+                <div>
+                  <div class="text-xs text-brand-600 dark:text-brand-400 font-bold">${new Date(ev.start).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })} • ${new Date(ev.start).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })} • 📍 ${ev.location}</div>
+                  <div class="font-bold text-sm">${ev.title}</div>
+                </div>
+                <span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-xs font-bold">${ev.group}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function changeSelectedCalendar(calId) {
+      const found = state.calendars.find(c => c.id === calId);
+      state.settings.selectedCalendarId = calId;
+      state.settings.selectedCalendarName = found ? found.summary : calId;
+      saveStateToDB();
+      if (googleToken) syncSelectedGoogleCalendar();
+    }
+
+    function toggleUEFilter(ue, enabled) {
+      if (enabled) state.filters.disabledUEs = state.filters.disabledUEs.filter(x => x !== ue);
+      else if (!state.filters.disabledUEs.includes(ue)) state.filters.disabledUEs.push(ue);
+      saveStateToDB();
+      renderCalendarView();
+    }
+
+    function toggleGroupFilter(grp) {
+      if (state.filters.blockedGroups.includes(grp)) state.filters.blockedGroups = state.filters.blockedGroups.filter(x => x !== grp);
+      else state.filters.blockedGroups.push(grp);
+      saveStateToDB();
+      renderCalendarView();
+    }
+
+    function renderDriveView() {
+      const el = document.getElementById('view-drive');
+      const visibleFiles = driveListedFiles.filter(f => !state.ignoredDriveIds.includes(f.id));
+      el.innerHTML = `
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-2xl font-extrabold">☁️ Google Drive & Synchronisation Cloud</h2>
+            <p class="text-sm text-slate-500">Parcours tes dossiers d'UE et fusionne ta base studyflow_db.json entre PC et smartphone.</p>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="openStudyFlowDriveRoot()" class="px-3.5 py-2 rounded-xl bg-slate-800 text-white text-xs font-semibold">📂 Dossier StudyFlow_GrenobleINP</button>
+            <button onclick="syncDriveDatabase()" class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold">🔄 Fusionner studyflow_db.json</button>
+          </div>
+        </div>
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+            <div class="flex items-center gap-1.5 text-xs font-semibold">
+              ${driveFolderBreadcrumbs.map((b, idx) => `<button onclick="navigateDriveBreadcrumb(${idx})" class="text-brand-600 hover:underline">${b.name}</button>${idx < driveFolderBreadcrumbs.length - 1 ? ' / ' : ''}`).join('')}
+            </div>
+            <button onclick="importSelectedDriveFiles()" class="px-3.5 py-1.5 rounded-xl bg-brand-600 text-white text-xs font-semibold ${selectedDriveFileIds.size === 0 ? 'opacity-50 pointer-events-none' : ''}">✨ Importer (${selectedDriveFileIds.size})</button>
+          </div>
+          ${!googleToken ? `<div class="py-8 text-center"><button onclick="connectGoogle()" class="px-4 py-2 rounded-xl bg-brand-600 text-white text-xs font-semibold">Se connecter à Google Drive</button></div>` : `
+            <div class="divide-y divide-slate-200 dark:divide-slate-800">
+              ${visibleFiles.map(file => {
+                const isFolder = file.mimeType === 'application/vnd.google-apps.folder';
+                return `
+                  <div class="py-2.5 flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                      ${!isFolder ? `<input type="checkbox" ${selectedDriveFileIds.has(file.id) ? 'checked' : ''} onchange="toggleDriveFileSelection('${file.id}', this.checked)" class="accent-brand-600" />` : ''}
+                      <span>${isFolder ? '📁' : '📄'}</span>
+                      ${isFolder ? `<button onclick="openDriveFolder('${file.id}', '${file.name.replace(/'/g, "\'")}')" class="font-semibold text-sm hover:text-brand-600">${file.name}</button>` : `<span class="text-sm">${file.name}</span>`}
+                    </div>
+                    ${!isFolder ? `<button onclick="ignoreDriveFile('${file.id}')" class="text-xs text-slate-400 hover:text-rose-600">Ignorer</button>` : ''}
+                  </div>
+                `;
+              }).join('') || '<p class="text-xs text-slate-500 py-4 text-center">Clique sur Dossier StudyFlow_GrenobleINP pour charger tes UE.</p>'}
+            </div>
+          `}
+        </div>
+      `;
+    }
+
+    async function openStudyFlowDriveRoot() {
+      if (!googleToken) return connectGoogle();
+      const rootId = await ensureDriveFolder(DRIVE_FOLDER_NAME);
+      driveFolderBreadcrumbs = [{ id: rootId, name: DRIVE_FOLDER_NAME }];
+      await listDriveFolderContents(rootId);
+    }
+
+    async function openDriveFolder(folderId, folderName) {
+      driveFolderBreadcrumbs.push({ id: folderId, name: folderName });
+      await listDriveFolderContents(folderId);
+    }
+
+    async function navigateDriveBreadcrumb(idx) {
+      const target = driveFolderBreadcrumbs[idx];
+      driveFolderBreadcrumbs = driveFolderBreadcrumbs.slice(0, idx + 1);
+      await listDriveFolderContents(target.id);
+    }
+
+    async function listDriveFolderContents(folderId) {
+      selectedDriveFileIds.clear();
+      const q = encodeURIComponent(`'${folderId}' in parents and trashed=false and (mimeType='application/vnd.google-apps.folder' or mimeType='application/pdf' or mimeType='application/vnd.google-apps.document')`);
+      const res = await googleFetch(`https://www.googleapis.com/drive/v3/files?q=${q}&orderBy=folder,name&fields=files(id,name,mimeType)`);
+      driveListedFiles = res.files || [];
+      renderDriveView();
+    }
+
+    function toggleDriveFileSelection(id, checked) {
+      if (checked) selectedDriveFileIds.add(id);
+      else selectedDriveFileIds.delete(id);
+      renderDriveView();
+    }
+
+    function ignoreDriveFile(id) {
+      state.ignoredDriveIds.push(id);
+      selectedDriveFileIds.delete(id);
+      saveStateToDB();
+      renderDriveView();
+    }
+
+    async function extractPdfTextFromArrayBuffer(buffer) {
+      if (!window.pdfjsLib) return '';
+      const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+      let fullText = '';
+      for (let p = 1; p <= Math.min(pdf.numPages, 25); p++) {
+        const page = await pdf.getPage(p);
+        const content = await page.getTextContent();
+        fullText += content.items.map(i => i.str).join(' ') + '
+';
+      }
+      return fullText.trim();
+    }
+
+    async function importSelectedDriveFiles() {
+      const currentUe = driveFolderBreadcrumbs[driveFolderBreadcrumbs.length - 1]?.name || 'UE Drive';
+      for (const fileId of selectedDriveFileIds) {
+        const meta = driveListedFiles.find(f => f.id === fileId);
+        if (!meta) continue;
+        const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+          headers: { Authorization: `Bearer ${googleToken}` }
+        });
+        const text = await extractPdfTextFromArrayBuffer(await res.arrayBuffer());
+        await createCourseFromText(meta.name.replace(/\.pdf$/i, ''), currentUe, text || meta.name);
+      }
+      selectedDriveFileIds.clear();
+      await saveStateToDB();
+      switchView('courses');
+    }
+
+    function renderCoursesView() {
+      const el = document.getElementById('view-courses');
+      el.innerHTML = `
+        <div>
+          <h2 class="text-2xl font-extrabold">📚 Mes Cours & Supports Scientifiques (KaTeX)</h2>
+          <p class="text-sm text-slate-500">Retrouve tes synthèses, quiz et flashcards avec rendu mathématique LaTeX complet.</p>
+        </div>
+
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-3">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <input id="newCourseTitle" type="text" placeholder="Titre du cours" class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm" />
+            <input id="newCourseUE" type="text" placeholder="UE associée" class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm" />
+            <label class="flex items-center justify-center px-3 py-2 rounded-xl border border-dashed border-brand-500 text-brand-600 text-xs font-semibold cursor-pointer">
+              📄 Importer PDF / TXT
+              <input type="file" accept=".pdf,.txt,.md" onchange="handleLocalCourseFile(event)" class="hidden" />
+            </label>
+          </div>
+          <textarea id="newCourseText" rows="2" placeholder="Ou colle le contenu du cours (les formules $...$ et $$...$$ sont automatiquement rendues)..." class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"></textarea>
+          <div class="flex justify-end">
+            <button onclick="handleManualCourseImport()" class="px-4 py-2 rounded-xl bg-brand-600 text-white text-xs font-semibold">✨ Générer les fiches & cartes SM-2</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          ${state.courses.map(c => `
+            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 flex flex-col justify-between gap-4">
+              <div>
+                <div class="flex items-center justify-between">
+                  <span class="px-2.5 py-0.5 rounded-full bg-brand-50 dark:bg-brand-950 text-brand-700 dark:text-brand-300 text-xs font-bold">${c.ue}</span>
+                  <span class="text-xs text-slate-400">${(c.flashcards || []).length} carte(s) SM-2</span>
+                </div>
+                <h3 class="font-bold text-base mt-2">${c.title}</h3>
+              </div>
+              <button onclick="openCourseDetail('${c.id}')" class="w-full py-2 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-brand-600 text-white text-xs font-semibold transition">Ouvrir le support →</button>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    async function handleLocalCourseFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      document.getElementById('newCourseTitle').value = file.name.replace(/\.(pdf|txt|md)$/i, '');
+      if (file.name.toLowerCase().endsWith('.pdf')) {
+        const text = await extractPdfTextFromArrayBuffer(await file.arrayBuffer());
+        document.getElementById('newCourseText').value = text;
+      } else {
+        document.getElementById('newCourseText').value = await file.text();
+      }
+    }
+
+    async function handleManualCourseImport() {
+      const title = document.getElementById('newCourseTitle').value.trim() || 'Nouveau Cours';
+      const ue = document.getElementById('newCourseUE').value.trim() || 'UE Générale';
+      const text = document.getElementById('newCourseText').value.trim();
+      if (!text) return;
+      await createCourseFromText(title, ue, text);
+      await saveStateToDB();
+      renderNavigation();
+      renderCoursesView();
+    }
+
+    async function createCourseFromText(title, ue, rawText) {
+      const apiKey = state.settings.geminiApiKey.trim();
+      let generated = null;
+      if (apiKey) {
+        try {
+          const prompt = `Analyse ce cours d ingénieur (formate toutes les formules mathématiques en LaTeX $...$ ou $$...$$) et réponds en JSON valide avec les clés "summary" (markdown), "memo" (markdown), "quiz" ([{question, options, answer, explanation}]) et "flashcards" ([{front, back}]). Texte : ${rawText.slice(0, 14000)}`;
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: 'application/json' } })
+          });
+          const data = await res.json();
+          const txt = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (txt) generated = JSON.parse(txt);
+        } catch (e) {}
+      }
+
+      if (!generated) {
+        const sentences = rawText.split(/[.!?]\s+/).filter(s => s.length > 20).slice(0, 4);
+        generated = {
+          summary: `### Synthèse : ${title}
+` + (sentences.length ? sentences.map(s => `- ${s.trim()}.`).join('
+') : `- ${rawText.slice(0, 350)}`),
+          memo: `- **À retenir** : Vérifie les formules clés et hypothèses de **${title}**.`,
+          quiz: [{ question: `Quel est le sujet principal de « ${title} » ?`, options: [sentences[0]?.slice(0, 60) || title, 'Histoire de l art', 'Droit civil', 'Aucune réponse'], answer: 0, explanation: 'Notion extraite du support.' }],
+          flashcards: [{ front: `Notion clé : ${title}`, back: sentences[0] || rawText.slice(0, 160) }]
+        };
+      }
+
+      const now = Date.now();
+      state.courses.unshift({
+        id: 'crs-' + now + '-' + Math.random().toString(36).slice(2, 6),
+        title,
+        ue,
+        updatedAt: now,
+        rawText,
+        summary: generated.summary,
+        memo: generated.memo,
+        quiz: generated.quiz || [],
+        flashcards: (generated.flashcards || []).map((f, i) => ({
+          id: 'fc-' + now + '-' + i,
+          front: f.front,
+          back: f.back,
+          sm2: { interval: 0, repetition: 0, efactor: 2.5, nextReview: now }
+        }))
+      });
+      showToast(`Support « ${title} » généré !`, 'success');
+    }
+
+    function openCourseDetail(courseId, tab = 'summary') {
+      const c = state.courses.find(x => x.id === courseId);
+      if (!c) return;
+      const modal = document.getElementById('courseDetailModal');
+      const container = document.getElementById('courseDetailContent');
+      let bodyHtml = '';
+      if (tab === 'summary') {
+        bodyHtml = `<div class="prose dark:prose-invert max-w-none text-sm">${marked.parse(c.summary || '')}</div><div class="mt-4 p-4 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-xs prose dark:prose-invert">${marked.parse(c.memo || '')}</div>`;
+      } else if (tab === 'quiz') {
+        bodyHtml = (c.quiz || []).map((q, qIdx) => `
+          <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 mb-3 space-y-2">
+            <div class="font-bold text-sm prose dark:prose-invert">${qIdx + 1}. ${q.question}</div>
+            ${q.options.map((opt, oIdx) => `<button onclick="this.classList.add('${oIdx === q.answer ? 'bg-emerald-600' : 'bg-rose-600'}', 'text-white')" class="block w-full text-left px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-xs">${opt}</button>`).join('')}
+          </div>
+        `).join('');
+      } else {
+        bodyHtml = (c.flashcards || []).map(fc => `
+          <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 mb-3 prose dark:prose-invert max-w-none">
+            <div class="font-bold text-sm">${marked.parse(fc.front)}</div>
+            <div class="text-xs text-slate-500 mt-1">${marked.parse(fc.back)}</div>
+          </div>
+        `).join('');
+      }
+
+      container.innerHTML = `
+        <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+          <div><span class="text-xs font-bold text-brand-600">${c.ue}</span><h3 class="font-bold text-lg">${c.title}</h3></div>
+          <button onclick="document.getElementById('courseDetailModal').classList.add('hidden')" class="text-2xl font-bold">&times;</button>
+        </div>
+        <div class="px-5 pt-2 border-b border-slate-200 dark:border-slate-800 flex gap-3">
+          <button onclick="openCourseDetail('${c.id}', 'summary')" class="pb-2 text-xs font-bold ${tab === 'summary' ? 'border-b-2 border-brand-600 text-brand-600' : 'text-slate-500'}">📝 Résumé & KaTeX</button>
+          <button onclick="openCourseDetail('${c.id}', 'quiz')" class="pb-2 text-xs font-bold ${tab === 'quiz' ? 'border-b-2 border-brand-600 text-brand-600' : 'text-slate-500'}">🎯 Quiz</button>
+          <button onclick="openCourseDetail('${c.id}', 'flashcards')" class="pb-2 text-xs font-bold ${tab === 'flashcards' ? 'border-b-2 border-brand-600 text-brand-600' : 'text-slate-500'}">🗂️ Flashcards</button>
+        </div>
+        <div class="p-5 overflow-y-auto flex-1">${bodyHtml}</div>
+      `;
+      modal.classList.remove('hidden');
+      renderMathInContainer(container);
+    }
+
+    function renderDeadlinesView() {
+      const el = document.getElementById('view-deadlines');
+      const sorted = [...state.deadlines].sort((a, b) => Number(a.done) - Number(b.done) || new Date(a.dueDate) - new Date(b.dueDate));
+      el.innerHTML = `
+        <h2 class="text-2xl font-extrabold">⏰ Deadlines & Rapports</h2>
+        <div class="space-y-3">
+          ${sorted.map(dl => `
+            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 flex items-center justify-between ${dl.done ? 'opacity-60' : ''}">
+              <div class="flex items-center gap-3">
+                <input type="checkbox" ${dl.done ? 'checked' : ''} onchange="toggleDeadlineDone('${dl.id}')" class="accent-brand-600" />
+                <div>
+                  <div class="text-xs font-bold text-brand-600">${dl.ue} • ${new Date(dl.dueDate).toLocaleDateString('fr-FR')}</div>
+                  <div class="font-bold text-sm ${dl.done ? 'line-through' : ''}">${dl.title}</div>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function toggleDeadlineDone(id) {
+      const dl = state.deadlines.find(d => d.id === id);
+      if (dl) dl.done = !dl.done;
+      saveStateToDB();
+      renderDeadlinesView();
+    }
+
+    function speakTextFrench(rawText) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const clean = rawText.replace(/[\$\*#`\]/g, ' ').replace(/\s+/g, ' ').trim();
+      const utter = new SpeechSynthesisUtterance(clean);
+      utter.lang = 'fr-FR';
+      utter.rate = 1.05;
+      window.speechSynthesis.speak(utter);
+    }
+
+    function toggleVoiceRecognition() {
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRec) {
+        showToast('Reconnaissance vocale non supportée sur ce navigateur.', 'warn');
+        return;
+      }
+      if (isListeningMic && speechRecognition) {
+        speechRecognition.stop();
+        isListeningMic = false;
+        renderTutorView();
+        return;
+      }
+      speechRecognition = new SpeechRec();
+      speechRecognition.lang = 'fr-FR';
+      speechRecognition.interimResults = false;
+      speechRecognition.onstart = () => {
+        isListeningMic = true;
+        renderTutorView();
+      };
+      speechRecognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        const input = document.getElementById('tutorInput');
+        if (input) {
+          input.value = transcript;
+          sendTutorMessage();
+        }
+      };
+      speechRecognition.onerror = () => {
+        isListeningMic = false;
+        renderTutorView();
+      };
+      speechRecognition.onend = () => {
+        isListeningMic = false;
+        renderTutorView();
+      };
+      speechRecognition.start();
+    }
+
+    function startColleOraleFromDashboard() {
+      colleModeActive = true;
+      switchView('tutor');
+      triggerColleQuestion();
+    }
+
+    async function triggerColleQuestion() {
+      colleModeActive = true;
+      const ueCourses = state.courses.filter(c => c.ue === colleSelectedUE);
+      const refCourse = ueCourses[0] || state.courses[0];
+      const prompt = `Mode Colle Orale activé sur l UE **${colleSelectedUE}**. Pose-moi une première question orale précise et technique issue du cours « ${refCourse?.title || colleSelectedUE} » (avec une équation ou un cas concret si pertinent), et attends ma réponse avant de me noter sur 20.`;
+      state.chatHistory.push({ role: 'user', text: `🎙️ Démarrer une colle orale sur : ${colleSelectedUE}` });
+      await generateTutorReply(prompt, true);
+    }
+
+    function renderTutorView() {
+      const el = document.getElementById('view-tutor');
+      const allUEs = Array.from(new Set(state.courses.map(c => c.ue)));
+      if (!allUEs.includes(colleSelectedUE) && allUEs.length) colleSelectedUE = allUEs[0];
+
+      el.innerHTML = `
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-2xl font-extrabold">🎙️ Tuteur IA & Mode Colle Orale</h2>
+            <p class="text-sm text-slate-500">Pose tes questions à l écrit ou passe en interrogation orale vocale (micro + synthèse vocale).</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <select onchange="colleSelectedUE = this.value" class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-semibold">
+              ${allUEs.map(ue => `<option value="${ue}" ${ue === colleSelectedUE ? 'selected' : ''}>${ue}</option>`).join('')}
+            </select>
+            <button onclick="triggerColleQuestion()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-sm">🎓 Lancer une Colle Orale</button>
+          </div>
+        </div>
+
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col h-[62vh]">
+          <div id="chatMessages" class="flex-1 p-5 overflow-y-auto space-y-3">
+            ${state.chatHistory.map((m, idx) => `
+              <div class="flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}">
+                <div class="max-w-[82%] p-3.5 rounded-2xl text-sm ${m.role === 'user' ? 'bg-brand-600 text-white' : 'bg-slate-100 dark:bg-slate-800 prose dark:prose-invert'}">
+                  ${m.role === 'user' ? m.text : marked.parse(m.text)}
+                  ${m.role === 'assistant' ? `<button onclick="speakTextFrench(state.chatHistory[${idx}].text)" class="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-brand-600 dark:text-brand-400 hover:underline">🔊 Écouter à voix haute</button>` : ''}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+          <div class="p-3 border-t border-slate-200 dark:border-slate-800 flex items-center gap-2">
+            <button onclick="toggleVoiceRecognition()" title="Répondre au micro" class="p-2.5 rounded-xl border ${isListeningMic ? 'bg-rose-600 text-white border-rose-600 animate-pulse' : 'border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'} text-sm">
+              🎤
+            </button>
+            <input id="tutorInput" type="text" onkeydown="if(event.key==='Enter') sendTutorMessage()" placeholder="${colleModeActive ? 'Réponds à l examinateur à l écrit ou au micro...' : 'Pose ta question sur tes cours du jour...'}" class="flex-1 px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm" />
+            <button onclick="sendTutorMessage()" class="px-4 py-2 rounded-xl bg-brand-600 text-white text-xs font-bold">Envoyer</button>
+          </div>
+        </div>
+      `;
+      const chatBox = document.getElementById('chatMessages');
+      if (chatBox) {
+        chatBox.scrollTop = chatBox.scrollHeight;
+        renderMathInContainer(chatBox);
+      }
+    }
+
+    function askTutorAboutEvent(eventId) {
+      const ev = state.events.find(e => e.id === eventId);
+      if (!ev) return;
+      colleModeActive = false;
+      switchView('tutor');
+      document.getElementById('tutorInput').value = `Explique-moi ma séance « ${ev.title} » (${ev.ue}) en salle ${ev.location}.`;
+      sendTutorMessage();
+    }
+
+    async function sendTutorMessage() {
+      const input = document.getElementById('tutorInput');
+      const text = input?.value.trim();
+      if (!text) return;
+      input.value = '';
+      state.chatHistory.push({ role: 'user', text });
+      renderTutorView();
+      await generateTutorReply(text, colleModeActive);
+    }
+
+    async function generateTutorReply(userPrompt, autoSpeak = false) {
+      const apiKey = state.settings.geminiApiKey.trim();
+      let reply = '';
+      if (apiKey) {
+        try {
+          const coursesContext = state.courses.map(c => `[${c.ue}] ${c.title}: ${c.summary}`).join('
+').slice(0, 9000);
+          const systemRole = colleModeActive
+            ? `Tu es un professeur examinateur de colle orale à Grenoble INP sur l UE ${colleSelectedUE}. Évalue la réponse de l étudiant avec bienveillance et rigueur (note indicative /20 si applicable), corrige les imprécisions avec des formules LaTeX $...$ et pose une question de relance.`
+            : `Tu es le tuteur pédagogique IA de Grenoble INP. Utilise LaTeX $...$ et $$...$$ pour les formules.`;
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: [{ text: `${systemRole}
+Supports:
+${coursesContext}
+Message: ${userPrompt}` }] }] })
+          });
+          const data = await res.json();
+          reply = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        } catch (e) {}
+      }
+      if (!reply) {
+        if (colleModeActive) {
+          reply = `**Question de Colle (${colleSelectedUE})** : Peux-tu expliquer les hypothèses principales du modèle étudié dans ton cours et écrire la relation mathématique fondamentale associée (par exemple $Q^* = \sqrt{\frac{2 D C_l}{C_p}}$ en gestion des stocks ou $a = \frac{m(Z_1+Z_2)}{2}$ en transmission) ?`;
+        } else {
+          reply = `Voici les éléments clés basés sur tes supports (**${state.courses.map(c => c.ue).join(', ')}**) : vérifie les formules principales et les hypothèses de ton polycopié correspondant.`;
+        }
+      }
+      state.chatHistory.push({ role: 'assistant', text: reply });
+      await saveStateToDB();
+      renderTutorView();
+      if (autoSpeak) speakTextFrench(reply);
+    }
+
+    function renderModulesView() {
+      const el = document.getElementById('view-modules');
+      el.innerHTML = `
+        <h2 class="text-2xl font-extrabold">🧩 Centre de Modules</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          ${MODULE_DEFINITIONS.map(mod => `
+            <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4">
+              <div>
+                <div class="text-xs font-bold text-slate-400">${mod.icon} ${mod.category}</div>
+                <h3 class="font-bold text-base">${mod.name}</h3>
+                <p class="text-xs text-slate-500">${mod.desc}</p>
+              </div>
+              <input type="checkbox" ${state.modules[mod.id] ? 'checked' : ''} onchange="toggleModule('${mod.id}', this.checked)" class="w-5 h-5 accent-brand-600" />
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function toggleModule(id, enabled) {
+      state.modules[id] = enabled;
+      saveStateToDB();
+      renderNavigation();
+      renderModulesView();
+    }
+
+    function openSettingsModal() {
+      document.getElementById('inputClientId').value = state.settings.googleClientId || '';
+      document.getElementById('inputGeminiKey').value = state.settings.geminiApiKey || '';
+      document.getElementById('settingsModal').classList.remove('hidden');
+    }
+
+    function closeSettingsModal() {
+      document.getElementById('settingsModal').classList.add('hidden');
+    }
+
+    async function saveSettings() {
+      state.settings.googleClientId = document.getElementById('inputClientId').value.trim();
+      state.settings.geminiApiKey = document.getElementById('inputGeminiKey').value.trim();
+      await saveStateToDB();
+      closeSettingsModal();
+      showToast('Paramètres enregistrés.', 'success');
+    }
+
+    function exportJsonBackup() {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' }));
+      a.download = 'studyflow_backup.json';
+      a.click();
+    }
+
+    function importJsonBackup(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        mergeStates(JSON.parse(e.target.result));
+        await saveStateToDB();
+        renderNavigation();
+        renderCurrentView();
+        closeSettingsModal();
+      };
+      reader.readAsText(file);
+    }
+
+    async function resetDemoData() {
+      const keep = { ...state.settings };
+      state = getDefaultState();
+      state.settings = keep;
+      await saveStateToDB();
+      renderNavigation();
+      renderCurrentView();
+      closeSettingsModal();
+    }
+
+    function downloadStandaloneApp() {
+      const html = '<!DOCTYPE html>
+' + document.documentElement.outerHTML;
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([html], { type: 'text/html;charset=utf-8' }));
+      a.download = 'index.html';
+      a.click();
+    }
+
+    (async function initApp() {
+      initPwaManifestAndIcons();
+      await loadStateFromDB();
+      applyTheme();
+      setupExtensionBridgeListeners();
+      renderNavigation();
+      renderCurrentView();
+    })();
+  </script>
+</body>
+</html>
