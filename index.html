@@ -134,18 +134,13 @@
         <div>
           <label class="block font-semibold mb-1">ID Client OAuth 2.0 Google Cloud</label>
           <input id="inputClientId" type="text" placeholder="123456789-abc.apps.googleusercontent.com" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-brand-500 outline-none" />
-          <p class="text-xs text-slate-500 mt-1">Requis pour Google Drive (sync cloud + dépôt Clipper v2) et Google Agenda (pont ADE).</p>
+          <p class="text-xs text-slate-500 mt-1">Requis pour Google Drive (sync cloud + dépôt Clipper v2) et Google Agenda.</p>
         </div>
 
         <div>
           <label class="block font-semibold mb-1">Clé API Gemini (Optionnelle — Mode Démo intégré)</label>
           <input id="inputGeminiKey" type="password" placeholder="AIzaSy..." class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-brand-500 outline-none" />
           <p class="text-xs text-slate-500 mt-1">Alimente l'analyse des PDF (avec équations LaTeX), l'extracteur Mail → Action et le mode Colle orale.</p>
-        </div>
-
-        <div class="p-3.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 space-y-1.5 text-xs">
-          <div class="font-bold text-indigo-700 dark:text-indigo-300">📲 Installation Progressive Web App (PC & Mobile)</div>
-          <p class="text-slate-600 dark:text-slate-300">Sur Chrome/Edge PC : clique sur l'icône <strong>Installer StudyFlow IA</strong> dans la barre d'adresse. Sur iOS/Android : <strong>Partager → Sur l'écran d'accueil</strong>.</p>
         </div>
 
         <div class="p-3.5 rounded-xl bg-slate-100 dark:bg-slate-800/70 space-y-2">
@@ -243,7 +238,7 @@
     const GOOGLE_SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/calendar.readonly';
 
     const MODULE_DEFINITIONS = [
-      { id: 'calendar', name: 'Google Agenda (Pont ADE)', desc: 'Synchronisation multi-agendas ADE via Google Calendar et filtrage UE/Groupes.', icon: '📅', category: 'Sources & Flux' },
+      { id: 'calendar', name: 'Planning ADE & Agendas Google', desc: 'Synchronisation Google Calendar, IDs abonnés et import direct lien/fichier .ics ADE.', icon: '📅', category: 'Sources & Flux' },
       { id: 'clipper', name: 'Pont Chamilo / Moodle (Clipper v2)', desc: "Réception sélective des supports aspirés par l'extension navigateur et dépôt Drive.", icon: '🧩', category: 'Sources & Flux' },
       { id: 'webmail', name: 'Automate Webmail → Action', desc: 'Analyse IA des e-mails Zimbra/Partage pour détecter deadlines et changements de salle.', icon: '✉️', category: 'Sources & Flux' },
       { id: 'drive', name: 'Google Drive & Cloud Sync', desc: 'Exploration de dossiers UE, import PDF sélectif et fusion studyflow_db.json.', icon: '☁️', category: 'Sources & Flux' },
@@ -270,7 +265,9 @@
           geminiApiKey: '',
           selectedCalendarId: 'primary',
           selectedCalendarIds: ['primary'],
-          selectedCalendarName: 'ADE Grenoble INP — Génie Industriel (Sync)'
+          customGoogleCalendarIds: [],
+          adeIcalUrl: '',
+          selectedCalendarName: 'Agenda Principal'
         },
         modules: {
           calendar: true,
@@ -302,16 +299,6 @@
             url: 'https://chamilo.grenoble-inp.fr/courses/GI4A/document/CM4_RCCP.pdf',
             capturedAt: now - 1800000,
             snippet: 'Méthode de vérification globale des capacités (RCCP) et formule de la quantité économique de commande de Wilson.',
-            selected: true
-          },
-          {
-            id: 'clip-demo-2',
-            source: 'Moodle Grenoble INP',
-            ue: 'Systèmes Mécaniques',
-            title: 'TD1_Enonce_Reducteur_35NCD6.pdf',
-            url: 'https://moodle.grenoble-inp.fr/pluginfile.php/1420/mod_resource/TD1_Reducteur.pdf',
-            capturedAt: now - 3600000,
-            snippet: "Dimensionnement d'un train d'engrenages cylindriques à denture droite en acier 35NCD6 : contrainte de flexion de Lewis.",
             selected: true
           }
         ],
@@ -356,9 +343,9 @@
           }
         ],
         calendars: [
-          { id: 'primary', summary: 'ADE Grenoble INP — Génie Industriel (Sync)', primary: true },
-          { id: 'perso_demo', summary: 'Agenda Personnel', primary: false }
+          { id: 'primary', summary: 'Agenda Principal Google', primary: true }
         ],
+        adeImportedEvents: [],
         events: [
           {
             id: 'evt-1',
@@ -366,7 +353,7 @@
             ue: 'Supply Chain & MRP',
             type: 'CM',
             group: 'CM',
-            calendarName: 'ADE Grenoble INP',
+            calendarName: 'Démo ADE',
             location: 'Amphi Bergès — Viallet',
             start: todayStr + 'T08:30:00',
             end: todayStr + 'T10:30:00',
@@ -378,23 +365,11 @@
             ue: 'Écoconception & ACV',
             type: 'TP',
             group: 'TP2',
-            calendarName: 'ADE Grenoble INP',
+            calendarName: 'Démo ADE',
             location: 'Salle Informatique B204',
             start: todayStr + 'T10:45:00',
             end: todayStr + 'T12:45:00',
             description: "Bilan énergétique et impact carbone d'un assemblage soudé."
-          },
-          {
-            id: 'evt-4',
-            title: 'TD1 Systèmes Mécaniques & Transmissions',
-            ue: 'Systèmes Mécaniques',
-            type: 'TD',
-            group: 'TD1',
-            calendarName: 'ADE Grenoble INP',
-            location: 'Salle D102',
-            start: todayStr + 'T14:00:00',
-            end: todayStr + 'T16:00:00',
-            description: "Dimensionnement d'un réducteur à engrenages droits et vérification à la fatigue."
           },
           {
             id: 'evt-6',
@@ -402,7 +377,7 @@
             ue: 'Ergonomie & Postes',
             type: 'CM',
             group: 'CM',
-            calendarName: 'ADE Grenoble INP',
+            calendarName: 'Démo ADE',
             location: 'Amphi Gosse',
             start: tomorrowStr + 'T09:00:00',
             end: tomorrowStr + 'T11:00:00',
@@ -432,12 +407,6 @@
                 front: 'Donner la formule de la quantité économique de commande de Wilson $Q^*$.',
                 back: '$$Q^* = \\sqrt{\\frac{2 \\cdot D \\cdot C_l}{C_p}}$$ où $D$ est la demande annuelle, $C_l$ le coût de lancement et $C_p$ le coût de possession annuel.',
                 sm2: { interval: 0, repetition: 0, efactor: 2.5, nextReview: now - 60000 }
-              },
-              {
-                id: 'fc-2',
-                front: 'Différence fondamentale entre PIC et PDP ?',
-                back: 'Le **PIC** raisonne par familles de produits sur 6 à 18 mois (maille mensuelle), tandis que le **PDP** raisonne par références de produits finis (maille hebdomadaire).',
-                sm2: { interval: 1, repetition: 1, efactor: 2.5, nextReview: now - 30000 }
               }
             ]
           },
@@ -538,10 +507,14 @@
                 ...req.result,
                 settings: { ...def.settings, ...(req.result.settings || {}) },
                 modules: { ...def.modules, ...(req.result.modules || {}) },
-                filters: { ...def.filters, ...(req.result.filters || {}) }
+                filters: { ...def.filters, ...(req.result.filters || {}) },
+                adeImportedEvents: req.result.adeImportedEvents || []
               };
               if (!Array.isArray(state.settings.selectedCalendarIds) || !state.settings.selectedCalendarIds.length) {
                 state.settings.selectedCalendarIds = [state.settings.selectedCalendarId || 'primary'];
+              }
+              if (!Array.isArray(state.settings.customGoogleCalendarIds)) {
+                state.settings.customGoogleCalendarIds = [];
               }
             }
             ensureSm2MetadataOnAllCards();
@@ -584,7 +557,7 @@
       el.textContent = msg;
       el.classList.remove('hidden');
       clearTimeout(window._toastTimer);
-      window._toastTimer = setTimeout(() => el.classList.add('hidden'), 4200);
+      window._toastTimer = setTimeout(() => el.classList.add('hidden'), 4500);
     }
 
     function applyTheme() {
@@ -598,6 +571,165 @@
       state.theme = state.theme === 'dark' ? 'light' : 'dark';
       applyTheme();
       saveStateToDB();
+    }
+
+    function parseIcsDateToIso(rawVal) {
+      if (!rawVal) return null;
+      const val = rawVal.trim();
+      const m = val.match(/^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(\d{2})(Z)?)?$/);
+      if (!m) return null;
+      const [, y, mo, d, hh, mm, ss, isUtc] = m;
+      if (!hh) return `${y}-${mo}-${d}T08:00:00`;
+      if (isUtc) {
+        return new Date(Date.UTC(Number(y), Number(mo) - 1, Number(d), Number(hh), Number(mm), Number(ss || 0))).toISOString();
+      }
+      return `${y}-${mo}-${d}T${hh}:${mm}:${ss || '00'}`;
+    }
+
+    function unescapeIcsText(str) {
+      return (str || '')
+        .replace(/\\n/gi, ' • ')
+        .replace(/\\,/g, ',')
+        .replace(/\\;/g, ';')
+        .replace(/\\\\/g, '\\')
+        .trim();
+    }
+
+    function parseIcsContent(icsText, sourceLabel = 'Flux ADE (.ics)') {
+      const unfolded = icsText.replace(/\r\n[ \t]/g, '').replace(/\n[ \t]/g, '');
+      const lines = unfolded.split(/\r?\n/);
+      const parsed = [];
+      let cur = null;
+
+      for (const line of lines) {
+        if (line === 'BEGIN:VEVENT') {
+          cur = {};
+        } else if (line === 'END:VEVENT' && cur) {
+          const startIso = parseIcsDateToIso(cur.DTSTART);
+          if (startIso) {
+            const endIso = parseIcsDateToIso(cur.DTEND) || new Date(new Date(startIso).getTime() + 7200000).toISOString();
+            const rawTitle = unescapeIcsText(cur.SUMMARY) || 'Séance ADE';
+            const rawDesc = unescapeIcsText(cur.DESCRIPTION);
+            const rawLoc = unescapeIcsText(cur.LOCATION) || 'Salle non précisée';
+            const meta = parseEventMetadata(rawTitle, rawDesc);
+            parsed.push({
+              id: 'ade_' + (cur.UID || (startIso + '_' + rawTitle)).replace(/[^a-zA-Z0-9_-]/g, '_'),
+              title: rawTitle,
+              ue: meta.ue,
+              type: meta.type,
+              group: meta.group,
+              calendarName: sourceLabel,
+              location: rawLoc,
+              start: startIso,
+              end: endIso,
+              description: rawDesc
+            });
+          }
+          cur = null;
+        } else if (cur) {
+          const colonIdx = line.indexOf(':');
+          if (colonIdx > 0) {
+            const propName = line.slice(0, colonIdx).split(';')[0].toUpperCase();
+            const propVal = line.slice(colonIdx + 1);
+            cur[propName] = propVal;
+          }
+        }
+      }
+      return parsed;
+    }
+
+    async function syncAdeFromUrl(silent = false) {
+      const inputEl = document.getElementById('inputAdeUrl');
+      const rawUrl = (inputEl ? inputEl.value : state.settings.adeIcalUrl || '').trim();
+      if (!rawUrl) {
+        if (!silent) showToast("Colle d'abord ton lien d'abonnement ADE (http:// ou webcal://).", 'warn');
+        return;
+      }
+      const normalizedUrl = rawUrl.replace(/^webcal:\/\//i, 'https://');
+      state.settings.adeIcalUrl = normalizedUrl;
+      await saveStateToDB();
+
+      if (!silent) showToast('Téléchargement du flux ADE en cours...', 'info');
+      const proxies = [
+        (u) => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
+        (u) => 'https://corsproxy.io/?' + encodeURIComponent(u),
+        (u) => u
+      ];
+
+      let icsData = null;
+      for (const buildUrl of proxies) {
+        try {
+          const res = await fetch(buildUrl(normalizedUrl));
+          if (res.ok) {
+            const txt = await res.text();
+            if (txt.includes('BEGIN:VCALENDAR')) {
+              icsData = txt;
+              break;
+            }
+          }
+        } catch (e) {}
+      }
+
+      if (!icsData) {
+        if (!silent) showToast("Le serveur ADE bloque l'accès direct. Télécharge le fichier .ics depuis ADE et importe-le avec le bouton « Importer .ics » juste à côté !", 'warn');
+        return;
+      }
+
+      const events = parseIcsContent(icsData, 'ADE Grenoble INP (Lien)');
+      if (!events.length) {
+        if (!silent) showToast('Flux ADE lu, mais aucun créneau trouvé.', 'warn');
+        return;
+      }
+      state.adeImportedEvents = events;
+      await saveStateToDB();
+      renderCurrentView();
+      if (!silent) showToast(events.length + ' créneau(x) ADE importé(s) avec succès !', 'success');
+    }
+
+    function handleAdeIcsFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const text = e.target.result || '';
+        const events = parseIcsContent(text, 'ADE Grenoble INP (.ics)');
+        if (!events.length) {
+          showToast('Aucun événement trouvé dans ce fichier .ics.', 'error');
+          return;
+        }
+        state.adeImportedEvents = events;
+        await saveStateToDB();
+        renderCurrentView();
+        showToast(events.length + ' créneau(x) ADE importé(s) depuis ' + file.name + ' !', 'success');
+      };
+      reader.readAsText(file);
+    }
+
+    async function addCustomGoogleCalendarId() {
+      const inp = document.getElementById('inputCustomGoogleCalId');
+      const val = inp?.value.trim();
+      if (!val) return;
+      if (!state.settings.customGoogleCalendarIds.includes(val)) {
+        state.settings.customGoogleCalendarIds.push(val);
+      }
+      if (!state.settings.selectedCalendarIds.includes(val)) {
+        state.settings.selectedCalendarIds.push(val);
+      }
+      if (!state.calendars.some(c => c.id === val)) {
+        state.calendars.push({ id: val, summary: 'Agenda Abonné (' + val.slice(0, 22) + '...)', primary: false });
+      }
+      inp.value = '';
+      await saveStateToDB();
+      if (googleToken) await syncSelectedGoogleCalendar();
+      else renderCalendarView();
+      showToast('ID d’agenda Google ajouté !', 'success');
+    }
+
+    function getAllCombinedEvents() {
+      const map = new Map();
+      (state.events || []).forEach(ev => map.set(ev.id, ev));
+      (state.adeImportedEvents || []).forEach(ev => map.set(ev.id, ev));
+      return Array.from(map.values());
     }
 
     function getDueSm2Cards() {
@@ -689,7 +821,7 @@
           <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-10 text-center space-y-3">
             <div class="text-4xl">🎉</div>
             <h3 class="text-lg font-bold">Session SM-2 terminée pour aujourd'hui !</h3>
-            <p class="text-sm text-slate-500 max-w-md mx-auto">Toutes tes cartes dues ont été planifiées selon leur facteur de facilité. Tu peux réinitialiser les échéances si tu veux t'entraîner à blanc avant un partiel.</p>
+            <p class="text-sm text-slate-500 max-w-md mx-auto">Toutes tes cartes dues ont été planifiées selon leur facteur de facilité.</p>
             <button onclick="forceReviewAllSm2()" class="px-4 py-2 rounded-xl bg-slate-900 dark:bg-slate-800 text-white text-xs font-semibold">🔁 Réviser tout le paquet maintenant</button>
           </div>
         ` : (() => {
@@ -898,7 +1030,7 @@
     }
 
     function getFilteredEvents() {
-      return state.events.filter(isEventAccepted).sort((a, b) => new Date(a.start) - new Date(b.start));
+      return getAllCombinedEvents().filter(isEventAccepted).sort((a, b) => new Date(a.start) - new Date(b.start));
     }
 
     function parseEventMetadata(rawTitle, rawDesc = '') {
@@ -1004,18 +1136,24 @@
     async function fetchGoogleCalendars() {
       if (!googleToken) return;
       try {
-        const data = await googleFetch('https://www.googleapis.com/calendar/v3/users/me/calendarList');
-        if (data.items?.length) {
-          state.calendars = data.items.map(c => ({
-            id: c.id,
-            summary: c.summary || c.id,
-            primary: !!c.primary,
-            backgroundColor: c.backgroundColor || '#2563eb'
-          }));
+        const data = await googleFetch('https://www.googleapis.com/calendar/v3/users/me/calendarList?showHidden=true&minAccessRole=reader');
+        const list = (data.items || []).map(c => ({
+          id: c.id,
+          summary: c.summaryOverride || c.summary || c.id,
+          primary: !!c.primary
+        }));
 
+        (state.settings.customGoogleCalendarIds || []).forEach(cid => {
+          if (!list.some(c => c.id === cid)) {
+            list.push({ id: cid, summary: 'Agenda Abonné (' + cid.slice(0, 22) + '...)', primary: false });
+          }
+        });
+
+        if (list.length) {
+          state.calendars = list;
           const validIds = new Set(state.calendars.map(c => c.id));
           let selected = (state.settings.selectedCalendarIds || []).filter(id => validIds.has(id));
-          const adeCals = state.calendars.filter(c => /ade|inp|edt|cours|univ|grenoble/i.test(c.summary));
+          const adeCals = state.calendars.filter(c => /ade|inp|edt|cours|univ|grenoble|import\.calendar/i.test(c.summary + ' ' + c.id));
           if (adeCals.length > 0) {
             adeCals.forEach(ac => {
               if (!selected.includes(ac.id)) selected.push(ac.id);
@@ -1035,16 +1173,16 @@
 
     async function syncSelectedGoogleCalendar() {
       if (!googleToken) {
-        showToast('Connecte ton compte Google pour synchroniser ton agenda ADE.', 'warn');
+        showToast('Connecte ton compte Google ou importe ton lien/fichier ADE ci-dessous.', 'warn');
         return;
       }
       try {
-        if (!state.calendars || state.calendars.length <= 2) {
-          await fetchGoogleCalendars();
-        }
-        const idsToFetch = (state.settings.selectedCalendarIds && state.settings.selectedCalendarIds.length)
-          ? state.settings.selectedCalendarIds
-          : [state.settings.selectedCalendarId || 'primary'];
+        await fetchGoogleCalendars();
+        const idsToFetch = Array.from(new Set([
+          ...(state.settings.selectedCalendarIds || []),
+          ...(state.settings.customGoogleCalendarIds || [])
+        ]));
+        if (!idsToFetch.length) idsToFetch.push('primary');
 
         const timeMin = new Date(Date.now() - 2 * 86400000).toISOString();
         const timeMax = new Date(Date.now() + 30 * 86400000).toISOString();
@@ -1052,7 +1190,7 @@
 
         for (const rawId of idsToFetch) {
           const calMeta = state.calendars.find(c => c.id === rawId);
-          const calLabel = calMeta ? calMeta.summary : 'Agenda';
+          const calLabel = calMeta ? calMeta.summary : 'Google Agenda';
           const calId = encodeURIComponent(rawId);
           try {
             const data = await googleFetch('https://www.googleapis.com/calendar/v3/calendars/' + calId + '/events?singleEvents=true&orderBy=startTime&timeMin=' + timeMin + '&timeMax=' + timeMax + '&maxResults=250');
@@ -1077,9 +1215,12 @@
         }
 
         state.events = mergedEvents;
+        if (state.settings.adeIcalUrl) {
+          await syncAdeFromUrl(true);
+        }
         await saveStateToDB();
         renderCurrentView();
-        showToast(state.events.length + ' créneau(x) récupéré(s) sur ' + idsToFetch.length + ' agenda(s).', 'success');
+        showToast(getAllCombinedEvents().length + ' créneau(x) synchronisé(s).', 'success');
       } catch (err) {
         showToast(err.message, 'error');
       }
@@ -1165,6 +1306,13 @@
       (remote.deadlines || []).forEach(d => dlMap.set(d.id, d));
       (state.deadlines || []).forEach(d => dlMap.set(d.id, d));
       state.deadlines = Array.from(dlMap.values());
+
+      if (remote.adeImportedEvents?.length && !state.adeImportedEvents?.length) {
+        state.adeImportedEvents = remote.adeImportedEvents;
+      }
+      if (remote.settings?.adeIcalUrl && !state.settings.adeIcalUrl) {
+        state.settings.adeIcalUrl = remote.settings.adeIcalUrl;
+      }
 
       state.ignoredDriveIds = Array.from(new Set([...(state.ignoredDriveIds || []), ...(remote.ignoredDriveIds || [])]));
       state.ignoredClipperUrls = Array.from(new Set([...(state.ignoredClipperUrls || []), ...(remote.ignoredClipperUrls || [])]));
@@ -1266,10 +1414,10 @@
           <div class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4">
             <div class="flex items-center justify-between">
               <h3 class="font-bold text-base">📅 Séances du jour (${todayEvents.length})</h3>
-              <button onclick="switchView('calendar')" class="text-xs font-semibold text-brand-600 hover:underline">Planning complet & Agendas →</button>
+              <button onclick="switchView('calendar')" class="text-xs font-semibold text-brand-600 hover:underline">Importer ADE / Planning complet →</button>
             </div>
             <div class="space-y-3">
-              ${todayEvents.map(ev => renderEventCardHtml(ev, true)).join('') || "<p class='text-sm text-slate-500'>Aucun créneau aujourd'hui. Vérifie tes agendas sélectionnés dans l'onglet <strong>Planning ADE</strong>.</p>"}
+              ${todayEvents.map(ev => renderEventCardHtml(ev, true)).join('') || "<p class='text-sm text-slate-500'>Aucun créneau aujourd'hui. Ouvre <strong>Planning ADE</strong> pour importer ton lien ou fichier .ics ADE.</p>"}
             </div>
           </div>
           ` : ''}
@@ -1678,7 +1826,8 @@
       if (!act) return;
 
       if (act.kind === 'room_change') {
-        const target = state.events.find(e => e.title.toLowerCase().includes((act.ue || '').toLowerCase())) || state.events[0];
+        const allEvs = getAllCombinedEvents();
+        const target = allEvs.find(e => e.title.toLowerCase().includes((act.ue || '').toLowerCase())) || allEvs[0];
         if (target) {
           target.location = act.newLocation;
           target.roomUpdated = true;
@@ -1705,10 +1854,15 @@
 
     function renderCalendarView() {
       const el = document.getElementById('view-calendar');
-      const allUEs = Array.from(new Set([...(state.filters.enabledUEs || []), ...(state.filters.disabledUEs || []), ...state.events.map(e => e.ue)]));
-      const allGroups = Array.from(new Set([...(state.filters.allowedGroups || []), ...(state.filters.blockedGroups || []), ...state.events.map(e => e.group)]));
+      const combinedEvents = getAllCombinedEvents();
+      const allUEs = Array.from(new Set([...(state.filters.enabledUEs || []), ...(state.filters.disabledUEs || []), ...combinedEvents.map(e => e.ue)]));
+      const allGroups = Array.from(new Set([...(state.filters.allowedGroups || []), ...(state.filters.blockedGroups || []), ...combinedEvents.map(e => e.group)]));
       const horizonLimit = Date.now() + calendarHorizonDays * 86400000;
-      const visibleEvents = getFilteredEvents().filter(ev => new Date(ev.start).getTime() <= horizonLimit);
+      const pastCutoff = Date.now() - 86400000;
+      const visibleEvents = getFilteredEvents().filter(ev => {
+        const t = new Date(ev.start).getTime();
+        return t >= pastCutoff && t <= horizonLimit;
+      });
 
       const groupedByDay = new Map();
       visibleEvents.forEach(ev => {
@@ -1723,10 +1877,28 @@
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h2 class="text-2xl font-extrabold">📅 Planning ADE & Agendas Google</h2>
-            <p class="text-sm text-slate-500">Coche tous les agendas Google à afficher (ADE abonné + agenda principal) et filtre par UE ou groupe.</p>
+            <p class="text-sm text-slate-500">Connecte ton flux ADE directement (lien iCal ou fichier .ics) et fusionne-le avec tes agendas Google.</p>
           </div>
           <div class="flex flex-wrap gap-2">
-            <button onclick="fetchGoogleCalendars().then(() => syncSelectedGoogleCalendar())" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold shadow-sm">🔄 Actualiser ADE & Google</button>
+            <button onclick="syncSelectedGoogleCalendar()" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold shadow-sm">🔄 Tout actualiser</button>
+          </div>
+        </div>
+
+        <div class="bg-gradient-to-r from-brand-50 to-indigo-50 dark:from-brand-950/40 dark:to-indigo-950/40 border border-brand-200 dark:border-brand-800 rounded-2xl p-5 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h3 class="font-bold text-sm text-brand-900 dark:text-brand-200">🎓 Pont Direct ADE Grenoble INP (Lien iCal / Webcal ou Fichier .ics)</h3>
+              <p class="text-xs text-slate-600 dark:text-slate-300">Google masque souvent les agendas abonnés par URL à son API. Colle ton lien ADE (celui utilisé sur ton téléphone) ou importe le fichier <code>.ics</code> exporté depuis ADE.</p>
+            </div>
+            ${state.adeImportedEvents.length > 0 ? `<span class="px-2.5 py-1 rounded-full bg-emerald-600 text-white text-xs font-bold">✓ ${state.adeImportedEvents.length} créneaux ADE chargés</span>` : ''}
+          </div>
+          <div class="flex flex-col sm:flex-row gap-2">
+            <input id="inputAdeUrl" type="text" value="${state.settings.adeIcalUrl || ''}" placeholder="https://ade-web-consult.grenoble-inp.fr/jsp/custom/modules/plannings/anonymous_cal.jsp?..." class="flex-1 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs" />
+            <button onclick="syncAdeFromUrl(false)" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold shrink-0">📥 Synchroniser le lien ADE</button>
+            <label class="px-4 py-2 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-indigo-600 text-white text-xs font-semibold cursor-pointer text-center shrink-0">
+              📂 Importer fichier .ics
+              <input type="file" accept=".ics,.ical,text/calendar" onchange="handleAdeIcsFileUpload(event)" class="hidden" />
+            </label>
           </div>
         </div>
 
@@ -1735,9 +1907,9 @@
             <div>
               <div class="flex items-center justify-between mb-2">
                 <label class="text-xs font-bold uppercase text-slate-500">Agendas Google synchronisés</label>
-                <button onclick="fetchGoogleCalendars()" class="text-[11px] font-semibold text-brand-600 hover:underline">Actualiser la liste</button>
+                <button onclick="fetchGoogleCalendars()" class="text-[11px] font-semibold text-brand-600 hover:underline">Actualiser</button>
               </div>
-              <div class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+              <div class="space-y-1.5 max-h-40 overflow-y-auto pr-1">
                 ${state.calendars.map(c => {
                   const checked = selectedCalIds.includes(c.id);
                   return `
@@ -1747,6 +1919,14 @@
                     </label>
                   `;
                 }).join('')}
+              </div>
+
+              <div class="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 space-y-1.5">
+                <span class="text-[11px] font-semibold text-slate-500 block">Ajouter un ID d'agenda Google abonné :</span>
+                <div class="flex gap-1.5">
+                  <input id="inputCustomGoogleCalId" type="text" placeholder="xxx@import.calendar.google.com" class="flex-1 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs" />
+                  <button onclick="addCustomGoogleCalendarId()" class="px-2.5 py-1.5 rounded-lg bg-slate-800 text-white text-xs font-bold">+</button>
+                </div>
               </div>
             </div>
 
@@ -1794,7 +1974,7 @@
             ${groupedByDay.size === 0 ? `
               <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 text-center space-y-2">
                 <p class="text-sm font-semibold">Aucune séance affichée sur cette période.</p>
-                <p class="text-xs text-slate-500">Vérifie à gauche que ton agenda ADE est bien coché et clique sur <strong>Actualiser ADE & Google</strong>.</p>
+                <p class="text-xs text-slate-500">Colle ton lien d'abonnement ADE ou importe ton fichier <code>.ics</code> dans le cadre bleu en haut de cette page.</p>
               </div>
             ` : Array.from(groupedByDay.entries()).map(([dayKey, dayEvents]) => {
               const header = formatDayHeaderLabel(dayKey);
@@ -2248,7 +2428,7 @@
     }
 
     function askTutorAboutEvent(eventId) {
-      const ev = state.events.find(e => e.id === eventId);
+      const ev = getAllCombinedEvents().find(e => e.id === eventId);
       if (!ev) return;
       colleModeActive = false;
       switchView('tutor');
