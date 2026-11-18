@@ -5,7 +5,7 @@
   "display": "standalone",
   "background_color": "#0b0f19",
   "theme_color": "#0b0f19",
-  "description": "Extraction de cours Moodle et Chamilo, emploi du temps ADE, fiches de révision et quiz IA.",
+  "description": "Agenda hebdomadaire ADE, extraction de cours Moodle et Chamilo, fiches de révision, flashcards et quiz IA.",
   "icons": [
     {
       "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Crect width='128' height='128' rx='24' fill='%23121826'/%3E%3Ctext x='64' y='78' font-family='system-ui,sans-serif' font-size='54' font-weight='700' fill='%233b82f6' text-anchor='middle'%3ESF%3C/text%3E%3C/svg%3E",
