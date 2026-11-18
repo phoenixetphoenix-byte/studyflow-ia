@@ -8,6 +8,7 @@
   <link rel="manifest" href="./manifest.json">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     :root {
       --bg: #0b0f19;
@@ -273,6 +274,31 @@
       font-size: 12px;
     }
 
+    .filter-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .chip {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .chip.active {
+      background: rgba(59, 130, 246, 0.18);
+      border-color: var(--accent);
+      color: #93c5fd;
+    }
+
     .dropzone {
       border: 2px dashed var(--border);
       border-radius: var(--radius);
@@ -346,6 +372,41 @@
       margin-top: 2px;
     }
 
+    .ue-group {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg);
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    .ue-group-header {
+      background: var(--surface-alt);
+      padding: 11px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .ue-group-body {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .folder-subhead {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      margin: 4px 0 4px 2px;
+    }
+
     .pill {
       display: inline-block;
       font-size: 11px;
@@ -363,13 +424,18 @@
       border-color: rgba(16, 185, 129, 0.35);
     }
 
+    .pill-img {
+      color: #93c5fd;
+      border-color: rgba(59, 130, 246, 0.35);
+    }
+
     .cal-toolbar {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      margin-bottom: 14px;
+      margin-bottom: 10px;
     }
 
     .cal-week-label {
@@ -451,7 +517,7 @@
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       background: rgba(30, 41, 59, 0.92);
       color: #f8fafc;
-      transition: filter 0.15s, z-index 0s;
+      transition: filter 0.15s;
     }
 
     .cal-event:hover {
@@ -503,6 +569,29 @@
       line-height: 1.65;
       max-height: 560px;
       overflow-y: auto;
+    }
+
+    .preview-images-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .preview-img-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px;
+      text-align: center;
+    }
+
+    .preview-img-card img {
+      max-width: 100%;
+      max-height: 200px;
+      border-radius: 4px;
+      display: block;
+      margin: 0 auto 4px;
     }
 
     .flashcard-grid {
@@ -633,12 +722,13 @@
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      max-width: 780px;
+      max-width: 860px;
       width: 100%;
-      max-height: 85vh;
+      max-height: 88vh;
       display: flex;
       flex-direction: column;
       padding: 18px;
+      overflow-y: auto;
     }
 
     @media (max-width: 640px) {
@@ -661,6 +751,7 @@
       <button type="button" class="tab-btn active" data-tab="agenda" onclick="switchTab('agenda')">Agenda</button>
       <button type="button" class="tab-btn" data-tab="import" onclick="switchTab('import')">Import Cours</button>
       <button type="button" class="tab-btn" data-tab="library" onclick="switchTab('library')">Supports (<span id="libCountBadge">0</span>)</button>
+      <button type="button" class="tab-btn" data-tab="webmail" onclick="switchTab('webmail')">Webmail</button>
       <button type="button" class="tab-btn" data-tab="studio" onclick="switchTab('studio')">Studio IA</button>
       <button type="button" class="tab-btn" data-tab="settings" onclick="switchTab('settings')">Réglages</button>
     </nav>
@@ -674,14 +765,14 @@
         <div class="stat-sub" id="statNextCourseTitle">Synchronise ADE pour afficher</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Supports extraits</div>
+        <div class="stat-label">Supports indexés</div>
         <div class="stat-value" id="statDocsCount">0</div>
-        <div class="stat-sub" id="statDocsChars">0 caractères indexés</div>
+        <div class="stat-sub" id="statDocsChars">0 caractères • 0 images</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Matières / UE</div>
         <div class="stat-value" id="statUeCount">0</div>
-        <div class="stat-sub">Prêts pour fiches, flashcards &amp; quiz</div>
+        <div class="stat-sub">Multimodal prêt pour Gemini</div>
       </div>
     </div>
 
@@ -695,11 +786,13 @@
             <span class="cal-week-label" id="calWeekLabel" style="margin-left:6px;">Semaine</span>
           </div>
           <div class="btn-row">
+            <input type="text" id="calSearchFilter" placeholder="Filtrer (salle, groupe, mot-clé...)" style="width:210px;margin-bottom:0;" oninput="renderWeeklyCalendar()">
             <button type="button" class="btn btn-sm" id="btnSyncAde" onclick="syncAdeSchedule()">Synchroniser ADE</button>
             <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('icsFileInput').click()">Importer .ics</button>
             <input type="file" id="icsFileInput" accept=".ics" style="display:none;" onchange="handleIcsUpload(this.files)">
           </div>
         </div>
+        <div id="calCourseFilterChips" class="filter-chips"></div>
         <div class="cal-wrapper">
           <div class="cal-grid" id="weeklyCalendarGrid"></div>
         </div>
@@ -711,9 +804,9 @@
         <div class="card">
           <div class="card-header">
             <span class="card-title">Moodle Grenoble INP (Relais CAS)</span>
-            <span class="pill pill-ok">Extraction directe</span>
+            <span class="pill pill-ok">PDF / XLSX / DOCX / PPTX + Images</span>
           </div>
-          <p class="card-subtitle">Colle l’URL d’un cours Moodle pour détecter les PDF et extraire automatiquement leur texte intégral via ton Worker.</p>
+          <p class="card-subtitle">Colle l’URL d’un cours Moodle pour détecter les supports et extraire leur texte ainsi que leurs schémas/images.</p>
           <label for="moodleCourseUrl">URL du cours Moodle</label>
           <input type="url" id="moodleCourseUrl" placeholder="https://moodle.grenoble-inp.fr/course/view.php?id=218">
           <label for="moodleUeName">Nom de l’UE / Matière</label>
@@ -728,11 +821,11 @@
         <div class="card">
           <div class="card-header">
             <span class="card-title">Chamilo (Favori récursif) &amp; Fichiers</span>
-            <span class="pill">PDF / DOCX / PPTX / ZIP</span>
+            <span class="pill">PDF / DOCX / PPTX / XLSX / ZIP</span>
           </div>
           <div class="bookmarklet-box">
             <div style="font-size:12px;font-weight:600;margin-bottom:6px;">1. Installe le favori d’extraction récursive Chamilo :</div>
-            <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Glisse ce bouton dans ta barre de favoris (ou copie son code). Depuis un cours Chamilo, un clic explore tous les sous-dossiers et télécharge uniquement les vrais documents (sans .php ni slideshow).</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Glisse ce bouton dans ta barre de favoris (ou copie son code). Depuis un cours Chamilo, un clic explore tous les sous-dossiers et télécharge uniquement les vrais supports.</div>
             <div class="btn-row">
               <a id="chamiloBookmarkletAnchor" class="bookmarklet-link" href="#">StudyFlow : Télécharger Chamilo</a>
               <button type="button" class="btn btn-secondary btn-sm" onclick="copyBookmarkletCode()">Copier le code du favori</button>
@@ -742,9 +835,9 @@
           <label for="chamiloUeName">2. Nom de l’UE / Matière des fichiers importés</label>
           <input type="text" id="chamiloUeName" placeholder="Ex. GI4 - Écoconception / Eco-innovation">
           <div id="archiveDropzone" class="dropzone" onclick="document.getElementById('archiveFileInput').click()">
-            <div style="font-weight:600;font-size:13px;margin-bottom:4px;">Glisse ici tes fichiers téléchargés (.pdf, .docx, .pptx, .zip)</div>
-            <div id="archiveStatus" style="font-size:12px;color:var(--muted);">Extraction automatique du texte intégral en mémoire</div>
-            <input type="file" id="archiveFileInput" accept=".zip,.pdf,.docx,.pptx,.txt,.md" multiple style="display:none;" onchange="handleLocalFiles(this.files)">
+            <div style="font-weight:600;font-size:13px;margin-bottom:4px;">Glisse ici tes fichiers (.pdf, .docx, .pptx, .xlsx, .zip)</div>
+            <div id="archiveStatus" style="font-size:12px;color:var(--muted);">Extraction automatique du texte et des images intégrées</div>
+            <input type="file" id="archiveFileInput" accept=".zip,.pdf,.docx,.pptx,.xlsx,.xls,.txt,.md" multiple style="display:none;" onchange="handleLocalFiles(this.files)">
           </div>
         </div>
       </div>
@@ -753,14 +846,31 @@
     <section id="panel-library" class="panel">
       <div class="card">
         <div class="card-header">
-          <span class="card-title">Bibliothèque des supports extraits</span>
+          <span class="card-title">Bibliothèque structurée par UE et dossier</span>
           <div class="btn-row">
-            <input type="text" id="libFilterInput" placeholder="Filtrer par titre ou UE..." style="width:220px;margin-bottom:0;" oninput="renderLibrary()">
+            <select id="libUeFilter" style="width:200px;margin-bottom:0;" onchange="renderLibrary()">
+              <option value="">Toutes les UE</option>
+            </select>
+            <input type="text" id="libFilterInput" placeholder="Rechercher un fichier..." style="width:200px;margin-bottom:0;" oninput="renderLibrary()">
             <button type="button" class="btn btn-danger btn-sm" onclick="clearAllDocuments()">Vider tout</button>
           </div>
         </div>
-        <p class="card-subtitle">Tous les supports ci-dessous ont leur texte intégral prêt pour la génération de fiches, résumés, flashcards et quiz.</p>
-        <div id="libraryList" class="item-list"></div>
+        <p class="card-subtitle">Chaque support conserve son texte intégral ainsi que les schémas/illustrations extraits.</p>
+        <div id="libraryStructuredContainer"></div>
+      </div>
+    </section>
+
+    <section id="panel-webmail" class="panel">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Webmail Grenoble INP</span>
+          <div class="btn-row">
+            <button type="button" class="btn btn-sm" id="btnSyncWebmail" onclick="syncWebmailInbox()">Actualiser la boîte mail</button>
+            <a href="https://webmail.grenoble-inp.fr" target="_blank" rel="noopener" class="btn btn-secondary btn-sm" style="text-decoration:none;">Ouvrir Zimbra</a>
+          </div>
+        </div>
+        <p class="card-subtitle">Synchronisation via le Worker Cloudflare (authentification CAS / Zimbra). Clique sur un mail pour l’importer comme note de cours.</p>
+        <div id="webmailList" class="item-list"></div>
       </div>
     </section>
 
@@ -768,7 +878,7 @@
       <div class="grid-2">
         <div class="card">
           <div class="card-header">
-            <span class="card-title">1. Sélection des supports</span>
+            <span class="card-title">1. Sélection des supports (Texte + Images)</span>
             <button type="button" class="btn btn-secondary btn-sm" onclick="toggleSelectAllDocs()">Tout cocher / décocher</button>
           </div>
           <div id="studioDocSelector" class="item-list" style="max-height:330px;overflow-y:auto;"></div>
@@ -776,20 +886,20 @@
 
         <div class="card">
           <div class="card-header">
-            <span class="card-title">2. Génération IA</span>
+            <span class="card-title">2. Génération IA (Multimodal Gemini)</span>
           </div>
           <label for="studioMode">Format de révision</label>
           <select id="studioMode">
-            <option value="fiche">Fiche de révision structurée (notions clés, formules, pièges)</option>
+            <option value="fiche">Fiche de révision structurée (notions clés, schémas, formules)</option>
             <option value="resume">Résumé synthétique rapide (essentiel en 5 minutes)</option>
             <option value="flashcards">Flashcards interactives (10 cartes recto / verso)</option>
             <option value="quiz">Quiz QCM interactif (8 questions corrigées)</option>
           </select>
           <label for="studioFocus">Consigne complémentaire (optionnel)</label>
-          <input type="text" id="studioFocus" placeholder="Ex. Insiste sur les calculs d'ACV et les définitions normatives">
+          <input type="text" id="studioFocus" placeholder="Ex. Explique aussi les schémas présents sur les diapositives">
           <div class="btn-row">
-            <button type="button" class="btn" id="btnGenerateAI" onclick="generateStudyMaterial()">Générer avec l’API IA</button>
-            <button type="button" class="btn btn-secondary" onclick="copyPromptForExternalAI()">Copier le prompt (sans API)</button>
+            <button type="button" class="btn" id="btnGenerateAI" onclick="generateStudyMaterial()">Générer avec Gemini / IA</button>
+            <button type="button" class="btn btn-secondary" onclick="copyPromptForExternalAI()">Copier le prompt</button>
           </div>
           <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
             <label for="pasteJsonInput">Coller un JSON (Quiz ou Flashcards générés ailleurs)</label>
@@ -818,7 +928,7 @@
       <div class="grid-2">
         <div class="card">
           <div class="card-header">
-            <span class="card-title">Relais Cloudflare Workers (CAS / ADE)</span>
+            <span class="card-title">Relais Cloudflare Workers (CAS / ADE / Webmail)</span>
           </div>
           <label for="cfgWorkerUrl">URL du Worker Cloudflare</label>
           <input type="url" id="cfgWorkerUrl" placeholder="https://studyflow-cas-relay.ton-compte.workers.dev">
@@ -826,22 +936,31 @@
           <input type="password" id="cfgWorkerSecret" placeholder="Ton API_SECRET Cloudflare">
           <label for="cfgAdeUrl">URL ADE directCal</label>
           <input type="url" id="cfgAdeUrl" placeholder="https://edt.grenoble-inp.fr/directCal/...">
+          <label for="cfgWebmailUrl">URL Webmail Grenoble INP</label>
+          <input type="url" id="cfgWebmailUrl" placeholder="https://webmail.grenoble-inp.fr/home/~/inbox.json?limit=25">
           <button type="button" class="btn" onclick="saveSettings()">Enregistrer la configuration</button>
         </div>
 
         <div class="card">
           <div class="card-header">
-            <span class="card-title">Fournisseur IA &amp; Sauvegarde</span>
+            <span class="card-title">API Google Gemini &amp; Sauvegarde</span>
           </div>
-          <label for="cfgAiEndpoint">Endpoint Chat Completions (Compatible OpenAI)</label>
-          <input type="url" id="cfgAiEndpoint" placeholder="https://api.groq.com/openai/v1/chat/completions">
-          <label for="cfgAiKey">Clé API</label>
-          <input type="password" id="cfgAiKey" placeholder="gsk_... ou sk-...">
+          <label for="cfgAiProvider">Fournisseur IA</label>
+          <select id="cfgAiProvider" onchange="onAiProviderChange()">
+            <option value="gemini">Google Gemini API (Recommandé — Multimodal Texte + Images)</option>
+            <option value="openai">Compatible OpenAI (Groq, Mistral, OpenAI, Ollama)</option>
+          </select>
+          <div id="openaiEndpointWrapper" style="display:none;">
+            <label for="cfgAiEndpoint">Endpoint Chat Completions</label>
+            <input type="url" id="cfgAiEndpoint" placeholder="https://api.groq.com/openai/v1/chat/completions">
+          </div>
+          <label for="cfgAiKey">Clé API (Google AI Studio AIza... ou autre)</label>
+          <input type="password" id="cfgAiKey" placeholder="AIzaSy...">
           <label for="cfgAiModel">Modèle</label>
-          <input type="text" id="cfgAiModel" placeholder="llama-3.3-70b-versatile">
+          <input type="text" id="cfgAiModel" placeholder="gemini-2.5-flash">
           <div class="btn-row">
             <button type="button" class="btn" onclick="saveSettings()">Enregistrer l’IA</button>
-            <button type="button" class="btn btn-secondary" onclick="exportBackupJson()">Exporter sauvegarde (.json)</button>
+            <button type="button" class="btn btn-secondary" onclick="exportBackupJson()">Exporter (.json)</button>
             <button type="button" class="btn btn-secondary" onclick="document.getElementById('backupImportInput').click()">Restaurer (.json)</button>
             <input type="file" id="backupImportInput" accept=".json" style="display:none;" onchange="importBackupJson(this.files)">
           </div>
@@ -856,6 +975,7 @@
         <span class="card-title" id="previewModalTitle">Détails</span>
         <button type="button" class="btn btn-secondary btn-sm" onclick="closePreviewModal()">Fermer</button>
       </div>
+      <div id="previewModalImages" class="preview-images-grid"></div>
       <div id="previewModalBody" class="output-box" style="flex:1;"></div>
     </div>
   </div>
@@ -874,9 +994,10 @@
     const BOOKMARKLET_CODE = "javascript:(function(){if(!location.hostname.includes('chamilo.grenoble-inp.fr')){alert('Ouvre d’abord un cours sur Chamilo Grenoble INP.');return;}const old=document.getElementById('sfChamiloBox');if(old)old.remove();const box=document.createElement('div');box.id='sfChamiloBox';box.style.cssText='position:fixed;bottom:20px;right:20px;z-index:999999;background:#0f172a;color:#f1f5f9;padding:16px 18px;border-radius:12px;font-family:system-ui,-apple-system,sans-serif;font-size:13px;box-shadow:0 12px 30px rgba(0,0,0,0.45);border:1px solid #334155;max-width:350px;';box.textContent='Analyse récursive des dossiers Chamilo...';document.body.appendChild(box);const queue=[{url:location.href,folder:'Racine'}];const visited=new Set();const files=new Map();const getFolderKey=u=>{try{const p=new URL(u);return(p.searchParams.get('cidReq')||'')+'_'+(p.searchParams.get('id')||p.searchParams.get('curdirpath')||'root');}catch(e){return u;}};visited.add(getFolderKey(location.href));const sanitize=s=>s.replace(/[<>:\"/\\\\|?*\\x00-\\x1F]/g,'_').replace(/\\s+/g,' ').trim();const docExtRegex=/\\.(pdf|docx?|pptx?|xlsx?|odt|odp|ods|txt|md|csv|rtf)(\\?|$)/i;const isFolderLink=u=>{try{const p=new URL(u);if(!p.pathname.endsWith('/document.php'))return false;if(!p.searchParams.get('cidReq'))return false;if(p.searchParams.get('action')||p.searchParams.get('sort')||p.searchParams.get('direction'))return false;const id=p.searchParams.get('id');const dir=p.searchParams.get('curdirpath');if(dir&&dir!=='/'&&dir!=='..')return true;return Boolean(id&&/^\\d+$/.test(id)&&id!=='0');}catch(e){return false;}};const resolveViewerUrl=async viewerUrl=>{try{const u=new URL(viewerUrl);const fParam=u.searchParams.get('file');if(fParam){const resolved=new URL(fParam,viewerUrl).toString();if(docExtRegex.test(resolved))return resolved;}const res=await fetch(viewerUrl,{credentials:'include'});const html=await res.text();const doc=new DOMParser().parseFromString(html,'text/html');for(const el of doc.querySelectorAll('iframe[src],embed[src],object[data],a[href]')){const raw=el.getAttribute('src')||el.getAttribute('data')||el.getAttribute('href');if(!raw)continue;const cand=new URL(raw,viewerUrl).toString();if(cand.includes('action=download')||docExtRegex.test(cand))return cand;}}catch(e){}return null;};(async()=>{while(queue.length){const{url,folder}=queue.shift();box.textContent='Exploration : '+visited.size+' dossier(s), '+files.size+' support(s)...';try{const res=await fetch(url,{credentials:'include'});const html=await res.text();const doc=new DOMParser().parseFromString(html,'text/html');for(const a of doc.querySelectorAll('a[href]')){const raw=a.getAttribute('href');if(!raw||raw.startsWith('#')||raw.startsWith('javascript:'))continue;let full='';try{full=new URL(raw,url).toString();}catch(e){continue;}if(/slideshow\\.php|create_document\\.php|upload\\.php|record_audio\\.php|export_to_pdf/i.test(full))continue;const label=sanitize(a.textContent||a.getAttribute('title')||'');const isDownloadAction=full.includes('document.php')&&full.includes('action=download')&&!full.includes('downloadfolder');const isDirectDoc=docExtRegex.test(full)&&!/\\.php(\\?|$)/i.test(new URL(full).pathname);const isViewer=full.includes('showinframes.php');if(isDownloadAction||isDirectDoc||isViewer){let targetUrl=full;if(isViewer){targetUrl=await resolveViewerUrl(full);if(!targetUrl)continue;}const parsed=new URL(targetUrl);const docId=parsed.searchParams.get('id');const dedupKey=docId&&parsed.pathname.endsWith('/document.php')?'id_'+docId:parsed.origin+parsed.pathname;if(!files.has(dedupKey)){const fallbackName=decodeURIComponent(parsed.pathname.split('/').pop()||'document');files.set(dedupKey,{url:targetUrl,name:label&&!/^télécharger$/i.test(label)?label:fallbackName,folder:folder});}}else if(isFolderLink(full)){const k=getFolderKey(full);if(!visited.has(k)){visited.add(k);queue.push({url:full,folder:label||folder});}}}}catch(e){}await new Promise(r=>setTimeout(r,100));}const list=[...files.values()];if(!list.length){box.textContent='Aucun support détecté dans ce cours.';setTimeout(()=>box.remove(),4000);return;}const downloadSingle=async item=>{const r=await fetch(item.url,{credentials:'include'});const ct=(r.headers.get('content-type')||'').toLowerCase();if(ct.includes('text/html'))return false;const blob=await r.blob();let fname=item.name.replace(/\\.php$/i,'');const cd=r.headers.get('content-disposition')||'';const m=cd.match(/filename\\*?=(?:UTF-8'')?[\"']?([^\"';\\n]+)[\"']?/i);if(m&&m[1])fname=sanitize(decodeURIComponent(m[1]));if(!/\\.(pdf|docx?|pptx?|xlsx?|odt|odp|ods|txt|md|csv|rtf)$/i.test(fname)){const ext=(blob.type.split('/')[1]||'pdf').replace('vnd.openxmlformats-officedocument.wordprocessingml.document','docx').replace('vnd.openxmlformats-officedocument.presentationml.presentation','pptx').replace('vnd.openxmlformats-officedocument.spreadsheetml.sheet','xlsx');if(ext==='html'||ext==='php')return false;fname+='.'+ext;}const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fname;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);return true;};box.innerHTML='<div style=\"font-weight:700;margin-bottom:6px;\">'+list.length+' support(s) dans '+visited.size+' dossier(s)</div><div style=\"font-size:12px;color:#94a3b8;margin-bottom:10px;\">Uniquement les documents (PDF, DOCX, PPTX, XLSX)</div><div style=\"display:flex;gap:8px;\"><button id=\"sfDlAll\" style=\"flex:1;background:#3b82f6;color:#fff;border:none;padding:8px 10px;border-radius:8px;font-weight:600;cursor:pointer;\">Tout télécharger</button><button id=\"sfClose\" style=\"background:#1e293b;color:#cbd5e1;border:1px solid #334155;padding:8px 10px;border-radius:8px;cursor:pointer;\">Fermer</button></div>';document.getElementById('sfClose').onclick=()=>box.remove();document.getElementById('sfDlAll').onclick=async()=>{const btn=document.getElementById('sfDlAll');btn.disabled=true;let okCount=0;for(let i=0;i<list.length;i++){btn.textContent='Téléchargement '+(i+1)+'/'+list.length+'...';try{const ok=await downloadSingle(list[i]);if(ok)okCount++;}catch(e){}await new Promise(r=>setTimeout(r,350));}box.textContent='Téléchargement terminé ('+okCount+' fichier(s)). Glisse-les dans StudyFlow IA !';setTimeout(()=>box.remove(),4000);};})();})();";
 
     const STORAGE_KEYS = {
-      settings: 'studyflow_settings_v3',
-      docs: 'studyflow_docs_v3',
-      ade: 'studyflow_ade_v3'
+      settings: 'studyflow_settings_v4',
+      docs: 'studyflow_docs_v4',
+      ade: 'studyflow_ade_v4',
+      hiddenCourses: 'studyflow_hidden_courses_v4'
     };
 
     const EVENT_COLORS = [
@@ -902,12 +1023,16 @@
         workerUrl: 'https://studyflow-cas-relay.phoenix-et-phoenix.workers.dev',
         workerSecret: '',
         adeUrl: '',
+        webmailUrl: 'https://webmail.grenoble-inp.fr/home/~/inbox.json?limit=25',
+        aiProvider: 'gemini',
         aiEndpoint: 'https://api.groq.com/openai/v1/chat/completions',
         aiKey: '',
-        aiModel: 'llama-3.3-70b-versatile'
+        aiModel: 'gemini-2.5-flash'
       }, JSON.parse(localStorage.getItem(STORAGE_KEYS.settings) || '{}')),
       docs: JSON.parse(localStorage.getItem(STORAGE_KEYS.docs) || '[]'),
       adeEvents: JSON.parse(localStorage.getItem(STORAGE_KEYS.ade) || '[]'),
+      hiddenCourses: new Set(JSON.parse(localStorage.getItem(STORAGE_KEYS.hiddenCourses) || '[]')),
+      webmailMessages: [],
       moodleLinks: [],
       selectedDocIds: new Set(),
       lastStudioText: '',
@@ -943,12 +1068,13 @@
       document.getElementById('libCountBadge').textContent = state.docs.length;
       document.getElementById('statDocsCount').textContent = state.docs.length;
       const totalChars = state.docs.reduce((acc, d) => acc + (d.charCount || 0), 0);
-      document.getElementById('statDocsChars').textContent = totalChars.toLocaleString('fr-FR') + ' caractères indexés';
+      const totalImgs = state.docs.reduce((acc, d) => acc + (d.images ? d.images.length : 0), 0);
+      document.getElementById('statDocsChars').textContent = totalChars.toLocaleString('fr-FR') + ' car. • ' + totalImgs + ' image(s)';
       const ues = new Set(state.docs.map(d => d.ue).filter(Boolean));
       document.getElementById('statUeCount').textContent = ues.size;
 
       const now = new Date();
-      const nextEv = state.adeEvents.find(ev => new Date(ev.end) > now);
+      const nextEv = state.adeEvents.find(ev => new Date(ev.end) > now && !state.hiddenCourses.has(getCourseFilterKey(ev.summary)));
       if (nextEv) {
         const s = new Date(nextEv.start);
         const dayPart = s.toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: 'short' });
@@ -957,7 +1083,7 @@
         document.getElementById('statNextCourseTitle').textContent = nextEv.summary + ' (' + nextEv.location + ')';
       } else {
         document.getElementById('statNextCourseTime').textContent = '--:--';
-        document.getElementById('statNextCourseTitle').textContent = state.adeEvents.length ? 'Aucun cours à venir' : 'Synchronise ADE pour afficher';
+        document.getElementById('statNextCourseTitle').textContent = state.adeEvents.length ? 'Aucun cours filtré à venir' : 'Synchronise ADE pour afficher';
       }
     }
 
@@ -965,7 +1091,16 @@
       try {
         localStorage.setItem(STORAGE_KEYS.docs, JSON.stringify(state.docs));
       } catch (e) {
-        showToast('Stockage local plein : supprime d’anciens supports dans la bibliothèque.', 'warn');
+        for (let i = state.docs.length - 1; i >= 0; i--) {
+          if (state.docs[i].images && state.docs[i].images.length) {
+            state.docs[i].images = [];
+            try {
+              localStorage.setItem(STORAGE_KEYS.docs, JSON.stringify(state.docs));
+              showToast('Espace local optimisé : images des anciens cours libérées.', 'warn');
+              break;
+            } catch (err) {}
+          }
+        }
       }
       updateDashboardStats();
     }
@@ -982,22 +1117,36 @@
       if (tabName === 'studio') renderStudioSelector();
     }
 
+    function onAiProviderChange() {
+      const provider = document.getElementById('cfgAiProvider').value;
+      document.getElementById('openaiEndpointWrapper').style.display = provider === 'openai' ? 'block' : 'none';
+      const modelInput = document.getElementById('cfgAiModel');
+      if (provider === 'gemini' && (!modelInput.value || modelInput.value.includes('llama'))) {
+        modelInput.value = 'gemini-2.5-flash';
+      }
+    }
+
     function loadSettingsIntoForm() {
       document.getElementById('cfgWorkerUrl').value = state.settings.workerUrl || '';
       document.getElementById('cfgWorkerSecret').value = state.settings.workerSecret || '';
       document.getElementById('cfgAdeUrl').value = state.settings.adeUrl || '';
+      document.getElementById('cfgWebmailUrl').value = state.settings.webmailUrl || 'https://webmail.grenoble-inp.fr/home/~/inbox.json?limit=25';
+      document.getElementById('cfgAiProvider').value = state.settings.aiProvider || 'gemini';
       document.getElementById('cfgAiEndpoint').value = state.settings.aiEndpoint || '';
       document.getElementById('cfgAiKey').value = state.settings.aiKey || '';
-      document.getElementById('cfgAiModel').value = state.settings.aiModel || '';
+      document.getElementById('cfgAiModel').value = state.settings.aiModel || 'gemini-2.5-flash';
+      onAiProviderChange();
     }
 
     function saveSettings() {
       state.settings.workerUrl = document.getElementById('cfgWorkerUrl').value.trim().replace(/\/+$/, '');
       state.settings.workerSecret = document.getElementById('cfgWorkerSecret').value.trim();
       state.settings.adeUrl = document.getElementById('cfgAdeUrl').value.trim();
+      state.settings.webmailUrl = document.getElementById('cfgWebmailUrl').value.trim();
+      state.settings.aiProvider = document.getElementById('cfgAiProvider').value;
       state.settings.aiEndpoint = document.getElementById('cfgAiEndpoint').value.trim();
       state.settings.aiKey = document.getElementById('cfgAiKey').value.trim();
-      state.settings.aiModel = document.getElementById('cfgAiModel').value.trim();
+      state.settings.aiModel = document.getElementById('cfgAiModel').value.trim() || 'gemini-2.5-flash';
       localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(state.settings));
       showToast('Configuration enregistrée.', 'success');
     }
@@ -1022,6 +1171,53 @@
         throw new Error(errText);
       }
       return res;
+    }
+
+    function getCourseFilterKey(summary) {
+      return (summary || 'Cours').split(' - ')[0].trim();
+    }
+
+    function toggleCourseVisibility(courseKey) {
+      if (state.hiddenCourses.has(courseKey)) {
+        state.hiddenCourses.delete(courseKey);
+      } else {
+        state.hiddenCourses.add(courseKey);
+      }
+      localStorage.setItem(STORAGE_KEYS.hiddenCourses, JSON.stringify(Array.from(state.hiddenCourses)));
+      renderWeeklyCalendar();
+      updateDashboardStats();
+    }
+
+    function resetCourseFilters() {
+      state.hiddenCourses.clear();
+      localStorage.setItem(STORAGE_KEYS.hiddenCourses, '[]');
+      document.getElementById('calSearchFilter').value = '';
+      renderWeeklyCalendar();
+      updateDashboardStats();
+    }
+
+    function renderCourseFilterChips() {
+      const container = document.getElementById('calCourseFilterChips');
+      container.innerHTML = '';
+      const keys = Array.from(new Set(state.adeEvents.map(ev => getCourseFilterKey(ev.summary)))).sort();
+      if (!keys.length) return;
+
+      const resetChip = document.createElement('button');
+      resetChip.type = 'button';
+      resetChip.className = 'chip' + (state.hiddenCourses.size === 0 ? ' active' : '');
+      resetChip.textContent = 'Tout afficher (' + keys.length + ')';
+      resetChip.onclick = resetCourseFilters;
+      container.appendChild(resetChip);
+
+      keys.forEach(k => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        const isVisible = !state.hiddenCourses.has(k);
+        chip.className = 'chip' + (isVisible ? ' active' : '');
+        chip.textContent = k;
+        chip.onclick = () => toggleCourseVisibility(k);
+        container.appendChild(chip);
+      });
     }
 
     function hashStringColor(str) {
@@ -1115,8 +1311,10 @@
     }
 
     function renderWeeklyCalendar() {
+      renderCourseFilterChips();
       const grid = document.getElementById('weeklyCalendarGrid');
       const weekLabel = document.getElementById('calWeekLabel');
+      const searchStr = (document.getElementById('calSearchFilter').value || '').toLowerCase();
       grid.innerHTML = '';
 
       const monday = new Date(state.currentWeekMonday);
@@ -1173,7 +1371,13 @@
 
         const rawDayEvents = state.adeEvents.filter(ev => {
           const s = new Date(ev.start);
-          return s >= dayDate && s < nextDay;
+          if (s < dayDate || s >= nextDay) return false;
+          if (state.hiddenCourses.has(getCourseFilterKey(ev.summary))) return false;
+          if (searchStr) {
+            const hay = (ev.summary + ' ' + ev.location + ' ' + (ev.description || '')).toLowerCase();
+            if (!hay.includes(searchStr)) return false;
+          }
+          return true;
         });
 
         const positionedItems = computeNonOverlappingLayout(rawDayEvents);
@@ -1203,6 +1407,7 @@
           `;
           block.onclick = () => {
             document.getElementById('previewModalTitle').textContent = ev.summary;
+            document.getElementById('previewModalImages').innerHTML = '';
             document.getElementById('previewModalBody').textContent =
               'Horaire : ' + dayDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) + ' (' + startStr + ' - ' + endStr + ')\n' +
               'Salle : ' + ev.location + '\n\n' +
@@ -1288,6 +1493,250 @@
       showToast(events.length + ' créneau(x) importé(s) depuis le fichier .ics.', 'success');
     }
 
+    async function syncWebmailInbox() {
+      const btn = document.getElementById('btnSyncWebmail');
+      const container = document.getElementById('webmailList');
+      btn.disabled = true;
+      btn.textContent = 'Connexion CAS...';
+      try {
+        const res = await callWorker('/webmail', { url: state.settings.webmailUrl });
+        const data = await res.json();
+        state.webmailMessages = data.messages || [];
+        container.innerHTML = '';
+        if (!state.webmailMessages.length) {
+          container.innerHTML = '<div class="card-subtitle">Aucun message récupéré. Vérifie l’URL Webmail dans Réglages.</div>';
+          return;
+        }
+        state.webmailMessages.forEach((msg, idx) => {
+          const d = new Date(msg.date);
+          const dateStr = isNaN(d.getTime()) ? '' : d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+          const row = document.createElement('div');
+          row.className = 'item-row';
+          row.innerHTML = `
+            <div class="item-info">
+              <div class="item-title">${msg.unread ? '● ' : ''}${escapeHtml(msg.subject)}</div>
+              <div class="item-meta"><strong>${escapeHtml(msg.sender)}</strong> • ${dateStr} — ${escapeHtml(msg.snippet)}</div>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="importEmailAsDoc(${idx})">Ajouter aux supports</button>
+          `;
+          container.appendChild(row);
+        });
+        showToast(state.webmailMessages.length + ' message(s) récupéré(s).', 'success');
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Actualiser la boîte mail';
+      }
+    }
+
+    function importEmailAsDoc(idx) {
+      const msg = state.webmailMessages[idx];
+      if (!msg) return;
+      const docObj = {
+        id: 'mail_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+        source: 'Webmail',
+        ue: 'Messages Webmail',
+        folder: msg.sender,
+        title: msg.subject,
+        content: 'De : ' + msg.sender + '\nObjet : ' + msg.subject + '\nDate : ' + msg.date + '\n\n' + msg.snippet,
+        charCount: msg.snippet.length + msg.subject.length,
+        images: [],
+        createdAt: new Date().toISOString()
+      };
+      state.docs.unshift(docObj);
+      state.selectedDocIds.add(docObj.id);
+      persistDocs();
+      showToast('Mail ajouté à la bibliothèque des supports.', 'success');
+    }
+
+    function compressDataUrlToJpeg(dataUrl, maxWidth = 680, quality = 0.55) {
+      return new Promise(resolve => {
+        const img = new Image();
+        img.onload = () => {
+          const scale = Math.min(1, maxWidth / (img.width || maxWidth));
+          const w = Math.max(1, Math.round(img.width * scale));
+          const h = Math.max(1, Math.round(img.height * scale));
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, w, h);
+          ctx.drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = () => resolve(null);
+        img.src = dataUrl;
+      });
+    }
+
+    async function extractPdfContentAndImages(arrayBuffer) {
+      if (!window.pdfjsLib) return { text: '', images: [] };
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const pagesText = [];
+      const images = [];
+      const OPS = pdfjsLib.OPS || {};
+
+      for (let p = 1; p <= pdf.numPages; p++) {
+        const page = await pdf.getPage(p);
+        const textContent = await page.getTextContent();
+        const pageStr = textContent.items.map(it => it.str).join(' ');
+        pagesText.push('--- Page ' + p + ' ---\n' + pageStr);
+
+        if (images.length < 6) {
+          let hasGraphic = false;
+          try {
+            const opList = await page.getOperatorList();
+            for (const fn of opList.fnArray) {
+              if (
+                fn === OPS.paintImageXObject ||
+                fn === OPS.paintInlineImageXObject ||
+                fn === OPS.paintImageMaskXObject
+              ) {
+                hasGraphic = true;
+                break;
+              }
+            }
+          } catch (e) {}
+
+          if (hasGraphic || pageStr.trim().length < 80) {
+            try {
+              const viewport = page.getViewport({ scale: 1.0 });
+              const scale = Math.min(1.2, 680 / viewport.width);
+              const scaledViewport = page.getViewport({ scale });
+              const canvas = document.createElement('canvas');
+              canvas.width = Math.round(scaledViewport.width);
+              canvas.height = Math.round(scaledViewport.height);
+              const ctx = canvas.getContext('2d');
+              await page.render({ canvasContext: ctx, viewport: scaledViewport }).promise;
+              const jpegUrl = canvas.toDataURL('image/jpeg', 0.55);
+              images.push({
+                label: 'Page ' + p,
+                dataUrl: jpegUrl
+              });
+            } catch (e) {}
+          }
+        }
+      }
+
+      return {
+        text: pagesText.join('\n\n').replace(/[ \t]+/g, ' ').trim(),
+        images
+      };
+    }
+
+    async function extractZipMediaImages(zip, mediaPrefix, maxImages = 8) {
+      const images = [];
+      const mediaNames = Object.keys(zip.files)
+        .filter(name => name.startsWith(mediaPrefix) && /\.(png|jpe?g|webp)$/i.test(name))
+        .slice(0, maxImages);
+
+      for (const name of mediaNames) {
+        try {
+          const base64 = await zip.file(name).async('base64');
+          const ext = name.split('.').pop().toLowerCase();
+          const mime = ext === 'png' ? 'image/png' : (ext === 'webp' ? 'image/webp' : 'image/jpeg');
+          const compressed = await compressDataUrlToJpeg('data:' + mime + ';base64,' + base64);
+          if (compressed) {
+            images.push({
+              label: name.split('/').pop(),
+              dataUrl: compressed
+            });
+          }
+        } catch (e) {}
+      }
+      return images;
+    }
+
+    async function extractDocxContentAndImages(arrayBuffer) {
+      const zip = await JSZip.loadAsync(arrayBuffer);
+      const docFile = zip.file('word/document.xml');
+      let text = '';
+      if (docFile) {
+        const xmlStr = await docFile.async('string');
+        const xmlDoc = new DOMParser().parseFromString(xmlStr, 'application/xml');
+        text = Array.from(xmlDoc.getElementsByTagName('w:p'))
+          .map(p => Array.from(p.getElementsByTagName('w:t')).map(t => t.textContent).join(''))
+          .filter(Boolean)
+          .join('\n')
+          .trim();
+      }
+      const images = await extractZipMediaImages(zip, 'word/media/');
+      return { text, images };
+    }
+
+    async function extractPptxContentAndImages(arrayBuffer) {
+      const zip = await JSZip.loadAsync(arrayBuffer);
+      const slideFiles = Object.keys(zip.files)
+        .filter(name => /^ppt\/slides\/slide\d+\.xml$/i.test(name))
+        .sort((a, b) => parseInt(a.match(/\d+/)[0], 10) - parseInt(b.match(/\d+/)[0], 10));
+      const slidesText = [];
+      for (let i = 0; i < slideFiles.length; i++) {
+        const xmlStr = await zip.file(slideFiles[i]).async('string');
+        const xmlDoc = new DOMParser().parseFromString(xmlStr, 'application/xml');
+        const content = Array.from(xmlDoc.getElementsByTagName('a:p'))
+          .map(p => Array.from(p.getElementsByTagName('a:t')).map(t => t.textContent).join(''))
+          .filter(Boolean)
+          .join('\n');
+        if (content) slidesText.push('Slide ' + (i + 1) + ' :\n' + content);
+      }
+      const images = await extractZipMediaImages(zip, 'ppt/media/');
+      return { text: slidesText.join('\n\n').trim(), images };
+    }
+
+    function extractXlsxContent(arrayBuffer) {
+      if (!window.XLSX) return '';
+      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+      const parts = [];
+      for (const sheetName of workbook.SheetNames) {
+        const sheet = workbook.Sheets[sheetName];
+        const csv = XLSX.utils.sheet_to_csv(sheet, { blankrows: false });
+        if (csv && csv.trim()) {
+          parts.push('=== Feuille : ' + sheetName + ' ===\n' + csv.trim());
+        }
+      }
+      return parts.join('\n\n').trim();
+    }
+
+    async function parseBinaryFile(fileName, folderPath, buffer, ueName, sourceLabel = 'Chamilo / Local') {
+      const lower = fileName.toLowerCase();
+      let text = '';
+      let images = [];
+
+      if (lower.endsWith('.pdf')) {
+        const res = await extractPdfContentAndImages(buffer);
+        text = res.text;
+        images = res.images;
+      } else if (lower.endsWith('.docx')) {
+        const res = await extractDocxContentAndImages(buffer);
+        text = res.text;
+        images = res.images;
+      } else if (lower.endsWith('.pptx')) {
+        const res = await extractPptxContentAndImages(buffer);
+        text = res.text;
+        images = res.images;
+      } else if (lower.endsWith('.xlsx') || lower.endsWith('.xls')) {
+        text = extractXlsxContent(buffer);
+      } else if (lower.endsWith('.txt') || lower.endsWith('.md') || lower.endsWith('.csv')) {
+        text = new TextDecoder('utf-8').decode(buffer);
+      }
+
+      if ((!text || text.length < 10) && !images.length) return null;
+
+      return {
+        id: 'doc_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+        source: sourceLabel,
+        ue: ueName,
+        folder: folderPath || 'Racine',
+        title: fileName,
+        content: text || '(Document principalement visuel — ' + images.length + ' image(s) extraite(s))',
+        charCount: text.length,
+        images,
+        createdAt: new Date().toISOString()
+      };
+    }
+
     async function scanMoodleCourse() {
       const courseUrl = document.getElementById('moodleCourseUrl').value.trim();
       const ueInput = document.getElementById('moodleUeName').value.trim();
@@ -1320,7 +1769,7 @@
             return;
           }
           if (seen.has(fullUrl)) return;
-          const isResource = fullUrl.includes('/mod/resource/view.php') || fullUrl.includes('/pluginfile.php/') || /\.pdf(\?|$)/i.test(fullUrl);
+          const isResource = fullUrl.includes('/mod/resource/view.php') || fullUrl.includes('/pluginfile.php/') || /\.(pdf|docx?|pptx?|xlsx?)(\?|$)/i.test(fullUrl);
           if (!isResource) return;
 
           const clone = a.cloneNode(true);
@@ -1374,137 +1823,106 @@
             <div class="item-meta">${escapeHtml(item.ue)}</div>
           </div>
           <button type="button" class="btn btn-sm ${item.extracted ? 'btn-secondary' : ''}" id="mdlBtn_${idx}">
-            ${item.extracted ? 'Extrait' : 'Extraire le texte'}
+            ${item.extracted ? 'Extrait' : 'Extraire'}
           </button>
         `;
-        row.querySelector('button').onclick = () => extractSingleMoodleResource(idx);
+        row.querySelector('button').onclick = () => extractSingleMoodleResource(idx, false);
         container.appendChild(row);
       });
     }
 
-    async function extractSingleMoodleResource(idx) {
+    function detectFilenameFromHeaders(res, fallbackTitle) {
+      const cd = res.headers.get('content-disposition') || '';
+      const m = cd.match(/filename\*?=(?:UTF-8'')?["']?([^"';\n]+)["']?/i);
+      if (m && m[1]) {
+        return decodeURIComponent(m[1]).trim();
+      }
+      const finalUrl = res.headers.get('x-final-url') || '';
+      const urlExtMatch = finalUrl.match(/\/([^/?#]+\.(pdf|docx?|pptx?|xlsx?|xls|txt|md))(?:\?|#|$)/i);
+      if (urlExtMatch && urlExtMatch[1]) {
+        const ext = '.' + urlExtMatch[2].toLowerCase();
+        if (!fallbackTitle.toLowerCase().endsWith(ext)) {
+          return fallbackTitle + ext;
+        }
+        return fallbackTitle;
+      }
+      const ct = (res.headers.get('content-type') || '').toLowerCase();
+      if (ct.includes('spreadsheetml') && !fallbackTitle.toLowerCase().endsWith('.xlsx')) return fallbackTitle + '.xlsx';
+      if (ct.includes('wordprocessingml') && !fallbackTitle.toLowerCase().endsWith('.docx')) return fallbackTitle + '.docx';
+      if (ct.includes('presentationml') && !fallbackTitle.toLowerCase().endsWith('.pptx')) return fallbackTitle + '.pptx';
+      if (ct.includes('application/pdf') && !fallbackTitle.toLowerCase().endsWith('.pdf')) return fallbackTitle + '.pdf';
+      return fallbackTitle;
+    }
+
+    async function extractSingleMoodleResource(idx, silent = false) {
       const item = state.moodleLinks[idx];
-      if (!item) return;
+      if (!item) return false;
       const btn = document.getElementById('mdlBtn_' + idx);
       if (btn) {
         btn.disabled = true;
-        btn.textContent = 'Téléchargement...';
+        btn.textContent = 'Extraction...';
       }
-      try {
-        const res = await callWorker('/fetch', { target: item.url });
-        const contentType = res.headers.get('content-type') || '';
-        const finalUrl = res.headers.get('x-final-url') || item.url;
-        const buffer = await res.arrayBuffer();
 
-        if (contentType.includes('text/html') && !finalUrl.toLowerCase().endsWith('.pdf')) {
-          throw new Error('Cette ressource Moodle n’est pas un fichier PDF direct.');
-        }
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          const res = await callWorker('/fetch', { target: item.url });
+          const contentType = (res.headers.get('content-type') || '').toLowerCase();
+          const finalUrl = res.headers.get('x-final-url') || item.url;
+          const buffer = await res.arrayBuffer();
 
-        const text = await extractTextFromPdfBuffer(buffer);
-        if (!text || text.length < 20) {
-          throw new Error('PDF vide ou scanné sans couche texte.');
-        }
+          if (contentType.includes('text/html') && !/\.(pdf|docx?|pptx?|xlsx?)(\?|$)/i.test(finalUrl)) {
+            if (attempt === 0) {
+              await new Promise(r => setTimeout(r, 1400));
+              continue;
+            }
+            throw new Error('Ressource Moodle non téléchargeable directement (page web ou dossier).');
+          }
 
-        const docObj = {
-          id: 'doc_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
-          source: 'Moodle',
-          ue: item.ue,
-          folder: 'Cours Moodle',
-          title: item.title.endsWith('.pdf') ? item.title : item.title + '.pdf',
-          content: text,
-          charCount: text.length,
-          createdAt: new Date().toISOString()
-        };
+          const realFileName = detectFilenameFromHeaders(res, item.title);
+          const docObj = await parseBinaryFile(realFileName, 'Cours Moodle', buffer, item.ue, 'Moodle');
+          if (!docObj) {
+            throw new Error('Fichier vide ou format non pris en charge (' + realFileName + ').');
+          }
 
-        state.docs.unshift(docObj);
-        state.selectedDocIds.add(docObj.id);
-        persistDocs();
-        item.extracted = true;
-        renderMoodleDetectedList();
-        showToast('PDF extrait : ' + docObj.title + ' (' + text.length.toLocaleString('fr-FR') + ' car.)', 'success');
-      } catch (err) {
-        showToast(err.message, 'error');
-        if (btn) {
-          btn.disabled = false;
-          btn.textContent = 'Réessayer';
+          state.docs.unshift(docObj);
+          state.selectedDocIds.add(docObj.id);
+          persistDocs();
+          item.extracted = true;
+          renderMoodleDetectedList();
+          if (!silent) {
+            showToast('Extrait : ' + docObj.title + ' (' + docObj.images.length + ' image(s))', 'success');
+          }
+          return true;
+        } catch (err) {
+          if (attempt === 1) {
+            if (!silent) showToast(err.message, 'error');
+            if (btn) {
+              btn.disabled = false;
+              btn.textContent = 'Réessayer';
+            }
+            return false;
+          }
+          await new Promise(r => setTimeout(r, 1400));
         }
       }
+      return false;
     }
 
     async function extractAllMoodleLinks() {
+      const btnAll = document.getElementById('btnExtractAllMoodle');
+      btnAll.disabled = true;
+      let okCount = 0;
       for (let i = 0; i < state.moodleLinks.length; i++) {
         if (!state.moodleLinks[i].extracted) {
-          await extractSingleMoodleResource(i);
+          btnAll.textContent = 'Extraction ' + (i + 1) + '/' + state.moodleLinks.length + '...';
+          const ok = await extractSingleMoodleResource(i, true);
+          if (ok) okCount++;
+          await new Promise(r => setTimeout(r, 850));
         }
       }
-    }
-
-    async function extractTextFromPdfBuffer(arrayBuffer) {
-      if (!window.pdfjsLib) return '';
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-      const pages = [];
-      for (let p = 1; p <= pdf.numPages; p++) {
-        const page = await pdf.getPage(p);
-        const textContent = await page.getTextContent();
-        pages.push(textContent.items.map(it => it.str).join(' '));
-      }
-      return pages.join('\n\n').replace(/[ \t]+/g, ' ').trim();
-    }
-
-    async function extractTextFromDocxBuffer(arrayBuffer) {
-      const zip = await JSZip.loadAsync(arrayBuffer);
-      const docFile = zip.file('word/document.xml');
-      if (!docFile) return '';
-      const xmlStr = await docFile.async('string');
-      const xmlDoc = new DOMParser().parseFromString(xmlStr, 'application/xml');
-      return Array.from(xmlDoc.getElementsByTagName('w:p'))
-        .map(p => Array.from(p.getElementsByTagName('w:t')).map(t => t.textContent).join(''))
-        .filter(Boolean)
-        .join('\n')
-        .trim();
-    }
-
-    async function extractTextFromPptxBuffer(arrayBuffer) {
-      const zip = await JSZip.loadAsync(arrayBuffer);
-      const slideFiles = Object.keys(zip.files)
-        .filter(name => /^ppt\/slides\/slide\d+\.xml$/i.test(name))
-        .sort((a, b) => parseInt(a.match(/\d+/)[0], 10) - parseInt(b.match(/\d+/)[0], 10));
-      const slidesText = [];
-      for (let i = 0; i < slideFiles.length; i++) {
-        const xmlStr = await zip.file(slideFiles[i]).async('string');
-        const xmlDoc = new DOMParser().parseFromString(xmlStr, 'application/xml');
-        const content = Array.from(xmlDoc.getElementsByTagName('a:p'))
-          .map(p => Array.from(p.getElementsByTagName('a:t')).map(t => t.textContent).join(''))
-          .filter(Boolean)
-          .join('\n');
-        if (content) slidesText.push('Slide ' + (i + 1) + ' :\n' + content);
-      }
-      return slidesText.join('\n\n').trim();
-    }
-
-    async function parseBinaryFile(fileName, folderPath, buffer, ueName) {
-      const lower = fileName.toLowerCase();
-      let text = '';
-      if (lower.endsWith('.pdf')) {
-        text = await extractTextFromPdfBuffer(buffer);
-      } else if (lower.endsWith('.docx')) {
-        text = await extractTextFromDocxBuffer(buffer);
-      } else if (lower.endsWith('.pptx')) {
-        text = await extractTextFromPptxBuffer(buffer);
-      } else if (lower.endsWith('.txt') || lower.endsWith('.md')) {
-        text = new TextDecoder('utf-8').decode(buffer);
-      }
-      if (!text || text.length < 15) return null;
-      return {
-        id: 'doc_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
-        source: 'Chamilo / Local',
-        ue: ueName,
-        folder: folderPath || 'Racine',
-        title: fileName,
-        content: text,
-        charCount: text.length,
-        createdAt: new Date().toISOString()
-      };
+      btnAll.disabled = false;
+      btnAll.textContent = 'Tout extraire (' + state.moodleLinks.length + ')';
+      showToast(okCount + ' support(s) Moodle extraits avec succès.', 'success');
     }
 
     async function handleLocalFiles(fileList) {
@@ -1523,7 +1941,7 @@
             if (entry.dir) return false;
             const base = entry.name.split('/').pop();
             if (entry.name.includes('__MACOSX') || base.startsWith('.')) return false;
-            return /\.(pdf|docx|pptx|txt|md)$/i.test(base);
+            return /\.(pdf|docx?|pptx?|xlsx?|xls|txt|md|csv)$/i.test(base);
           });
 
           for (let i = 0; i < entries.length; i++) {
@@ -1534,21 +1952,21 @@
             statusEl.textContent = 'Extraction (' + (i + 1) + '/' + entries.length + ') : ' + fileName;
             try {
               const entryBuffer = await entry.async('arraybuffer');
-              const parsed = await parseBinaryFile(fileName, folderPath, entryBuffer, ueName);
+              const parsed = await parseBinaryFile(fileName, folderPath, entryBuffer, ueName, 'Chamilo / Local');
               if (parsed) added.push(parsed);
             } catch (e) {}
           }
         } else {
           try {
-            const parsed = await parseBinaryFile(file.name, '', buffer, ueName);
+            const parsed = await parseBinaryFile(file.name, '', buffer, ueName, 'Chamilo / Local');
             if (parsed) added.push(parsed);
           } catch (e) {}
         }
       }
 
       if (!added.length) {
-        statusEl.textContent = 'Aucun texte exploitable détecté.';
-        showToast('Aucun texte exploitable trouvé dans ces fichiers.', 'warn');
+        statusEl.textContent = 'Aucun contenu exploitable détecté.';
+        showToast('Aucun texte ni image exploitable trouvé dans ces fichiers.', 'warn');
         return;
       }
 
@@ -1557,51 +1975,129 @@
         state.selectedDocIds.add(doc.id);
       });
       persistDocs();
-      statusEl.textContent = added.length + ' support(s) extrait(s) et ajouté(s) à la bibliothèque.';
-      showToast(added.length + ' support(s) de cours extraits avec succès.', 'success');
+      const imgsTotal = added.reduce((acc, d) => acc + d.images.length, 0);
+      statusEl.textContent = added.length + ' support(s) et ' + imgsTotal + ' image(s) ajoutés.';
+      showToast(added.length + ' support(s) extraits (' + imgsTotal + ' image(s)).', 'success');
     }
 
     function renderLibrary() {
-      const container = document.getElementById('libraryList');
+      const container = document.getElementById('libraryStructuredContainer');
+      const ueSelect = document.getElementById('libUeFilter');
       const query = (document.getElementById('libFilterInput').value || '').toLowerCase();
+
+      const currentUeVal = ueSelect.value;
+      const allUes = Array.from(new Set(state.docs.map(d => d.ue || 'Sans UE'))).sort();
+      ueSelect.innerHTML = '<option value="">Toutes les UE (' + allUes.length + ')</option>';
+      allUes.forEach(ue => {
+        const opt = document.createElement('option');
+        opt.value = ue;
+        opt.textContent = ue;
+        if (ue === currentUeVal) opt.selected = true;
+        ueSelect.appendChild(opt);
+      });
+
+      const filtered = state.docs.filter(d => {
+        if (ueSelect.value && (d.ue || 'Sans UE') !== ueSelect.value) return false;
+        if (query) {
+          const hay = (d.title + ' ' + d.ue + ' ' + (d.folder || '')).toLowerCase();
+          if (!hay.includes(query)) return false;
+        }
+        return true;
+      });
+
       container.innerHTML = '';
-
-      const filtered = state.docs.filter(d =>
-        d.title.toLowerCase().includes(query) ||
-        d.ue.toLowerCase().includes(query) ||
-        (d.folder || '').toLowerCase().includes(query)
-      );
-
       if (!filtered.length) {
-        container.innerHTML = '<div class="card-subtitle">Aucun support extrait pour le moment. Importe un cours Moodle ou tes fichiers Chamilo dans l’onglet Import Cours.</div>';
+        container.innerHTML = '<div class="card-subtitle">Aucun support correspondant. Importe un cours Moodle ou tes fichiers Chamilo.</div>';
         return;
       }
 
+      const byUe = new Map();
       filtered.forEach(doc => {
-        const row = document.createElement('div');
-        row.className = 'item-row';
-        row.innerHTML = `
-          <div class="item-info">
-            <div class="item-title">${escapeHtml(doc.title)}</div>
-            <div class="item-meta">
-              <span class="pill">${escapeHtml(doc.source)}</span>
-              <strong>${escapeHtml(doc.ue)}</strong> • ${escapeHtml(doc.folder || 'Racine')} • ${doc.charCount.toLocaleString('fr-FR')} caractères
-            </div>
-          </div>
-          <div class="btn-row">
-            <button type="button" class="btn btn-secondary btn-sm" onclick="openPreviewModal('${doc.id}')">Aperçu</button>
-            <button type="button" class="btn btn-sm" onclick="sendDocToStudio('${doc.id}')">Studio IA</button>
-            <button type="button" class="btn btn-danger btn-sm" onclick="deleteDocument('${doc.id}')">Suppr.</button>
-          </div>
+        const ue = doc.ue || 'Sans UE';
+        if (!byUe.has(ue)) byUe.set(ue, new Map());
+        const folderMap = byUe.get(ue);
+        const folder = doc.folder || 'Racine';
+        if (!folderMap.has(folder)) folderMap.set(folder, []);
+        folderMap.get(folder).push(doc);
+      });
+
+      byUe.forEach((folderMap, ueName) => {
+        let totalInUe = 0;
+        folderMap.forEach(list => { totalInUe += list.length; });
+
+        const groupBox = document.createElement('div');
+        groupBox.className = 'ue-group';
+
+        const header = document.createElement('div');
+        header.className = 'ue-group-header';
+        header.innerHTML = `
+          <span>${escapeHtml(ueName)}</span>
+          <span class="pill">${totalInUe} support(s)</span>
         `;
-        container.appendChild(row);
+
+        const body = document.createElement('div');
+        body.className = 'ue-group-body';
+
+        header.onclick = () => {
+          body.style.display = body.style.display === 'none' ? 'flex' : 'none';
+        };
+
+        folderMap.forEach((docsList, folderName) => {
+          const fHead = document.createElement('div');
+          fHead.className = 'folder-subhead';
+          fHead.textContent = 'Dossier : ' + folderName;
+          body.appendChild(fHead);
+
+          docsList.forEach(doc => {
+            const ext = (doc.title.split('.').pop() || 'DOC').toUpperCase();
+            const imgCount = doc.images ? doc.images.length : 0;
+            const row = document.createElement('div');
+            row.className = 'item-row';
+            row.innerHTML = `
+              <div class="item-info">
+                <div class="item-title">${escapeHtml(doc.title)}</div>
+                <div class="item-meta">
+                  <span class="pill">${escapeHtml(ext)}</span>
+                  <span class="pill">${escapeHtml(doc.source)}</span>
+                  ${imgCount ? '<span class="pill pill-img">' + imgCount + ' image(s)</span>' : ''}
+                  ${doc.charCount.toLocaleString('fr-FR')} caractères
+                </div>
+              </div>
+              <div class="btn-row">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="openPreviewModal('${doc.id}')">Aperçu</button>
+                <button type="button" class="btn btn-sm" onclick="sendDocToStudio('${doc.id}')">Studio IA</button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="deleteDocument('${doc.id}')">Suppr.</button>
+              </div>
+            `;
+            body.appendChild(row);
+          });
+        });
+
+        groupBox.appendChild(header);
+        groupBox.appendChild(body);
+        container.appendChild(groupBox);
       });
     }
 
     function openPreviewModal(docId) {
       const doc = state.docs.find(d => d.id === docId);
       if (!doc) return;
-      document.getElementById('previewModalTitle').textContent = doc.title;
+      document.getElementById('previewModalTitle').textContent = doc.title + ' (' + doc.ue + ')';
+      const imgGrid = document.getElementById('previewModalImages');
+      imgGrid.innerHTML = '';
+
+      if (doc.images && doc.images.length) {
+        doc.images.forEach(img => {
+          const card = document.createElement('div');
+          card.className = 'preview-img-card';
+          card.innerHTML = `
+            <img src="${img.dataUrl}" alt="${escapeHtml(img.label)}">
+            <div style="font-size:11px;color:var(--muted);">${escapeHtml(img.label)}</div>
+          `;
+          imgGrid.appendChild(card);
+        });
+      }
+
       document.getElementById('previewModalBody').textContent = doc.content;
       document.getElementById('previewModal').classList.add('open');
     }
@@ -1645,11 +2141,12 @@
         row.style.cursor = 'pointer';
         row.style.marginBottom = '0';
         const checked = state.selectedDocIds.has(doc.id) ? 'checked' : '';
+        const imgCount = doc.images ? doc.images.length : 0;
         row.innerHTML = `
           <input type="checkbox" ${checked} style="width:auto;margin:0;" onchange="toggleDocSelection('${doc.id}', this.checked)">
           <div class="item-info">
             <div class="item-title">${escapeHtml(doc.title)}</div>
-            <div class="item-meta">${escapeHtml(doc.ue)} • ${doc.charCount.toLocaleString('fr-FR')} caractères</div>
+            <div class="item-meta">${escapeHtml(doc.ue)} • ${doc.charCount.toLocaleString('fr-FR')} car.${imgCount ? ' • ' + imgCount + ' image(s)' : ''}</div>
           </div>
         `;
         container.appendChild(row);
@@ -1673,7 +2170,7 @@
       renderStudioSelector();
     }
 
-    function buildStudyPrompt() {
+    function buildStudyPromptAndImages() {
       const selected = state.docs.filter(d => state.selectedDocIds.has(d.id));
       if (!selected.length) {
         throw new Error('Sélectionne au moins un support de cours.');
@@ -1683,29 +2180,43 @@
       const combinedCorpus = selected
         .map(d => '=== SUPPORT : ' + d.title + ' (' + d.ue + ') ===\n' + d.content)
         .join('\n\n')
-        .slice(0, 42000);
+        .slice(0, 48000);
+
+      const collectedImages = [];
+      for (const doc of selected) {
+        if (doc.images && doc.images.length) {
+          for (const img of doc.images) {
+            if (collectedImages.length < 12) {
+              collectedImages.push(img);
+            }
+          }
+        }
+      }
 
       let instruction = '';
       if (mode === 'fiche') {
-        instruction = 'Tu es un enseignant d’école d’ingénieurs (Grenoble INP). Rédige une fiche de révision claire, structurée et rigoureuse en français à partir des supports ci-dessous : définitions exactes, concepts clés, formules ou méthodes, et points de vigilance pour l’examen.';
+        instruction = 'Tu es un enseignant d’école d’ingénieurs (Grenoble INP). Rédige une fiche de révision claire, structurée et rigoureuse en français à partir des supports et schémas fournis : définitions exactes, concepts clés, analyse des schémas/graphiques joints, formules et points de vigilance.';
       } else if (mode === 'resume') {
-        instruction = 'Rédige un résumé synthétique et structuré en français permettant de maîtriser l’essentiel des supports ci-dessous en 5 minutes.';
+        instruction = 'Rédige un résumé synthétique et structuré en français permettant de maîtriser l’essentiel des supports et images ci-dessous en 5 minutes.';
       } else if (mode === 'flashcards') {
-        instruction = 'Génère 10 flashcards de révision en français à partir des supports ci-dessous. Réponds UNIQUEMENT avec un tableau JSON valide (sans texte avant ni après, sans balises markdown) au format exact : [{"front":"Question ou notion","back":"Réponse précise et concise"}]';
+        instruction = 'Génère 10 flashcards de révision en français à partir des supports et schémas ci-dessous. Réponds UNIQUEMENT avec un tableau JSON valide (sans texte avant ni après, sans balises markdown) au format exact : [{"front":"Question ou notion","back":"Réponse précise et concise"}]';
       } else {
-        instruction = 'Génère un quiz de 8 questions QCM de niveau ingénieur en français à partir des supports ci-dessous. Réponds UNIQUEMENT avec un tableau JSON valide (sans texte avant ni après, sans balises markdown) au format exact : [{"question":"...","options":["A","B","C","D"],"answerIndex":0,"explanation":"..."}]';
+        instruction = 'Génère un quiz de 8 questions QCM de niveau ingénieur en français à partir des supports et schémas ci-dessous. Réponds UNIQUEMENT avec un tableau JSON valide (sans texte avant ni après, sans balises markdown) au format exact : [{"question":"...","options":["A","B","C","D"],"answerIndex":0,"explanation":"..."}]';
       }
 
       if (focus) {
         instruction += '\nConsigne spécifique : ' + focus;
       }
 
-      return instruction + '\n\n' + combinedCorpus;
+      return {
+        prompt: instruction + '\n\n' + combinedCorpus,
+        images: collectedImages
+      };
     }
 
     function copyPromptForExternalAI() {
       try {
-        const prompt = buildStudyPrompt();
+        const { prompt } = buildStudyPromptAndImages();
         navigator.clipboard.writeText(prompt).then(() => {
           showToast('Prompt complet copié dans le presse-papiers !', 'success');
         });
@@ -1715,44 +2226,85 @@
     }
 
     async function generateStudyMaterial() {
-      let prompt = '';
+      let payload;
       try {
-        prompt = buildStudyPrompt();
+        payload = buildStudyPromptAndImages();
       } catch (err) {
         showToast(err.message, 'warn');
         return;
       }
 
-      if (!state.settings.aiEndpoint || !state.settings.aiKey) {
-        showToast('Aucune clé API configurée dans Réglages. Utilise « Copier le prompt » ou renseigne ta clé API.', 'warn');
+      if (!state.settings.aiKey) {
+        showToast('Renseigne ta clé API Google Gemini (AIza...) dans l’onglet Réglages.', 'warn');
         return;
       }
 
       const mode = document.getElementById('studioMode').value;
       const btn = document.getElementById('btnGenerateAI');
       btn.disabled = true;
-      btn.textContent = 'Génération en cours...';
+      btn.textContent = 'Génération IA (' + payload.images.length + ' image(s))...';
 
       try {
-        const res = await fetch(state.settings.aiEndpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + state.settings.aiKey
-          },
-          body: JSON.stringify({
-            model: state.settings.aiModel || 'llama-3.3-70b-versatile',
-            messages: [{ role: 'user', content: prompt }],
-            temperature: 0.3
-          })
-        });
+        let rawOutput = '';
 
-        if (!res.ok) {
-          throw new Error('Erreur API IA (' + res.status + ')');
+        if (state.settings.aiProvider === 'gemini') {
+          const model = state.settings.aiModel || 'gemini-2.5-flash';
+          const parts = [{ text: payload.prompt }];
+          payload.images.forEach(img => {
+            const commaIdx = img.dataUrl.indexOf(',');
+            if (commaIdx > 0) {
+              parts.push({
+                inline_data: {
+                  mime_type: 'image/jpeg',
+                  data: img.dataUrl.slice(commaIdx + 1)
+                }
+              });
+            }
+          });
+
+          const geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) + ':generateContent?key=' + encodeURIComponent(state.settings.aiKey);
+          const res = await fetch(geminiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts }],
+              generationConfig: { temperature: 0.3 }
+            })
+          });
+
+          if (!res.ok) {
+            let msg = 'Erreur API Gemini (' + res.status + ')';
+            try {
+              const errJson = await res.json();
+              if (errJson.error?.message) msg = errJson.error.message;
+            } catch (e) {}
+            throw new Error(msg);
+          }
+
+          const data = await res.json();
+          rawOutput = (data.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('\n').trim();
+        } else {
+          const res = await fetch(state.settings.aiEndpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + state.settings.aiKey
+            },
+            body: JSON.stringify({
+              model: state.settings.aiModel || 'llama-3.3-70b-versatile',
+              messages: [{ role: 'user', content: payload.prompt }],
+              temperature: 0.3
+            })
+          });
+
+          if (!res.ok) {
+            throw new Error('Erreur API IA (' + res.status + ')');
+          }
+
+          const data = await res.json();
+          rawOutput = data.choices?.[0]?.message?.content || '';
         }
 
-        const data = await res.json();
-        const rawOutput = data.choices?.[0]?.message?.content || '';
         state.lastStudioText = rawOutput;
 
         const card = document.getElementById('studioResultCard');
@@ -1781,7 +2333,7 @@
         showToast(err.message, 'error');
       } finally {
         btn.disabled = false;
-        btn.textContent = 'Générer avec l’API IA';
+        btn.textContent = 'Générer avec Gemini / IA';
       }
     }
 
