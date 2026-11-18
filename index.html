@@ -1,2476 +1,1439 @@
 <!DOCTYPE html>
-<html lang="fr" class="light">
+<html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#2563eb" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="StudyFlow IA" />
-  <link id="pwaManifestLink" rel="manifest" />
-  <link id="pwaAppleIcon" rel="apple-touch-icon" />
-  <title>StudyFlow IA — Édition Complète (Relais CAS, PWA, KaTeX, SM-2 & Colle)</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              50: '#eff6ff',
-              100: '#dbeafe',
-              500: '#3b82f6',
-              600: '#2563eb',
-              700: '#1d4ed8',
-              900: '#1e3a8a'
-            }
-          }
-        }
-      }
-    };
-  </script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b0f19">
+  <title>StudyFlow IA — Grenoble INP</title>
+  <link rel="manifest" href="./manifest.json">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-    body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    .prose h1, .prose h2, .prose h3 { font-weight: 700; margin-top: 1em; margin-bottom: 0.4em; }
-    .prose ul { list-style-type: disc; padding-left: 1.25rem; margin-bottom: 0.75rem; }
-    .prose ol { list-style-type: decimal; padding-left: 1.25rem; margin-bottom: 0.75rem; }
-    .prose p { margin-bottom: 0.65rem; line-height: 1.6; }
-    .prose strong { font-weight: 700; }
-    .prose code { background: rgba(148, 163, 184, 0.2); padding: 0.15rem 0.35rem; border-radius: 0.25rem; font-size: 0.875em; }
-    .katex-display { overflow-x: auto; overflow-y: hidden; padding: 0.4rem 0; }
+    :root {
+      --bg: #0b0f19;
+      --surface: #121826;
+      --surface-alt: #182032;
+      --border: #253047;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --success: #10b981;
+      --warn: #f59e0b;
+      --danger: #ef4444;
+      --radius: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background-color: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 17px;
+      letter-spacing: -0.01em;
+    }
+
+    .brand-badge {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--muted);
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+
+    .tab-btn:hover {
+      background: var(--surface-alt);
+      color: var(--text);
+    }
+
+    .tab-btn.active {
+      background: var(--surface-alt);
+      border-color: var(--border);
+      color: var(--text);
+    }
+
+    main {
+      width: 100%;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 24px 20px 60px;
+      flex: 1;
+    }
+
+    .panel {
+      display: none;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .card-subtitle {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    input[type="text"],
+    input[type="url"],
+    input[type="password"],
+    select,
+    textarea {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: 13px;
+      font-family: inherit;
+      margin-bottom: 12px;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .btn {
+      background: var(--accent);
+      color: #ffffff;
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: var(--surface-alt);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: #202b42;
+    }
+
+    .btn-danger {
+      background: transparent;
+      color: var(--danger);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+    }
+
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.12);
+    }
+
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 12px;
+    }
+
+    .dropzone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 24px 16px;
+      text-align: center;
+      cursor: pointer;
+      background: var(--bg);
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .dropzone:hover,
+    .dropzone.dragover {
+      border-color: var(--accent);
+      background: rgba(59, 130, 246, 0.06);
+    }
+
+    .item-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .item-row {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .item-info {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .item-title {
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .item-meta {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .pill {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 5px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      margin-right: 6px;
+    }
+
+    .pill-ok {
+      color: var(--success);
+      border-color: rgba(16, 185, 129, 0.35);
+    }
+
+    .output-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      font-size: 14px;
+      white-space: pre-wrap;
+      line-height: 1.65;
+      max-height: 560px;
+      overflow-y: auto;
+    }
+
+    .quiz-card {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .quiz-q {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    .quiz-opt {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin-bottom: 6px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .quiz-opt:hover {
+      border-color: var(--accent);
+    }
+
+    .quiz-opt.correct {
+      border-color: var(--success);
+      background: rgba(16, 185, 129, 0.14);
+      color: #a7f3d0;
+    }
+
+    .quiz-opt.wrong {
+      border-color: var(--danger);
+      background: rgba(239, 68, 68, 0.14);
+      color: #fecaca;
+    }
+
+    .quiz-exp {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+    }
+
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-width: 380px;
+    }
+
+    .toast {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      color: var(--text);
+      padding: 11px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+    }
+
+    .toast.success {
+      border-left-color: var(--success);
+    }
+
+    .toast.warn {
+      border-left-color: var(--warn);
+    }
+
+    .toast.error {
+      border-left-color: var(--danger);
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.72);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 200;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      max-width: 780px;
+      width: 100%;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      padding: 18px;
+    }
+
+    @media (max-width: 640px) {
+      header {
+        padding: 12px 16px;
+      }
+      main {
+        padding: 16px 14px 50px;
+      }
+    }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col md:flex-row selection:bg-brand-500 selection:text-white">
-
-  <aside class="hidden md:flex md:w-72 md:flex-col md:fixed md:inset-y-0 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 z-30">
-    <div class="p-5 flex items-center justify-between border-b border-slate-200 dark:border-slate-800">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-600 to-indigo-600 flex items-center justify-center text-white font-extrabold text-lg shadow-md">SF</div>
-        <div>
-          <h1 class="font-bold text-base tracking-tight leading-none">StudyFlow IA</h1>
-          <span class="text-[11px] font-semibold text-brand-600 dark:text-brand-400">Relais CAS • PWA • SM-2</span>
-        </div>
-      </div>
-      <button onclick="toggleTheme()" title="Changer de thème" class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
-        <span id="themeIconDesktop">🌙</span>
-      </button>
+<body>
+  <header>
+    <div class="brand">
+      <span>StudyFlow IA</span>
+      <span class="brand-badge">Grenoble INP</span>
     </div>
-
-    <nav id="desktopNav" class="flex-1 p-3 space-y-1 overflow-y-auto"></nav>
-
-    <div class="p-4 border-t border-slate-200 dark:border-slate-800 space-y-2.5">
-      <div id="googleStatusCard" class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs">
-        <div class="flex items-center justify-between mb-1.5">
-          <span class="font-semibold text-slate-700 dark:text-slate-200">Google Cloud Sync</span>
-          <span id="googleDot" class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-        </div>
-        <p id="googleStatusText" class="text-slate-500 dark:text-slate-400 mb-2">Non connecté</p>
-        <div class="flex gap-1.5">
-          <button onclick="connectGoogle()" class="flex-1 py-1.5 px-2 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-semibold transition">Connecter</button>
-          <button id="btnQuickSync" onclick="syncDriveDatabase()" class="hidden py-1.5 px-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold transition" title="Fusionner IndexedDB et Drive">🔄 Sync</button>
-        </div>
-      </div>
-      <div class="flex gap-1.5">
-        <button onclick="openSettingsModal()" class="flex-1 py-2 px-3 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition">⚙️ Paramètres</button>
-        <button id="btnInstallPwaDesktop" onclick="triggerPwaInstall()" class="hidden py-2 px-3 rounded-lg bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition" title="Installer l'application">📲</button>
-        <button onclick="downloadStandaloneApp()" class="py-2 px-3 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Exporter index.html">💾</button>
-      </div>
-    </div>
-  </aside>
-
-  <header class="md:hidden sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center justify-between">
-    <div class="flex items-center gap-2.5">
-      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-600 to-indigo-600 flex items-center justify-center text-white font-bold text-sm">SF</div>
-      <div>
-        <span class="font-bold text-sm block leading-none">StudyFlow IA</span>
-        <span id="mobileSyncBadge" class="text-[10px] text-slate-500 dark:text-slate-400">Relais CAS • PWA</span>
-      </div>
-    </div>
-    <div class="flex items-center gap-1.5">
-      <button id="btnInstallPwaMobile" onclick="triggerPwaInstall()" class="hidden p-2 rounded-lg bg-indigo-600 text-white text-xs font-semibold">📲 Installer</button>
-      <button onclick="syncAdeFromRelay(false)" class="p-2 rounded-lg bg-brand-50 dark:bg-brand-950 text-brand-600 dark:text-brand-400 text-xs font-semibold" title="Actualiser ADE">📅</button>
-      <button onclick="syncDriveDatabase()" class="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 text-xs font-semibold" title="Sync Drive">🔄</button>
-      <button onclick="toggleTheme()" class="p-2 rounded-lg text-slate-600 dark:text-slate-300 text-sm">🌓</button>
-      <button onclick="openSettingsModal()" class="p-2 rounded-lg text-slate-600 dark:text-slate-300 text-sm">⚙️</button>
-    </div>
+    <nav>
+      <button type="button" class="tab-btn active" data-tab="import" onclick="switchTab('import')">1. Import &amp; Cours</button>
+      <button type="button" class="tab-btn" data-tab="library" onclick="switchTab('library')">2. Supports (<span id="libCountBadge">0</span>)</button>
+      <button type="button" class="tab-btn" data-tab="studio" onclick="switchTab('studio')">3. Studio IA</button>
+      <button type="button" class="tab-btn" data-tab="ade" onclick="switchTab('ade')">4. Emploi du temps</button>
+      <button type="button" class="tab-btn" data-tab="settings" onclick="switchTab('settings')">Réglages</button>
+    </nav>
   </header>
 
-  <main class="flex-1 md:pl-72 pb-24 md:pb-10">
-    <div id="toastBanner" class="hidden fixed bottom-20 md:bottom-6 right-4 left-4 md:left-auto md:w-96 z-50 p-3.5 rounded-xl shadow-xl border text-sm font-medium transition-all"></div>
+  <main>
+    <section id="panel-import" class="panel active">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Moodle Grenoble INP (Relais CAS)</span>
+            <span class="pill pill-ok">Extraction directe</span>
+          </div>
+          <p class="card-subtitle">Colle l’URL d’un cours Moodle pour détecter les PDF et extraire automatiquement leur texte intégral via ton Worker.</p>
+          <label for="moodleCourseUrl">URL du cours Moodle</label>
+          <input type="url" id="moodleCourseUrl" placeholder="https://moodle.grenoble-inp.fr/course/view.php?id=218">
+          <label for="moodleUeName">Nom de l’UE / Matière</label>
+          <input type="text" id="moodleUeName" placeholder="Ex. GI4 - Écoconception">
+          <div class="btn-row">
+            <button type="button" class="btn" id="btnScanMoodle" onclick="scanMoodleCourse()">Scanner le cours Moodle</button>
+            <button type="button" class="btn btn-secondary" id="btnExtractAllMoodle" style="display:none;" onclick="extractAllMoodleLinks()">Tout extraire (<span id="moodleFoundCount">0</span>)</button>
+          </div>
+          <div id="moodleDetectedList" class="item-list" style="margin-top:14px;"></div>
+        </div>
 
-    <div class="max-w-6xl mx-auto p-4 md:p-8">
-      <section id="view-dashboard" class="space-y-6"></section>
-      <section id="view-calendar" class="hidden space-y-6"></section>
-      <section id="view-clipper" class="hidden space-y-6"></section>
-      <section id="view-webmail" class="hidden space-y-6"></section>
-      <section id="view-courses" class="hidden space-y-6"></section>
-      <section id="view-sm2" class="hidden space-y-6"></section>
-      <section id="view-drive" class="hidden space-y-6"></section>
-      <section id="view-deadlines" class="hidden space-y-6"></section>
-      <section id="view-tutor" class="hidden space-y-6"></section>
-      <section id="view-modules" class="hidden space-y-6"></section>
-    </div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Chamilo &amp; Fichiers locaux</span>
+            <span class="pill">ZIP / PDF / DOCX / PPTX</span>
+          </div>
+          <p class="card-subtitle">Télécharge l’archive ZIP complète d’un dossier Chamilo (avec tous ses sous-dossiers) puis dépose-la ci-dessous.</p>
+          <label for="chamiloFolderUrl">URL de la page Documents Chamilo (optionnel)</label>
+          <input type="url" id="chamiloFolderUrl" placeholder="https://chamilo.grenoble-inp.fr/main/document/document.php?cidReq=...">
+          <label for="chamiloUeName">Nom de l’UE / Matière</label>
+          <input type="text" id="chamiloUeName" placeholder="Ex. GI4 - Gestion de production">
+          <div class="btn-row" style="margin-bottom:14px;">
+            <button type="button" class="btn btn-secondary" onclick="downloadChamiloZip()">Télécharger le ZIP du dossier Chamilo</button>
+          </div>
+          <div id="archiveDropzone" class="dropzone" onclick="document.getElementById('archiveFileInput').click()">
+            <div style="font-weight:600;font-size:13px;margin-bottom:4px;">Glisse ici le .zip Chamilo ou tes fichiers (.pdf, .docx, .pptx)</div>
+            <div id="archiveStatus" style="font-size:12px;color:var(--muted);">Exploration récursive automatique des sous-dossiers en mémoire</div>
+            <input type="file" id="archiveFileInput" accept=".zip,.pdf,.docx,.pptx,.txt,.md" multiple style="display:none;" onchange="handleLocalFiles(this.files)">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="panel-library" class="panel">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Bibliothèque des supports extraits</span>
+          <div class="btn-row">
+            <input type="text" id="libFilterInput" placeholder="Filtrer par titre ou UE..." style="width:220px;margin-bottom:0;" oninput="renderLibrary()">
+            <button type="button" class="btn btn-danger btn-sm" onclick="clearAllDocuments()">Vider tout</button>
+          </div>
+        </div>
+        <p class="card-subtitle">Tous les documents ci-dessous ont leur texte intégral prêt pour la génération de fiches, résumés et quiz.</p>
+        <div id="libraryList" class="item-list"></div>
+      </div>
+    </section>
+
+    <section id="panel-studio" class="panel">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">1. Sélection des supports</span>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="toggleSelectAllDocs()">Tout cocher / décocher</button>
+          </div>
+          <div id="studioDocSelector" class="item-list" style="max-height:320px;overflow-y:auto;"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">2. Paramètres de génération</span>
+          </div>
+          <label for="studioMode">Type de livrable</label>
+          <select id="studioMode">
+            <option value="fiche">Fiche de révision structurée (notions clés, formules, pièges)</option>
+            <option value="resume">Résumé synthétique rapide (essentiel en 5 minutes)</option>
+            <option value="quiz">Quiz interactif (8 questions QCM avec correction)</option>
+          </select>
+          <label for="studioFocus">Consigne complémentaire (optionnel)</label>
+          <input type="text" id="studioFocus" placeholder="Ex. Insiste sur les calculs d'ACV et les définitions normatives">
+          <div class="btn-row">
+            <button type="button" class="btn" id="btnGenerateAI" onclick="generateStudyMaterial()">Générer avec l’API IA</button>
+            <button type="button" class="btn btn-secondary" onclick="copyPromptForExternalAI()">Copier le prompt (sans API)</button>
+          </div>
+          <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+            <label for="pasteQuizJson">Importer un Quiz JSON généré ailleurs</label>
+            <div class="btn-row">
+              <input type="text" id="pasteQuizJson" placeholder='Colle ici le tableau JSON [{"question":...}]' style="margin-bottom:0;flex:1;">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="loadPastedQuiz()">Lancer le Quiz</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="studioResultCard" style="display:none;">
+        <div class="card-header">
+          <span class="card-title" id="studioResultTitle">Résultat</span>
+          <div class="btn-row">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="copyStudioOutput()">Copier</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="exportStudioMarkdown()">Exporter (.md)</button>
+          </div>
+        </div>
+        <div id="studioOutputBox" class="output-box"></div>
+        <div id="studioQuizContainer"></div>
+      </div>
+    </section>
+
+    <section id="panel-ade" class="panel">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Emploi du temps ADE (Grenoble INP)</span>
+          <button type="button" class="btn btn-sm" id="btnSyncAde" onclick="syncAdeSchedule()">Synchroniser ADE</button>
+        </div>
+        <p class="card-subtitle">Récupération directe de ton calendrier iCalendar via l’authentification Basic du Worker Cloudflare.</p>
+        <div id="adeEventsList" class="item-list"></div>
+      </div>
+    </section>
+
+    <section id="panel-settings" class="panel">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Relais Cloudflare Workers (CAS / ADE)</span>
+          </div>
+          <label for="cfgWorkerUrl">URL du Worker Cloudflare</label>
+          <input type="url" id="cfgWorkerUrl" placeholder="https://studyflow-cas-relay.ton-compte.workers.dev">
+          <label for="cfgWorkerSecret">Secret API (X-StudyFlow-Secret)</label>
+          <input type="password" id="cfgWorkerSecret" placeholder="Ton API_SECRET Cloudflare">
+          <label for="cfgAdeUrl">URL ADE directCal</label>
+          <input type="url" id="cfgAdeUrl" placeholder="https://edt.grenoble-inp.fr/directCal/...">
+          <button type="button" class="btn" onclick="saveSettings()">Enregistrer la configuration</button>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Fournisseur IA (Optionnel — Compatible OpenAI)</span>
+          </div>
+          <p class="card-subtitle">Renseigne une clé API (Groq, Mistral, OpenAI, OpenRouter ou Ollama local) pour générer fiches et quiz directement dans l’application.</p>
+          <label for="cfgAiEndpoint">Endpoint Chat Completions</label>
+          <input type="url" id="cfgAiEndpoint" placeholder="https://api.groq.com/openai/v1/chat/completions">
+          <label for="cfgAiKey">Clé API</label>
+          <input type="password" id="cfgAiKey" placeholder="gsk_... ou sk-...">
+          <label for="cfgAiModel">Modèle</label>
+          <input type="text" id="cfgAiModel" placeholder="llama-3.3-70b-versatile">
+          <div class="btn-row">
+            <button type="button" class="btn" onclick="saveSettings()">Enregistrer l’IA</button>
+            <button type="button" class="btn btn-secondary" onclick="exportBackupJson()">Exporter sauvegarde (.json)</button>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 
-  <nav id="mobileNav" class="md:hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-t border-slate-200 dark:border-slate-800 flex justify-around py-1.5 px-1"></nav>
-
-  <div id="settingsModal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
-      <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-        <h2 class="text-lg font-bold">⚙️ Configuration, Relais CAS & Cloud</h2>
-        <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+  <div id="previewModal" class="modal-backdrop" onclick="if(event.target===this)closePreviewModal()">
+    <div class="modal-box">
+      <div class="card-header">
+        <span class="card-title" id="previewModalTitle">Aperçu du document</span>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="closePreviewModal()">Fermer</button>
       </div>
-
-      <div class="space-y-4 text-sm">
-        <div class="p-3.5 rounded-xl bg-brand-50/70 dark:bg-brand-950/30 border border-brand-200 dark:border-brand-800 space-y-3">
-          <div class="font-bold text-xs uppercase tracking-wider text-brand-700 dark:text-brand-300">🔐 Relais CAS Cloudflare (PC + Mobile)</div>
-          <div>
-            <label class="block font-semibold text-xs mb-1">URL du Worker Cloudflare</label>
-            <input id="inputRelayUrl" type="text" placeholder="https://studyflow-cas-relay.phoenix-et-phoenix.workers.dev" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-brand-500 outline-none" />
-          </div>
-          <div>
-            <label class="block font-semibold text-xs mb-1">Secret du Relais (API_SECRET)</label>
-            <input id="inputRelaySecret" type="password" placeholder="Ton secret API_SECRET Cloudflare" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:ring-2 focus:ring-brand-500 outline-none" />
-          </div>
-        </div>
-
-        <div>
-          <label class="block font-semibold mb-1">ID Client OAuth 2.0 Google Cloud</label>
-          <input id="inputClientId" type="text" placeholder="123456789-abc.apps.googleusercontent.com" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-brand-500 outline-none" />
-          <p class="text-xs text-slate-500 mt-1">Synchronise tes réglages (dont le relais CAS) et tes cours entre Opera GX et Brave mobile.</p>
-        </div>
-
-        <div>
-          <label class="block font-semibold mb-1">Clé API Gemini (Optionnelle — Mode Démo intégré)</label>
-          <input id="inputGeminiKey" type="password" placeholder="AIzaSy..." class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-brand-500 outline-none" />
-        </div>
-
-        <div class="p-3.5 rounded-xl bg-slate-100 dark:bg-slate-800/70 space-y-2">
-          <div class="font-semibold text-xs uppercase tracking-wider text-slate-500">Sauvegarde & Portabilité</div>
-          <div class="flex flex-wrap gap-2">
-            <button onclick="exportJsonBackup()" class="px-3 py-1.5 rounded-lg bg-slate-800 dark:bg-slate-700 text-white text-xs font-medium hover:opacity-90">📤 Exporter JSON</button>
-            <label class="px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-slate-700 text-xs font-medium cursor-pointer hover:opacity-90">
-              📥 Importer JSON
-              <input type="file" accept=".json" onchange="importJsonBackup(event)" class="hidden" />
-            </label>
-            <button onclick="resetDemoData()" class="px-3 py-1.5 rounded-lg bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 text-xs font-medium hover:opacity-90">♻️ Réinitialiser Démo</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="flex justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
-        <button onclick="closeSettingsModal()" class="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-sm font-medium">Annuler</button>
-        <button onclick="saveSettings()" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold">Enregistrer & Synchroniser</button>
-      </div>
+      <div id="previewModalBody" class="output-box" style="flex:1;"></div>
     </div>
   </div>
 
-  <div id="courseDetailModal" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-2 md:p-6">
-    <div id="courseDetailContent" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden"></div>
-  </div>
+  <div id="toastContainer" class="toast-container"></div>
 
   <script>
     if (window.pdfjsLib) {
       pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     }
 
-    function initPwaManifestAndIcons() {
-      const svgIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#2563eb"/><stop offset="100%" stop-color="#4f46e5"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#g)"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" fill="#ffffff" font-family="Inter,Arial,sans-serif" font-weight="800" font-size="220">SF</text></svg>';
-      const iconUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgIcon);
-      const appleLink = document.getElementById('pwaAppleIcon');
-      if (appleLink) appleLink.href = iconUrl;
-
-      const manifest = {
-        name: 'StudyFlow IA — Grenoble INP',
-        short_name: 'StudyFlow IA',
-        description: "Hub d'études IA : ADE auto-sync CAS via relais personnel, Chamilo/Moodle, Webmail IA, KaTeX, SM-2 et Colle orale.",
-        start_url: window.location.href,
-        display: 'standalone',
-        background_color: '#0f172a',
-        theme_color: '#2563eb',
-        icons: [
-          { src: iconUrl, sizes: '192x192', type: 'image/svg+xml', purpose: 'any maskable' },
-          { src: iconUrl, sizes: '512x512', type: 'image/svg+xml', purpose: 'any maskable' }
-        ]
-      };
-      const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
-      const manifestLink = document.getElementById('pwaManifestLink');
-      if (manifestLink) manifestLink.href = URL.createObjectURL(manifestBlob);
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
     }
 
-    let deferredPwaPrompt = null;
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPwaPrompt = e;
-      const b1 = document.getElementById('btnInstallPwaDesktop');
-      const b2 = document.getElementById('btnInstallPwaMobile');
-      if (b1) b1.classList.remove('hidden');
-      if (b2) b2.classList.remove('hidden');
-    });
+    const STORAGE_KEYS = {
+      settings: 'studyflow_settings_v2',
+      docs: 'studyflow_docs_v2',
+      ade: 'studyflow_ade_v2'
+    };
 
-    async function triggerPwaInstall() {
-      if (!deferredPwaPrompt) {
-        showToast("Utilise le menu de ton navigateur : Installer l'application / Ajouter à l'écran d'accueil.", 'info');
-        return;
-      }
-      deferredPwaPrompt.prompt();
-      await deferredPwaPrompt.userChoice;
-      deferredPwaPrompt = null;
-    }
+    const state = {
+      settings: Object.assign({
+        workerUrl: 'https://studyflow-cas-relay.phoenix-et-phoenix.workers.dev',
+        workerSecret: '',
+        adeUrl: '',
+        aiEndpoint: 'https://api.groq.com/openai/v1/chat/completions',
+        aiKey: '',
+        aiModel: 'llama-3.3-70b-versatile'
+      }, JSON.parse(localStorage.getItem(STORAGE_KEYS.settings) || '{}')),
+      docs: JSON.parse(localStorage.getItem(STORAGE_KEYS.docs) || '[]'),
+      adeEvents: JSON.parse(localStorage.getItem(STORAGE_KEYS.ade) || '[]'),
+      moodleLinks: [],
+      selectedDocIds: new Set(),
+      lastStudioText: ''
+    };
 
-    function renderMathInContainer(container) {
-      if (!container || !window.renderMathInElement) return;
-      try {
-        renderMathInElement(container, {
-          delimiters: [
-            { left: '$$', right: '$$', display: true },
-            { left: '$', right: '$', display: false },
-            { left: '\\(', right: '\\)', display: false },
-            { left: '\\[', right: '\\]', display: true }
-          ],
-          throwOnError: false
-        });
-      } catch (e) {}
-    }
-
-    const DB_NAME = 'StudyFlowDB_Final';
-    const DB_STORE = 'appState';
-    const DRIVE_FOLDER_NAME = 'StudyFlow_GrenobleINP';
-    const DRIVE_DB_FILENAME = 'studyflow_db.json';
-    const GOOGLE_SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/calendar.readonly';
-
-    const MODULE_DEFINITIONS = [
-      { id: 'calendar', name: 'Planning ADE (Relais CAS)', desc: 'Synchronisation automatique de ton emploi du temps ADE sur PC et téléphone via ton Worker Cloudflare.', icon: '📅', category: 'Sources & Flux' },
-      { id: 'clipper', name: 'Pont Chamilo / Moodle (Relais CAS + Clipper)', desc: 'Aspiration des supports PDF depuis Chamilo/Moodle via ton relais CAS ou extension.', icon: '🧩', category: 'Sources & Flux' },
-      { id: 'webmail', name: 'Automate Webmail → Action', desc: 'Analyse IA des e-mails Zimbra/Partage pour détecter deadlines et changements de salle.', icon: '✉️', category: 'Sources & Flux' },
-      { id: 'drive', name: 'Google Drive & Cloud Sync', desc: 'Exploration de dossiers UE, import PDF sélectif et fusion studyflow_db.json.', icon: '☁️', category: 'Sources & Flux' },
-      { id: 'deadlines', name: 'Deadlines & Rapports', desc: 'Suivi des rendus, projets, comptes-rendus de TP et sous-tâches.', icon: '⏰', category: 'Organisation' },
-      { id: 'sm2', name: 'Répétition Espacée SM-2', desc: 'Planification cognitive des révisions de flashcards selon ta qualité de rappel (0 à 5).', icon: '🧠', category: 'Outils IA' },
-      { id: 'summaries', name: 'Résumés, Fiches Mémo & KaTeX', desc: 'Synthèses structurées avec rendu mathématique LaTeX haute précision.', icon: '📝', category: 'Outils IA' },
-      { id: 'quizzes', name: 'Quiz QCM Interactifs', desc: 'Évaluation rapide à 4 questions avec explications détaillées.', icon: '🎯', category: 'Outils IA' },
-      { id: 'tutor', name: 'Tuteur IA & Mode Colle Orale', desc: 'Assistant écrit et examinateur oral interactif (synthèse vocale + micro).', icon: '🎙️', category: 'Outils IA' }
-    ];
-
-    function getDefaultState() {
-      const now = Date.now();
-      const todayStr = new Date().toISOString().split('T')[0];
-      const tomorrowStr = new Date(now + 86400000).toISOString().split('T')[0];
-      const inThreeDays = new Date(now + 3 * 86400000).toISOString().split('T')[0];
-      const inFiveDays = new Date(now + 5 * 86400000).toISOString().split('T')[0];
-      const inSixDays = new Date(now + 6 * 86400000).toISOString().split('T')[0];
-
-      return {
-        updatedAt: now,
-        theme: 'light',
-        settings: {
-          googleClientId: '',
-          geminiApiKey: '',
-          selectedCalendarId: 'primary',
-          selectedCalendarIds: ['primary'],
-          casRelayUrl: 'https://studyflow-cas-relay.phoenix-et-phoenix.workers.dev',
-          casRelaySecret: '',
-          adeCustomOverrideUrl: '',
-          adeLastSyncAt: 0,
-          selectedCalendarName: 'Agenda Principal'
-        },
-        modules: {
-          calendar: true,
-          clipper: true,
-          webmail: true,
-          drive: true,
-          deadlines: true,
-          sm2: true,
-          summaries: true,
-          quizzes: true,
-          tutor: true
-        },
-        filters: {
-          enabledUEs: ['Supply Chain & MRP', 'Écoconception & ACV', 'Systèmes Mécaniques', 'Ergonomie & Postes'],
-          disabledUEs: [],
-          allowedGroups: [],
-          blockedGroups: [],
-          excludeKeywords: [],
-          bypassFilters: false
-        },
-        ignoredDriveIds: [],
-        ignoredClipperUrls: [],
-        clipperInbox: [
-          {
-            id: 'clip-demo-1',
-            source: 'Chamilo Grenoble INP',
-            ue: 'Supply Chain & MRP',
-            title: 'CM4_Calcul_Charges_RCCP_2026.pdf',
-            url: 'https://chamilo.grenoble-inp.fr/courses/GI4A/document/CM4_RCCP.pdf',
-            capturedAt: now - 1800000,
-            snippet: 'Méthode de vérification globale des capacités (RCCP) et formule de la quantité économique de commande de Wilson.',
-            selected: true
-          }
-        ],
-        webmailInbox: [
-          {
-            id: 'mail-demo-1',
-            sender: 'scolarite.gi@grenoble-inp.fr',
-            subject: "[GI 2A] Changement de salle TD1 Systèmes Mécaniques aujourd'hui",
-            receivedAt: now - 2400000,
-            body: "Bonjour, en raison d'une maintenance sur le vidéoprojecteur de la salle D102, le TD1 Systèmes Mécaniques & Transmissions de ce jour (14h00 - 16h00) est déplacé en Salle E304 (Bâtiment Bergès). Cordialement.",
-            status: 'pending',
-            proposedActions: [
-              {
-                id: 'act-101',
-                kind: 'room_change',
-                ue: 'Systèmes Mécaniques',
-                targetEventTitle: 'TD1 Systèmes Mécaniques & Transmissions',
-                newLocation: 'Salle E304 (Bâtiment Bergès)',
-                summary: 'Déplacer TD1 Systèmes Mécaniques → Salle E304 (Bâtiment Bergès)',
-                applied: false
-              }
-            ]
-          },
-          {
-            id: 'mail-demo-2',
-            sender: 'responsable.acv@grenoble-inp.fr',
-            subject: 'Rendu obligatoire : Synthèse ACV Comparative avant le ' + inFiveDays,
-            receivedAt: now - 7200000,
-            body: "Bonjour à tous, merci de déposer votre rapport d'analyse de cycle de vie (format PDF, 6 pages max) sur l'espace Chamilo de l'UE Écoconception & ACV au plus tard le " + inFiveDays + ' à 23h59.',
-            status: 'pending',
-            proposedActions: [
-              {
-                id: 'act-102',
-                kind: 'deadline',
-                ue: 'Écoconception & ACV',
-                title: 'Rapport ACV Comparative (PDF 6 pages max sur Chamilo)',
-                dueDate: inFiveDays,
-                summary: 'Ajouter la deadline « Rapport ACV Comparative » pour le ' + inFiveDays,
-                applied: false
-              }
-            ]
-          }
-        ],
-        calendars: [
-          { id: 'primary', summary: 'Agenda Principal Google', primary: true }
-        ],
-        adeImportedEvents: [],
-        events: [
-          {
-            id: 'evt-1',
-            title: 'CM Supply Chain & Planification MRP',
-            ue: 'Supply Chain & MRP',
-            type: 'CM',
-            group: 'CM',
-            calendarName: 'Démo ADE',
-            location: 'Amphi Bergès — Viallet',
-            start: todayStr + 'T08:30:00',
-            end: todayStr + 'T10:30:00',
-            description: 'Dimensionnement du Plan Directeur de Production (PDP) et calcul des besoins nets (MRP2).'
-          },
-          {
-            id: 'evt-2',
-            title: 'TP2 Écoconception & Analyse de Cycle de Vie',
-            ue: 'Écoconception & ACV',
-            type: 'TP',
-            group: 'TP2',
-            calendarName: 'Démo ADE',
-            location: 'Salle Informatique B204',
-            start: todayStr + 'T10:45:00',
-            end: todayStr + 'T12:45:00',
-            description: "Bilan énergétique et impact carbone d'un assemblage soudé."
-          },
-          {
-            id: 'evt-6',
-            title: 'CM Ergonomie & Analyse de Poste',
-            ue: 'Ergonomie & Postes',
-            type: 'CM',
-            group: 'CM',
-            calendarName: 'Démo ADE',
-            location: 'Amphi Gosse',
-            start: tomorrowStr + 'T09:00:00',
-            end: tomorrowStr + 'T11:00:00',
-            description: "Cotation RULA/REBA et flux physiques en ligne d'assemblage."
-          }
-        ],
-        courses: [
-          {
-            id: 'crs-1',
-            title: 'CM3 — Pilotage PIC/PDP, MRP & Modèle de Wilson',
-            ue: 'Supply Chain & MRP',
-            updatedAt: now - 3600000,
-            rawText: "Le Plan Industriel et Commercial (PIC) assure l'adéquation globale charge-capacité sur 6 à 18 mois. La quantité économique de commande (EOQ / Wilson) minimise la somme des coûts de lancement et de possession.",
-            summary: "### Pilotage Industriel & Gestion des Stocks\n- **PIC (Plan Industriel et Commercial)** : horizon tactique (6 à 18 mois) par familles de produits.\n- **PDP (Programme Directeur de Production)** : échéancier des produits finis semaine par semaine.\n- **Formule de Wilson (EOQ)** : quantité optimale $Q^*$ minimisant le coût total annuel de gestion des stocks :\n$$Q^* = \\sqrt{\\frac{2 \\cdot D \\cdot C_l}{C_p}}$$\navec $D$ la demande annuelle, $C_l$ le coût unitaire de lancement d'une commande et $C_p = t \\cdot P_u$ le coût annuel de possession d'une unité en stock.",
-            memo: "- **Piège classique d'examen** : vérifier l'homogénéité des unités de temps entre $D$ (annuelle) et $C_p$ (coût de stockage par an).",
-            quiz: [
-              {
-                question: 'Dans la formule de Wilson $Q^* = \\sqrt{\\frac{2 D C_l}{C_p}}$, comment évolue $Q^*$ si la demande $D$ est multipliée par 4 ?',
-                options: ['Elle est multipliée par 4', 'Elle est multipliée par 2', 'Elle est divisée par 2', 'Elle reste constante'],
-                answer: 1,
-                explanation: 'Puisque $Q^*$ est proportionnelle à $\\sqrt{D}$, multiplier $D$ par 4 multiplie $Q^*$ par $\\sqrt{4} = 2$.'
-              }
-            ],
-            flashcards: [
-              {
-                id: 'fc-1',
-                front: 'Donner la formule de la quantité économique de commande de Wilson $Q^*$.',
-                back: '$$Q^* = \\sqrt{\\frac{2 \\cdot D \\cdot C_l}{C_p}}$$ où $D$ est la demande annuelle, $C_l$ le coût de lancement et $C_p$ le coût de possession annuel.',
-                sm2: { interval: 0, repetition: 0, efactor: 2.5, nextReview: now - 60000 }
-              }
-            ]
-          },
-          {
-            id: 'crs-2',
-            title: 'Systèmes Mécaniques — Engrenages Droits & Critère de Lewis',
-            ue: 'Systèmes Mécaniques',
-            updatedAt: now - 7200000,
-            rawText: "Dimensionnement d'un engrenage cylindrique à denture droite. Entraxe a = m*(Z1+Z2)/2. Contrainte en pied de dent par la formule de Lewis.",
-            summary: "### Géométrie & Résistance des Engrenages Droits\n- **Entraxe théorique** d'un engrenage extérieur à denture droite de module $m$ :\n$$a = \\frac{m \\cdot (Z_1 + Z_2)}{2}$$\n- **Contrainte de flexion en pied de dent (Formule de Lewis)** :\n$$\\sigma_f = \\frac{F_t}{b \\cdot m \\cdot Y} \\le \\sigma_{\\text{adm}}$$\noù $F_t = \\frac{2 \\cdot C_1}{m \\cdot Z_1}$ est l'effort tangentiel, $b$ la largeur de denture et $Y$ le facteur de forme de Lewis.",
-            memo: "- **Condition de non-interférence** : pour un angle de pression $\\alpha = 20^\\circ$, le nombre minimal de dents d'un pignon sans déport est $Z_{\\min} = 17$.",
-            quiz: [
-              {
-                question: "Quel est le nombre minimal de dents $Z_{\\min}$ sans déport pour éviter l'interférence de taille avec $\\alpha = 20^\\circ$ ?",
-                options: ['12 dents', '14 dents', '17 dents', '24 dents'],
-                answer: 2,
-                explanation: 'Pour un angle de pression normalisé $\\alpha = 20^\\circ$, $Z_{\\min} = \\frac{2}{\\sin^2(20^\\circ)} \\approx 17,1$, soit 17 dents.'
-              }
-            ],
-            flashcards: [
-              {
-                id: 'fc-3',
-                front: "Formule de l'entraxe $a$ d'un engrenage droit extérieur en fonction du module $m$ et des nombres de dents $Z_1, Z_2$ ?",
-                back: '$$a = \\frac{m \\cdot (Z_1 + Z_2)}{2}$$',
-                sm2: { interval: 0, repetition: 0, efactor: 2.5, nextReview: now - 10000 }
-              }
-            ]
-          }
-        ],
-        deadlines: [
-          {
-            id: 'dl-1',
-            title: 'Compte-rendu TP2 — Bilan énergétique assemblage soudé',
-            ue: 'Écoconception & ACV',
-            type: 'TP',
-            dueDate: inThreeDays,
-            done: false
-          },
-          {
-            id: 'dl-2',
-            title: 'Projet MRP — Paramétrage sous tableur et rapport',
-            ue: 'Supply Chain & MRP',
-            type: 'Projet',
-            dueDate: inSixDays,
-            done: false
-          }
-        ],
-        chatHistory: [
-          {
-            role: 'assistant',
-            text: "Bonjour ! Je suis ton Tuteur IA. Tu peux m'interroger à l'écrit ou lancer une **Colle Orale vocale** sur n'importe quelle UE."
-          }
-        ]
-      };
-    }
-
-    let state = getDefaultState();
-    let currentView = 'dashboard';
-    let googleToken = null;
-    let tokenClient = null;
-    let driveFolderBreadcrumbs = [{ id: 'root', name: 'Mon Drive' }];
-    let driveListedFiles = [];
-    let selectedDriveFileIds = new Set();
-    let sm2Flipped = false;
-    let sm2SelectedUE = 'ALL';
-    let colleModeActive = false;
-    let colleSelectedUE = 'Supply Chain & MRP';
-    let speechRecognition = null;
-    let isListeningMic = false;
-    let calendarHorizonDays = 14;
-    let isSyncingAde = false;
-
-    function openIndexedDB() {
-      return new Promise((resolve, reject) => {
-        const req = indexedDB.open(DB_NAME, 1);
-        req.onupgradeneeded = (e) => {
-          const db = e.target.result;
-          if (!db.objectStoreNames.contains(DB_STORE)) {
-            db.createObjectStore(DB_STORE);
-          }
-        };
-        req.onsuccess = () => resolve(req.result);
-        req.onerror = () => reject(req.error);
-      });
-    }
-
-    async function loadStateFromDB() {
-      try {
-        const db = await openIndexedDB();
-        return new Promise((resolve) => {
-          const tx = db.transaction(DB_STORE, 'readonly');
-          const req = tx.objectStore(DB_STORE).get('mainState');
-          req.onsuccess = () => {
-            if (req.result) {
-              const def = getDefaultState();
-              state = {
-                ...def,
-                ...req.result,
-                settings: { ...def.settings, ...(req.result.settings || {}) },
-                modules: { ...def.modules, ...(req.result.modules || {}) },
-                filters: { ...def.filters, ...(req.result.filters || {}) },
-                adeImportedEvents: req.result.adeImportedEvents || []
-              };
-              if (!Array.isArray(state.settings.selectedCalendarIds) || !state.settings.selectedCalendarIds.length) {
-                state.settings.selectedCalendarIds = [state.settings.selectedCalendarId || 'primary'];
-              }
-            }
-            ensureSm2MetadataOnAllCards();
-            resolve();
-          };
-          req.onerror = () => resolve();
-        });
-      } catch (err) {}
-    }
-
-    function ensureSm2MetadataOnAllCards() {
-      const now = Date.now();
-      (state.courses || []).forEach(c => {
-        (c.flashcards || []).forEach(fc => {
-          if (!fc.sm2) {
-            fc.sm2 = { interval: 0, repetition: 0, efactor: 2.5, nextReview: now };
-          }
-        });
-      });
-    }
-
-    async function saveStateToDB() {
-      state.updatedAt = Date.now();
-      try {
-        const db = await openIndexedDB();
-        const tx = db.transaction(DB_STORE, 'readwrite');
-        tx.objectStore(DB_STORE).put(state, 'mainState');
-      } catch (err) {}
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
     }
 
     function showToast(msg, type = 'info') {
-      const el = document.getElementById('toastBanner');
-      const colors = {
-        info: 'bg-slate-900 text-white border-slate-700',
-        success: 'bg-emerald-600 text-white border-emerald-500',
-        warn: 'bg-amber-500 text-slate-950 border-amber-400',
-        error: 'bg-rose-600 text-white border-rose-500'
-      };
-      el.className = 'fixed bottom-20 md:bottom-6 right-4 left-4 md:left-auto md:w-96 z-50 p-3.5 rounded-xl shadow-xl border text-sm font-medium transition-all ' + (colors[type] || colors.info);
+      const container = document.getElementById('toastContainer');
+      const el = document.createElement('div');
+      el.className = 'toast ' + type;
       el.textContent = msg;
-      el.classList.remove('hidden');
-      clearTimeout(window._toastTimer);
-      window._toastTimer = setTimeout(() => el.classList.add('hidden'), 4500);
+      container.appendChild(el);
+      setTimeout(() => {
+        el.remove();
+      }, 4200);
     }
 
-    function applyTheme() {
-      const isDark = state.theme === 'dark';
-      document.documentElement.classList.toggle('dark', isDark);
-      const icon = document.getElementById('themeIconDesktop');
-      if (icon) icon.textContent = isDark ? '☀️' : '🌙';
-    }
-
-    function toggleTheme() {
-      state.theme = state.theme === 'dark' ? 'light' : 'dark';
-      applyTheme();
-      saveStateToDB();
-    }
-
-    function parseIcsDateToIso(rawVal) {
-      if (!rawVal) return null;
-      const val = rawVal.trim();
-      const m = val.match(/^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(\d{2})(Z)?)?$/);
-      if (!m) return null;
-      const [, y, mo, d, hh, mm, ss, isUtc] = m;
-      if (!hh) return `${y}-${mo}-${d}T08:00:00`;
-      if (isUtc) {
-        return new Date(Date.UTC(Number(y), Number(mo) - 1, Number(d), Number(hh), Number(mm), Number(ss || 0))).toISOString();
-      }
-      return `${y}-${mo}-${d}T${hh}:${mm}:${ss || '00'}`;
-    }
-
-    function unescapeIcsText(str) {
-      return (str || '')
-        .replace(/\\n/gi, ' • ')
-        .replace(/\\,/g, ',')
-        .replace(/\\;/g, ';')
-        .replace(/\\\\/g, '\\')
-        .trim();
-    }
-
-    function parseIcsContent(icsText, sourceLabel = 'ADE Grenoble INP (Relais CAS)') {
-      const unfolded = icsText.replace(/\r\n[ \t]/g, '').replace(/\n[ \t]/g, '');
-      const lines = unfolded.split(/\r?\n/);
-      const parsed = [];
-      let cur = null;
-
-      for (const line of lines) {
-        if (line === 'BEGIN:VEVENT') {
-          cur = {};
-        } else if (line === 'END:VEVENT' && cur) {
-          const startIso = parseIcsDateToIso(cur.DTSTART);
-          if (startIso) {
-            const endIso = parseIcsDateToIso(cur.DTEND) || new Date(new Date(startIso).getTime() + 7200000).toISOString();
-            const rawTitle = unescapeIcsText(cur.SUMMARY) || 'Séance ADE';
-            const rawDesc = unescapeIcsText(cur.DESCRIPTION);
-            const rawLoc = unescapeIcsText(cur.LOCATION) || 'Salle non précisée';
-            const meta = parseEventMetadata(rawTitle, rawDesc);
-            parsed.push({
-              id: 'ade_' + (cur.UID || (startIso + '_' + rawTitle)).replace(/[^a-zA-Z0-9_-]/g, '_'),
-              title: rawTitle,
-              ue: meta.ue,
-              type: meta.type,
-              group: meta.group,
-              calendarName: sourceLabel,
-              location: rawLoc,
-              start: startIso,
-              end: endIso,
-              description: rawDesc
-            });
-          }
-          cur = null;
-        } else if (cur) {
-          const colonIdx = line.indexOf(':');
-          if (colonIdx > 0) {
-            const propName = line.slice(0, colonIdx).split(';')[0].toUpperCase();
-            const propVal = line.slice(colonIdx + 1);
-            cur[propName] = propVal;
-          }
-        }
-      }
-      return parsed;
-    }
-
-    async function syncAdeFromRelay(silent = false) {
-      const relayInput = document.getElementById('inlineRelayUrl');
-      const secretInput = document.getElementById('inlineRelaySecret');
-      const overrideInput = document.getElementById('inlineAdeOverrideUrl');
-
-      const baseUrl = (relayInput ? relayInput.value : state.settings.casRelayUrl || '').trim().replace(/\/+$/, '');
-      const secret = (secretInput ? secretInput.value : state.settings.casRelaySecret || '').trim();
-      const customOverride = (overrideInput ? overrideInput.value : state.settings.adeCustomOverrideUrl || '').trim();
-
-      if (!baseUrl || !secret) {
-        if (!silent) showToast('Renseigne l’URL de ton Worker Cloudflare et ton Secret API_SECRET.', 'warn');
-        return;
-      }
-
-      state.settings.casRelayUrl = baseUrl;
-      state.settings.casRelaySecret = secret;
-      state.settings.adeCustomOverrideUrl = customOverride;
-      await saveStateToDB();
-
-      if (isSyncingAde) return;
-      isSyncingAde = true;
-      if (currentView === 'calendar') renderCalendarView();
-      if (!silent) showToast('Synchronisation ADE via ton relais CAS...', 'info');
-
+    function persistDocs() {
       try {
-        const endpoint = new URL(baseUrl + '/ade');
-        if (customOverride) endpoint.searchParams.set('url', customOverride);
-
-        const res = await fetch(endpoint.toString(), {
-          method: 'GET',
-          headers: {
-            'X-StudyFlow-Secret': secret
-          }
-        });
-
-        const rawText = await res.text();
-        if (!res.ok) {
-          let errMsg = 'Erreur relais (' + res.status + ')';
-          try {
-            const parsedErr = JSON.parse(rawText);
-            if (parsedErr.error) errMsg = parsedErr.error;
-          } catch (e) {}
-          throw new Error(errMsg);
-        }
-
-        if (!rawText.includes('BEGIN:VCALENDAR')) {
-          throw new Error("Réponse inattendue : le serveur n'a pas renvoyé de flux iCal valide.");
-        }
-
-        const events = parseIcsContent(rawText, 'ADE Grenoble INP (Relais CAS)');
-        state.adeImportedEvents = events;
-        state.settings.adeLastSyncAt = Date.now();
-        await saveStateToDB();
-
-        isSyncingAde = false;
-        renderCurrentView();
-        if (!silent) showToast(events.length + ' créneau(x) ADE synchronisé(s) en direct !', 'success');
-      } catch (err) {
-        isSyncingAde = false;
-        renderCurrentView();
-        if (!silent) showToast('Échec sync ADE : ' + err.message, 'error');
+        localStorage.setItem(STORAGE_KEYS.docs, JSON.stringify(state.docs));
+      } catch (e) {
+        showToast('Espace localStorage saturé : supprime d’anciens supports dans la bibliothèque.', 'warn');
       }
+      updateCounts();
     }
 
-    async function fetchProtectedUrlViaRelay(targetUrl) {
-      const baseUrl = (state.settings.casRelayUrl || '').trim().replace(/\/+$/, '');
-      const secret = (state.settings.casRelaySecret || '').trim();
-      if (!baseUrl || !secret) {
-        throw new Error('Configure ton relais CAS Cloudflare dans les Paramètres.');
+    function updateCounts() {
+      document.getElementById('libCountBadge').textContent = state.docs.length;
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tabName);
+      });
+      document.querySelectorAll('.panel').forEach(panel => {
+        panel.classList.toggle('active', panel.id === 'panel-' + tabName);
+      });
+      if (tabName === 'library') renderLibrary();
+      if (tabName === 'studio') renderStudioSelector();
+      if (tabName === 'ade') renderAdeEvents();
+    }
+
+    function loadSettingsIntoForm() {
+      document.getElementById('cfgWorkerUrl').value = state.settings.workerUrl || '';
+      document.getElementById('cfgWorkerSecret').value = state.settings.workerSecret || '';
+      document.getElementById('cfgAdeUrl').value = state.settings.adeUrl || '';
+      document.getElementById('cfgAiEndpoint').value = state.settings.aiEndpoint || '';
+      document.getElementById('cfgAiKey').value = state.settings.aiKey || '';
+      document.getElementById('cfgAiModel').value = state.settings.aiModel || '';
+    }
+
+    function saveSettings() {
+      state.settings.workerUrl = document.getElementById('cfgWorkerUrl').value.trim().replace(/\/+$/, '');
+      state.settings.workerSecret = document.getElementById('cfgWorkerSecret').value.trim();
+      state.settings.adeUrl = document.getElementById('cfgAdeUrl').value.trim();
+      state.settings.aiEndpoint = document.getElementById('cfgAiEndpoint').value.trim();
+      state.settings.aiKey = document.getElementById('cfgAiKey').value.trim();
+      state.settings.aiModel = document.getElementById('cfgAiModel').value.trim();
+      localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(state.settings));
+      showToast('Configuration enregistrée.', 'success');
+    }
+
+    async function callWorker(path, params = {}) {
+      if (!state.settings.workerUrl || !state.settings.workerSecret) {
+        throw new Error('Configure d’abord l’URL du Worker et le secret API dans l’onglet Réglages.');
       }
-      const endpoint = new URL(baseUrl + '/fetch');
-      endpoint.searchParams.set('target', targetUrl);
+      const endpoint = new URL(state.settings.workerUrl + path);
+      Object.entries(params).forEach(([k, v]) => {
+        if (v) endpoint.searchParams.set(k, v);
+      });
       const res = await fetch(endpoint.toString(), {
-        headers: { 'X-StudyFlow-Secret': secret }
+        headers: { 'X-StudyFlow-Secret': state.settings.workerSecret }
       });
       if (!res.ok) {
-        const txt = await res.text();
-        throw new Error('Erreur relais CAS (' + res.status + ') : ' + txt.slice(0, 120));
+        let errText = 'Erreur relais (' + res.status + ')';
+        try {
+          const j = await res.json();
+          if (j.error) errText = j.error;
+        } catch (e) {}
+        throw new Error(errText);
       }
       return res;
     }
-    
-    async function scanCoursePageViaRelay() {
-      const urlInput = document.getElementById('relayCoursePageUrl');
-      const ueInput = document.getElementById('relayCoursePageUE');
-      const targetUrl = (urlInput?.value || '').trim();
-      const targetUe = (ueInput?.value || '').trim() || 'UE Grenoble INP';
 
-      if (!targetUrl) {
-        showToast('Colle l’URL d’une page de cours Chamilo ou Moodle Grenoble INP.', 'warn');
+    async function scanMoodleCourse() {
+      const courseUrl = document.getElementById('moodleCourseUrl').value.trim();
+      const ueInput = document.getElementById('moodleUeName').value.trim();
+      if (!courseUrl || !courseUrl.includes('moodle.grenoble-inp.fr')) {
+        showToast('Saisis une URL valide de cours Moodle Grenoble INP.', 'warn');
         return;
       }
-
-      showToast('Connexion CAS et analyse de la page Chamilo/Moodle...', 'info');
+      const btn = document.getElementById('btnScanMoodle');
+      btn.disabled = true;
+      btn.textContent = 'Connexion CAS...';
       try {
-        const res = await fetchProtectedUrlViaRelay(targetUrl);
+        const res = await callWorker('/fetch', { target: courseUrl });
         const html = await res.text();
         const doc = new DOMParser().parseFromString(html, 'text/html');
-        const pageTitle = (doc.querySelector('title')?.textContent || '').trim();
-        const anchors = Array.from(doc.querySelectorAll('a[href]'));
+        const pageTitle = (doc.querySelector('title')?.textContent || '').replace(/\|.*$/, '').trim();
+        const ueName = ueInput || pageTitle || 'UE Moodle';
+        if (!ueInput && pageTitle) {
+          document.getElementById('moodleUeName').value = pageTitle;
+        }
+
         const found = [];
         const seen = new Set();
-
-        anchors.forEach(a => {
+        doc.querySelectorAll('a[href]').forEach(a => {
           const rawHref = a.getAttribute('href');
           if (!rawHref || rawHref.startsWith('#') || rawHref.startsWith('javascript:')) return;
           let fullUrl = '';
           try {
-            fullUrl = new URL(rawHref, targetUrl).toString();
+            fullUrl = new URL(rawHref, courseUrl).toString();
           } catch (e) {
             return;
           }
           if (seen.has(fullUrl)) return;
+          const isResource = fullUrl.includes('/mod/resource/view.php') || fullUrl.includes('/pluginfile.php/') || /\.pdf(\?|$)/i.test(fullUrl);
+          if (!isResource) return;
 
-          const label = (a.textContent || a.getAttribute('title') || '').replace(/\s+/g, ' ').trim();
-          const isMoodleFile = fullUrl.includes('/mod/resource/view.php') || fullUrl.includes('/mod/folder/view.php') || fullUrl.includes('/pluginfile.php/');
-          const isChamiloFile = fullUrl.includes('download.php') || (fullUrl.includes('/document/') && !fullUrl.includes('document.php?cidReq=') && !fullUrl.includes('action='));
-          const isDirectPdf = /\.pdf(\?|$)/i.test(fullUrl) || /\.pdf$/i.test(label);
-
-          if (isDirectPdf || isMoodleFile || isChamiloFile) {
-            seen.add(fullUrl);
-            const cleanTitle = label || fullUrl.split('/').pop().split('?')[0] || 'Support_Cours.pdf';
-            found.push({
-              source: targetUrl.includes('chamilo') ? 'Chamilo (Relais CAS)' : 'Moodle (Relais CAS)',
-              ue: targetUe,
-              title: cleanTitle,
-              url: fullUrl,
-              snippet: 'Page : ' + (pageTitle || targetUe)
-            });
-          }
+          const clone = a.cloneNode(true);
+          clone.querySelectorAll('.accesshide').forEach(el => el.remove());
+          const label = (clone.textContent || a.getAttribute('title') || '').replace(/\s+/g, ' ').trim();
+          seen.add(fullUrl);
+          found.push({
+            id: 'mdl_' + Math.random().toString(36).slice(2, 8),
+            title: label || fullUrl.split('/').pop().split('?')[0] || 'Document Moodle',
+            url: fullUrl,
+            ue: ueName,
+            extracted: false
+          });
         });
 
-        if (found.length === 0) {
-          showToast('Aucun support détecté sur « ' + (pageTitle || 'cette page') + ' ». Vérifie que le cours contient des fichiers ou ouvre un sous-dossier.', 'warn');
-          return;
+        state.moodleLinks = found;
+        renderMoodleDetectedList();
+        if (!found.length) {
+          showToast('Aucun fichier détecté sur « ' + pageTitle + ' ».', 'warn');
+        } else {
+          showToast(found.length + ' ressource(s) détectée(s) sur Moodle.', 'success');
         }
-
-        ingestClipperPayload(found);
       } catch (err) {
         showToast(err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Scanner le cours Moodle';
       }
-    }
-    
-    function getAllCombinedEvents() {
-      if (state.adeImportedEvents && state.adeImportedEvents.length > 0) {
-        const map = new Map();
-        state.adeImportedEvents.forEach(ev => map.set(ev.id, ev));
-        (state.events || []).filter(e => !e.id.startsWith('evt-')).forEach(ev => map.set(ev.id, ev));
-        return Array.from(map.values());
-      }
-      return [...(state.events || [])];
     }
 
-    function getDueSm2Cards() {
-      const now = Date.now();
-      const due = [];
-      state.courses.forEach(c => {
-        if (sm2SelectedUE !== 'ALL' && c.ue !== sm2SelectedUE) return;
-        (c.flashcards || []).forEach(fc => {
-          const sm2 = fc.sm2 || { interval: 0, repetition: 0, efactor: 2.5, nextReview: 0 };
-          if ((sm2.nextReview || 0) <= now) {
-            due.push({ courseId: c.id, courseTitle: c.title, ue: c.ue, card: fc });
-          }
-        });
+    function renderMoodleDetectedList() {
+      const container = document.getElementById('moodleDetectedList');
+      const btnAll = document.getElementById('btnExtractAllMoodle');
+      const countSpan = document.getElementById('moodleFoundCount');
+      container.innerHTML = '';
+
+      if (!state.moodleLinks.length) {
+        btnAll.style.display = 'none';
+        return;
+      }
+
+      btnAll.style.display = 'inline-block';
+      countSpan.textContent = state.moodleLinks.length;
+
+      state.moodleLinks.forEach((item, idx) => {
+        const row = document.createElement('div');
+        row.className = 'item-row';
+        row.innerHTML = `
+          <div class="item-info">
+            <div class="item-title">${escapeHtml(item.title)}</div>
+            <div class="item-meta">${escapeHtml(item.ue)}</div>
+          </div>
+          <button type="button" class="btn btn-sm ${item.extracted ? 'btn-secondary' : ''}" id="mdlBtn_${idx}">
+            ${item.extracted ? 'Extrait' : 'Extraire le texte'}
+          </button>
+        `;
+        row.querySelector('button').onclick = () => extractSingleMoodleResource(idx);
+        container.appendChild(row);
       });
-      return due.sort((a, b) => (a.card.sm2?.nextReview || 0) - (b.card.sm2?.nextReview || 0));
     }
 
-    function computeNextSm2(sm2, quality) {
-      let { interval, repetition, efactor } = sm2 || { interval: 0, repetition: 0, efactor: 2.5 };
-      if (quality >= 3) {
-        if (repetition === 0) interval = 1;
-        else if (repetition === 1) interval = 6;
-        else interval = Math.round(interval * efactor);
-        repetition += 1;
-      } else {
-        repetition = 0;
-        interval = 1;
+    async function extractSingleMoodleResource(idx) {
+      const item = state.moodleLinks[idx];
+      if (!item) return;
+      const btn = document.getElementById('mdlBtn_' + idx);
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Téléchargement...';
       }
-      efactor = efactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
-      if (efactor < 1.3) efactor = 1.3;
-      const delayMs = quality < 3 ? 10 * 60 * 1000 : interval * 86400000;
+      try {
+        const res = await callWorker('/fetch', { target: item.url });
+        const contentType = res.headers.get('content-type') || '';
+        const finalUrl = res.headers.get('x-final-url') || item.url;
+        const buffer = await res.arrayBuffer();
+
+        if (contentType.includes('text/html') && !finalUrl.toLowerCase().endsWith('.pdf')) {
+          throw new Error('Cette ressource Moodle n’est pas un fichier PDF direct.');
+        }
+
+        const text = await extractTextFromPdfBuffer(buffer);
+        if (!text || text.length < 20) {
+          throw new Error('PDF vide ou scanné sans couche texte.');
+        }
+
+        const docObj = {
+          id: 'doc_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+          source: 'Moodle',
+          ue: item.ue,
+          folder: 'Cours Moodle',
+          title: item.title.endsWith('.pdf') ? item.title : item.title + '.pdf',
+          content: text,
+          charCount: text.length,
+          createdAt: new Date().toISOString()
+        };
+
+        state.docs.unshift(docObj);
+        state.selectedDocIds.add(docObj.id);
+        persistDocs();
+        item.extracted = true;
+        renderMoodleDetectedList();
+        showToast('PDF extrait : ' + docObj.title + ' (' + text.length.toLocaleString('fr-FR') + ' car.)', 'success');
+      } catch (err) {
+        showToast(err.message, 'error');
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'Réessayer';
+        }
+      }
+    }
+
+    async function extractAllMoodleLinks() {
+      for (let i = 0; i < state.moodleLinks.length; i++) {
+        if (!state.moodleLinks[i].extracted) {
+          await extractSingleMoodleResource(i);
+        }
+      }
+    }
+
+    function downloadChamiloZip() {
+      const rawUrl = document.getElementById('chamiloFolderUrl').value.trim();
+      if (!rawUrl || !rawUrl.includes('chamilo.grenoble-inp.fr')) {
+        showToast('Colle d’abord l’URL de la page Documents de ton cours Chamilo.', 'warn');
+        return;
+      }
+      try {
+        const zipUrl = new URL(rawUrl);
+        zipUrl.searchParams.set('action', 'downloadfolder');
+        window.open(zipUrl.toString(), '_blank');
+        showToast('Téléchargement du ZIP Chamilo lancé. Glisse-le dans la zone ci-dessous.', 'info');
+      } catch (e) {
+        showToast('URL Chamilo invalide.', 'error');
+      }
+    }
+
+    async function extractTextFromPdfBuffer(arrayBuffer) {
+      if (!window.pdfjsLib) return '';
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const pages = [];
+      for (let p = 1; p <= pdf.numPages; p++) {
+        const page = await pdf.getPage(p);
+        const textContent = await page.getTextContent();
+        pages.push(textContent.items.map(it => it.str).join(' '));
+      }
+      return pages.join('\n\n').replace(/[ \t]+/g, ' ').trim();
+    }
+
+    async function extractTextFromDocxBuffer(arrayBuffer) {
+      const zip = await JSZip.loadAsync(arrayBuffer);
+      const docFile = zip.file('word/document.xml');
+      if (!docFile) return '';
+      const xmlStr = await docFile.async('string');
+      const xmlDoc = new DOMParser().parseFromString(xmlStr, 'application/xml');
+      return Array.from(xmlDoc.getElementsByTagName('w:p'))
+        .map(p => Array.from(p.getElementsByTagName('w:t')).map(t => t.textContent).join(''))
+        .filter(Boolean)
+        .join('\n')
+        .trim();
+    }
+
+    async function extractTextFromPptxBuffer(arrayBuffer) {
+      const zip = await JSZip.loadAsync(arrayBuffer);
+      const slideFiles = Object.keys(zip.files)
+        .filter(name => /^ppt\/slides\/slide\d+\.xml$/i.test(name))
+        .sort((a, b) => parseInt(a.match(/\d+/)[0], 10) - parseInt(b.match(/\d+/)[0], 10));
+      const slidesText = [];
+      for (let i = 0; i < slideFiles.length; i++) {
+        const xmlStr = await zip.file(slideFiles[i]).async('string');
+        const xmlDoc = new DOMParser().parseFromString(xmlStr, 'application/xml');
+        const content = Array.from(xmlDoc.getElementsByTagName('a:p'))
+          .map(p => Array.from(p.getElementsByTagName('a:t')).map(t => t.textContent).join(''))
+          .filter(Boolean)
+          .join('\n');
+        if (content) slidesText.push('Slide ' + (i + 1) + ' :\n' + content);
+      }
+      return slidesText.join('\n\n').trim();
+    }
+
+    async function parseBinaryFile(fileName, folderPath, buffer, ueName) {
+      const lower = fileName.toLowerCase();
+      let text = '';
+      if (lower.endsWith('.pdf')) {
+        text = await extractTextFromPdfBuffer(buffer);
+      } else if (lower.endsWith('.docx')) {
+        text = await extractTextFromDocxBuffer(buffer);
+      } else if (lower.endsWith('.pptx')) {
+        text = await extractTextFromPptxBuffer(buffer);
+      } else if (lower.endsWith('.txt') || lower.endsWith('.md')) {
+        text = new TextDecoder('utf-8').decode(buffer);
+      }
+      if (!text || text.length < 15) return null;
       return {
-        interval,
-        repetition,
-        efactor: Number(efactor.toFixed(2)),
-        nextReview: Date.now() + delayMs
+        id: 'doc_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+        source: 'Chamilo / Local',
+        ue: ueName,
+        folder: folderPath || 'Racine',
+        title: fileName,
+        content: text,
+        charCount: text.length,
+        createdAt: new Date().toISOString()
       };
     }
 
-    function rateCurrentSm2Card(courseId, cardId, quality) {
-      const course = state.courses.find(c => c.id === courseId);
-      const card = course?.flashcards?.find(f => f.id === cardId);
-      if (!card) return;
-      card.sm2 = computeNextSm2(card.sm2, quality);
-      sm2Flipped = false;
-      saveStateToDB();
-      renderNavigation();
-      renderSm2View();
-      const label = quality < 3 ? 'Reprogrammée dans 10 min' : 'Prochaine révision dans ' + card.sm2.interval + ' jour(s)';
-      showToast('SM-2 enregistré : ' + label, 'success');
-    }
+    async function handleLocalFiles(fileList) {
+      if (!fileList || !fileList.length) return;
+      const statusEl = document.getElementById('archiveStatus');
+      const ueName = document.getElementById('chamiloUeName').value.trim() || 'UE Chamilo';
+      const added = [];
 
-    function renderSm2View() {
-      const el = document.getElementById('view-sm2');
-      const allUEs = Array.from(new Set(state.courses.map(c => c.ue)));
-      const dueList = getDueSm2Cards();
-      const totalCards = state.courses.reduce((acc, c) => acc + (c.flashcards?.length || 0), 0);
+      for (const file of Array.from(fileList)) {
+        statusEl.textContent = 'Analyse de ' + file.name + '...';
+        const buffer = await file.arrayBuffer();
 
-      el.innerHTML = `
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h2 class="text-2xl font-extrabold">🧠 Répétition Espacée (Algorithme SM-2)</h2>
-            <p class="text-sm text-slate-500">Révise tes flashcards au moment optimal avant l'oubli. Rendu mathématique LaTeX / KaTeX activé.</p>
-          </div>
-          <div class="flex items-center gap-2">
-            <select onchange="sm2SelectedUE = this.value; sm2Flipped = false; renderSm2View();" class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-semibold">
-              <option value="ALL" ${sm2SelectedUE === 'ALL' ? 'selected' : ''}>Toutes les UE (${totalCards} cartes)</option>
-              ${allUEs.map(ue => `<option value="${ue}" ${sm2SelectedUE === ue ? 'selected' : ''}>${ue}</option>`).join('')}
-            </select>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-            <div class="text-xs font-bold uppercase text-slate-400">À réviser maintenant</div>
-            <div class="text-2xl font-extrabold text-brand-600 mt-1">${dueList.length}</div>
-          </div>
-          <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-            <div class="text-xs font-bold uppercase text-slate-400">Paquet total</div>
-            <div class="text-2xl font-extrabold mt-1">${totalCards} cartes</div>
-          </div>
-          <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-            <div class="text-xs font-bold uppercase text-slate-400">Algorithme actif</div>
-            <div class="text-sm font-bold text-emerald-600 mt-2">SuperMemo-2 (EF adaptatif)</div>
-          </div>
-        </div>
-
-        ${dueList.length === 0 ? `
-          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-10 text-center space-y-3">
-            <div class="text-4xl">🎉</div>
-            <h3 class="text-lg font-bold">Session SM-2 terminée pour aujourd'hui !</h3>
-            <p class="text-sm text-slate-500 max-w-md mx-auto">Toutes tes cartes dues ont été planifiées selon leur facteur de facilité.</p>
-            <button onclick="forceReviewAllSm2()" class="px-4 py-2 rounded-xl bg-slate-900 dark:bg-slate-800 text-white text-xs font-semibold">🔁 Réviser tout le paquet maintenant</button>
-          </div>
-        ` : (() => {
-          const current = dueList[0];
-          const sm2 = current.card.sm2 || { interval: 0, repetition: 0, efactor: 2.5 };
-          return `
-            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 md:p-8 max-w-2xl mx-auto space-y-6 shadow-sm">
-              <div class="flex items-center justify-between text-xs">
-                <span class="px-2.5 py-1 rounded-full bg-brand-50 dark:bg-brand-950 text-brand-700 dark:text-brand-300 font-bold">${current.ue} • ${current.courseTitle}</span>
-                <span class="text-slate-400 font-semibold">EF ${sm2.efactor} • Rép. ${sm2.repetition}</span>
-              </div>
-
-              <div onclick="sm2Flipped = !sm2Flipped; renderSm2View();" class="min-h-[200px] p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center text-center cursor-pointer transition hover:border-brand-500">
-                <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-3">${sm2Flipped ? 'Réponse & Démonstration' : 'Question (Clique pour retourner)'}</div>
-                <div class="prose dark:prose-invert max-w-none text-base font-semibold">
-                  ${marked.parse(sm2Flipped ? current.card.back : current.card.front)}
-                </div>
-              </div>
-
-              ${!sm2Flipped ? `
-                <button onclick="sm2Flipped = true; renderSm2View();" class="w-full py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold transition">Afficher la réponse</button>
-              ` : `
-                <div class="space-y-2">
-                  <div class="text-center text-xs font-semibold text-slate-500">Évalue ta qualité de mémorisation (SM-2) :</div>
-                  <div class="grid grid-cols-4 gap-2">
-                    <button onclick="rateCurrentSm2Card('${current.courseId}', '${current.card.id}', 1)" class="py-2.5 px-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold">
-                      À revoir<span class="block text-[10px] opacity-80">10 min</span>
-                    </button>
-                    <button onclick="rateCurrentSm2Card('${current.courseId}', '${current.card.id}', 3)" class="py-2.5 px-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold">
-                      Difficile<span class="block text-[10px] opacity-80">1 jour</span>
-                    </button>
-                    <button onclick="rateCurrentSm2Card('${current.courseId}', '${current.card.id}', 4)" class="py-2.5 px-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold">
-                      Correct<span class="block text-[10px] opacity-80">${computeNextSm2(sm2, 4).interval} j</span>
-                    </button>
-                    <button onclick="rateCurrentSm2Card('${current.courseId}', '${current.card.id}', 5)" class="py-2.5 px-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold">
-                      Facile<span class="block text-[10px] opacity-80">${computeNextSm2(sm2, 5).interval} j</span>
-                    </button>
-                  </div>
-                </div>
-              `}
-            </div>
-          `;
-        })()}
-      `;
-      renderMathInContainer(el);
-    }
-
-    function forceReviewAllSm2() {
-      const now = Date.now() - 1000;
-      state.courses.forEach(c => (c.flashcards || []).forEach(fc => {
-        if (!fc.sm2) fc.sm2 = { interval: 0, repetition: 0, efactor: 2.5, nextReview: now };
-        else fc.sm2.nextReview = now;
-      }));
-      saveStateToDB();
-      renderNavigation();
-      renderSm2View();
-    }
-
-    function ingestClipperPayload(items) {
-      let added = 0;
-      items.forEach(item => {
-        if (state.ignoredClipperUrls.includes(item.url)) return;
-        if (state.clipperInbox.some(x => x.url === item.url)) return;
-        state.clipperInbox.unshift({
-          id: 'clip-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
-          source: item.source || 'Portail Grenoble INP',
-          ue: item.ue || 'UE Capturée',
-          title: item.title || 'Document sans titre',
-          url: item.url,
-          capturedAt: Date.now(),
-          snippet: item.snippet || '',
-          selected: true
-        });
-        added++;
-      });
-      if (added > 0) {
-        saveStateToDB();
-        renderNavigation();
-        renderCurrentView();
-        showToast(added + ' support(s) détecté(s) et ajouté(s) à la boîte de tri !', 'success');
-      }
-    }
-
-    async function ingestWebmailPayload(mail) {
-      const analyzed = await analyzeEmailWithAI(mail.sender || 'Scolarité', mail.subject || 'Information cours', mail.body || '');
-      state.webmailInbox.unshift({
-        id: 'mail-' + Date.now(),
-        sender: mail.sender || 'Webmail Grenoble INP',
-        subject: mail.subject || 'Notification',
-        receivedAt: Date.now(),
-        body: mail.body || '',
-        status: 'pending',
-        proposedActions: analyzed
-      });
-      await saveStateToDB();
-      renderNavigation();
-      renderCurrentView();
-      showToast('Nouveau mail analysé par Automate Webmail → Action !', 'success');
-    }
-
-    function getNavItems() {
-      const m = state.modules;
-      const pendingClipper = state.clipperInbox.filter(x => !state.ignoredClipperUrls.includes(x.url)).length;
-      const pendingMails = state.webmailInbox.filter(x => x.status === 'pending').length;
-      const dueSm2 = getDueSm2Cards().length;
-
-      const items = [
-        { id: 'dashboard', label: "Aujourd'hui", icon: '🏠', visible: true },
-        { id: 'calendar', label: 'Planning ADE', icon: '📅', visible: m.calendar },
-        { id: 'clipper', label: 'Chamilo & Moodle', icon: '🧩', visible: m.clipper, badge: pendingClipper },
-        { id: 'webmail', label: 'Webmail IA', icon: '✉️', visible: m.webmail, badge: pendingMails },
-        { id: 'courses', label: 'Mes Cours', icon: '📚', visible: true },
-        { id: 'sm2', label: 'Révision SM-2', icon: '🧠', visible: m.sm2, badge: dueSm2 },
-        { id: 'drive', label: 'Drive & Cloud', icon: '☁️', visible: m.drive },
-        { id: 'deadlines', label: 'Deadlines', icon: '⏰', visible: m.deadlines },
-        { id: 'tutor', label: 'Tuteur & Colle', icon: '🎙️', visible: m.tutor },
-        { id: 'modules', label: 'Modules', icon: '⚙️', visible: true }
-      ];
-      return items.filter(i => i.visible);
-    }
-
-    function renderNavigation() {
-      const items = getNavItems();
-      if (!items.some(i => i.id === currentView)) currentView = 'dashboard';
-
-      const desktopNav = document.getElementById('desktopNav');
-      desktopNav.innerHTML = items.map(item => {
-        const active = item.id === currentView;
-        return `
-          <button onclick="switchView('${item.id}')" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold transition ${active ? 'bg-brand-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'}">
-            <span class="flex items-center gap-3">
-              <span class="text-base">${item.icon}</span>
-              <span>${item.label}</span>
-            </span>
-            ${item.badge ? `<span class="px-2 py-0.5 rounded-full text-[11px] font-bold ${active ? 'bg-white text-brand-600' : 'bg-brand-100 dark:bg-brand-950 text-brand-700 dark:text-brand-300'}">${item.badge}</span>` : ''}
-          </button>
-        `;
-      }).join('');
-
-      const mobileNav = document.getElementById('mobileNav');
-      mobileNav.innerHTML = items.slice(0, 6).map(item => {
-        const active = item.id === currentView;
-        return `
-          <button onclick="switchView('${item.id}')" class="relative flex flex-col items-center justify-center py-1 px-2 rounded-xl text-[11px] font-semibold transition ${active ? 'text-brand-600 dark:text-brand-400' : 'text-slate-500 dark:text-slate-400'}">
-            <span class="text-lg leading-tight">${item.icon}</span>
-            <span class="truncate max-w-[60px]">${item.label}</span>
-            ${item.badge ? `<span class="absolute top-0.5 right-1 w-4 h-4 rounded-full bg-rose-600 text-white text-[9px] flex items-center justify-center font-bold">${item.badge}</span>` : ''}
-          </button>
-        `;
-      }).join('');
-    }
-
-    function switchView(viewId) {
-      currentView = viewId;
-      document.querySelectorAll('main section[id^="view-"]').forEach(sec => {
-        sec.classList.toggle('hidden', sec.id !== 'view-' + viewId);
-      });
-      renderNavigation();
-      renderCurrentView();
-    }
-
-    function renderCurrentView() {
-      if (currentView === 'dashboard') renderDashboard();
-      else if (currentView === 'calendar') renderCalendarView();
-      else if (currentView === 'clipper') renderClipperView();
-      else if (currentView === 'webmail') renderWebmailView();
-      else if (currentView === 'courses') renderCoursesView();
-      else if (currentView === 'sm2') renderSm2View();
-      else if (currentView === 'drive') renderDriveView();
-      else if (currentView === 'deadlines') renderDeadlinesView();
-      else if (currentView === 'tutor') renderTutorView();
-      else if (currentView === 'modules') renderModulesView();
-    }
-
-    function isEventAccepted(ev) {
-      if (state.filters.bypassFilters) return true;
-      const f = state.filters;
-      const titleLower = (ev.title + ' ' + (ev.description || '')).toLowerCase();
-      if (f.excludeKeywords && f.excludeKeywords.some(kw => kw.trim() && titleLower.includes(kw.trim().toLowerCase()))) return false;
-      if (ev.ue && f.disabledUEs && f.disabledUEs.includes(ev.ue)) return false;
-      if (ev.group && f.blockedGroups && f.blockedGroups.includes(ev.group)) return false;
-      return true;
-    }
-
-    function getFilteredEvents() {
-      return getAllCombinedEvents().filter(isEventAccepted).sort((a, b) => new Date(a.start) - new Date(b.start));
-    }
-
-    function parseEventMetadata(rawTitle, rawDesc = '') {
-      const combined = rawTitle + ' ' + rawDesc;
-      let type = 'Séance';
-      if (/\bCM\b|Cours\s*Magistral/i.test(combined)) type = 'CM';
-      else if (/\bTD\d*\b|Travaux\s*Dirig/i.test(combined)) type = 'TD';
-      else if (/\bTP\d*\b|Travaux\s*Prat/i.test(combined)) type = 'TP';
-      else if (/Examen|DS|Partiel|Contrôle/i.test(combined)) type = 'Examen';
-
-      const grpMatch = combined.match(/\b(CM|TD\d+|TP\d+|G\d+|Groupe\s*\d+)\b/i);
-      const group = grpMatch ? grpMatch[1].toUpperCase().replace(/\s+/g, '') : type;
-      let ue = rawTitle
-        .replace(/\[[^\]]+\]/g, '')
-        .replace(/\b(CM|TD\d*|TP\d*|G\d+|Groupe\s*\d+)\b/gi, '')
-        .replace(/^[\s\-–—:]+|[\s\-–—:]+$/g, '')
-        .trim();
-      return { ue: ue || rawTitle, type, group };
-    }
-
-    function getEventBadgeStyle(type) {
-      if (type === 'CM') return { border: 'border-l-4 border-l-blue-600', badge: 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300' };
-      if (type === 'TD') return { border: 'border-l-4 border-l-indigo-600', badge: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300' };
-      if (type === 'TP') return { border: 'border-l-4 border-l-emerald-600', badge: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' };
-      if (type === 'Examen') return { border: 'border-l-4 border-l-rose-600', badge: 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300' };
-      return { border: 'border-l-4 border-l-slate-400', badge: 'bg-slate-200 text-slate-800 dark:bg-slate-800 dark:text-slate-300' };
-    }
-
-    function formatDayHeaderLabel(dateStr) {
-      const todayStr = new Date().toISOString().split('T')[0];
-      const tomorrowStr = new Date(Date.now() + 86400000).toISOString().split('T')[0];
-      const d = new Date(dateStr + 'T12:00:00');
-      const formatted = d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
-      const capitalized = formatted.charAt(0).toUpperCase() + formatted.slice(1);
-      if (dateStr === todayStr) return { title: "Aujourd'hui — " + capitalized, isToday: true };
-      if (dateStr === tomorrowStr) return { title: 'Demain — ' + capitalized, isToday: false };
-      return { title: capitalized, isToday: false };
-    }
-
-    function connectGoogle() {
-      const clientId = state.settings.googleClientId.trim();
-      if (!clientId) {
-        openSettingsModal();
-        showToast("Renseigne d'abord ton ID Client OAuth 2.0 Google Cloud.", 'warn');
-        return;
-      }
-      if (!window.google || !google.accounts || !google.accounts.oauth2) {
-        showToast('Module Google Identity en chargement, réessaie dans 2 secondes.', 'warn');
-        return;
-      }
-      tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: clientId,
-        scope: GOOGLE_SCOPES,
-        callback: async (resp) => {
-          if (resp.error) {
-            showToast('Erreur OAuth : ' + resp.error, 'error');
-            return;
-          }
-          googleToken = resp.access_token;
-          updateGoogleStatusUI(true);
-          showToast('Connecté à Google Drive & Agenda !', 'success');
-          await fetchGoogleCalendars();
-          await syncSelectedGoogleCalendar();
-          await syncDriveDatabase();
-        }
-      });
-      tokenClient.requestAccessToken({ prompt: 'consent' });
-    }
-
-    function updateGoogleStatusUI(connected) {
-      const dot = document.getElementById('googleDot');
-      const txt = document.getElementById('googleStatusText');
-      const btnSync = document.getElementById('btnQuickSync');
-      const mobileBadge = document.getElementById('mobileSyncBadge');
-      if (connected) {
-        dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500';
-        txt.textContent = 'Connecté (Drive + Agenda)';
-        btnSync.classList.remove('hidden');
-        if (mobileBadge) mobileBadge.textContent = 'Connecté • Cloud Sync prêt';
-      } else {
-        dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-500';
-        txt.textContent = 'Non connecté';
-        btnSync.classList.add('hidden');
-        if (mobileBadge) mobileBadge.textContent = 'Relais CAS • PWA';
-      }
-    }
-
-    async function googleFetch(url, options = {}) {
-      if (!googleToken) throw new Error('Non authentifié auprès de Google.');
-      const res = await fetch(url, {
-        ...options,
-        headers: { Authorization: 'Bearer ' + googleToken, ...(options.headers || {}) }
-      });
-      if (res.status === 401) {
-        googleToken = null;
-        updateGoogleStatusUI(false);
-        throw new Error('Session Google expirée, reconnecte-toi.');
-      }
-      if (!res.ok) throw new Error('Erreur API Google (' + res.status + ')');
-      return res.json();
-    }
-
-    async function fetchGoogleCalendars() {
-      if (!googleToken) return;
-      try {
-        const data = await googleFetch('https://www.googleapis.com/calendar/v3/users/me/calendarList?showHidden=true');
-        const list = (data.items || []).map(c => ({
-          id: c.id,
-          summary: c.summaryOverride || c.summary || c.id,
-          primary: !!c.primary
-        }));
-        if (list.length) {
-          state.calendars = list;
-          const validIds = new Set(state.calendars.map(c => c.id));
-          let selected = (state.settings.selectedCalendarIds || []).filter(id => validIds.has(id));
-          if (selected.length === 0) selected = state.calendars.map(c => c.id);
-          state.settings.selectedCalendarIds = selected;
-          state.settings.selectedCalendarId = selected[0] || 'primary';
-          await saveStateToDB();
-          renderCurrentView();
-        }
-      } catch (err) {
-        showToast(err.message, 'error');
-      }
-    }
-
-    async function syncSelectedGoogleCalendar() {
-      if (state.settings.casRelayUrl && state.settings.casRelaySecret) {
-        await syncAdeFromRelay(false);
-      }
-      if (!googleToken) return;
-      try {
-        await fetchGoogleCalendars();
-        const idsToFetch = state.settings.selectedCalendarIds || ['primary'];
-        const timeMin = new Date(Date.now() - 2 * 86400000).toISOString();
-        const timeMax = new Date(Date.now() + 30 * 86400000).toISOString();
-        const mergedEvents = [];
-
-        for (const rawId of idsToFetch) {
-          const calMeta = state.calendars.find(c => c.id === rawId);
-          const calLabel = calMeta ? calMeta.summary : 'Google Agenda';
-          const calId = encodeURIComponent(rawId);
-          try {
-            const data = await googleFetch('https://www.googleapis.com/calendar/v3/calendars/' + calId + '/events?singleEvents=true&orderBy=startTime&timeMin=' + timeMin + '&timeMax=' + timeMax + '&maxResults=250');
-            (data.items || []).filter(item => item.start).forEach(item => {
-              const rawTitle = item.summary || 'Séance';
-              const rawDesc = item.description || '';
-              const meta = parseEventMetadata(rawTitle, rawDesc);
-              mergedEvents.push({
-                id: rawId + '_' + item.id,
-                title: rawTitle,
-                ue: meta.ue,
-                type: meta.type,
-                group: meta.group,
-                calendarName: calLabel,
-                location: item.location || 'Salle non précisée',
-                start: item.start.dateTime || (item.start.date + 'T08:00:00'),
-                end: item.end?.dateTime || ((item.end?.date || item.start.date) + 'T10:00:00'),
-                description: rawDesc
-              });
-            });
-          } catch (subErr) {}
-        }
-
-        state.events = mergedEvents;
-        await saveStateToDB();
-        renderCurrentView();
-      } catch (err) {
-        showToast(err.message, 'error');
-      }
-    }
-
-    async function ensureDriveFolder(folderName, parentId = null) {
-      const parentClause = parentId ? "and '" + parentId + "' in parents" : '';
-      const q = encodeURIComponent("name='" + folderName.replace(/'/g, "\\'") + "' and mimeType='application/vnd.google-apps.folder' " + parentClause + " and trashed=false");
-      const res = await googleFetch('https://www.googleapis.com/drive/v3/files?q=' + q + '&fields=files(id,name)');
-      if (res.files?.length > 0) return res.files[0].id;
-      const body = { name: folderName, mimeType: 'application/vnd.google-apps.folder' };
-      if (parentId) body.parents = [parentId];
-      const created = await googleFetch('https://www.googleapis.com/drive/v3/files', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-      return created.id;
-    }
-
-    async function uploadBinaryOrTextToDriveUE(ueName, fileName, contentBlob) {
-      const rootId = await ensureDriveFolder(DRIVE_FOLDER_NAME);
-      const ueFolderId = await ensureDriveFolder(ueName, rootId);
-      const metadata = { name: fileName, parents: [ueFolderId] };
-      const form = new FormData();
-      form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-      form.append('file', contentBlob, fileName);
-
-      const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-        method: 'POST',
-        headers: { Authorization: 'Bearer ' + googleToken },
-        body: form
-      });
-      if (!res.ok) throw new Error('Échec upload Drive (' + res.status + ')');
-      return res.json();
-    }
-
-    async function syncDriveDatabase() {
-      if (!googleToken) {
-        showToast('Connecte Google Drive pour synchroniser Opera GX et Brave mobile.', 'warn');
-        return;
-      }
-      try {
-        showToast('Fusion cloud studyflow_db.json...', 'info');
-        const folderId = await ensureDriveFolder(DRIVE_FOLDER_NAME);
-        const q = encodeURIComponent("name='" + DRIVE_DB_FILENAME + "' and '" + folderId + "' in parents and trashed=false");
-        const search = await googleFetch('https://www.googleapis.com/drive/v3/files?q=' + q + '&fields=files(id,name)');
-
-        if (search.files?.length > 0) {
-          const fileId = search.files[0].id;
-          const dlRes = await fetch('https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media', {
-            headers: { Authorization: 'Bearer ' + googleToken }
+        if (file.name.toLowerCase().endsWith('.zip')) {
+          const outerZip = await JSZip.loadAsync(buffer);
+          const entries = Object.values(outerZip.files).filter(entry => {
+            if (entry.dir) return false;
+            const base = entry.name.split('/').pop();
+            if (entry.name.includes('__MACOSX') || base.startsWith('.')) return false;
+            return /\.(pdf|docx|pptx|txt|md)$/i.test(base);
           });
-          if (dlRes.ok) {
-            const remoteData = await dlRes.json();
-            mergeStates(remoteData);
+
+          for (let i = 0; i < entries.length; i++) {
+            const entry = entries[i];
+            const parts = entry.name.split('/');
+            const fileName = parts.pop();
+            const folderPath = parts.join(' / ');
+            statusEl.textContent = 'Extraction (' + (i + 1) + '/' + entries.length + ') : ' + fileName;
+            try {
+              const entryBuffer = await entry.async('arraybuffer');
+              const parsed = await parseBinaryFile(fileName, folderPath, entryBuffer, ueName);
+              if (parsed) added.push(parsed);
+            } catch (e) {}
           }
-          await uploadStateToDrive(folderId, fileId);
         } else {
-          await uploadStateToDrive(folderId, null);
-        }
-        await saveStateToDB();
-        renderNavigation();
-        renderCurrentView();
-        showToast('Synchronisation Drive réussie (PC ↔ Mobile).', 'success');
-      } catch (err) {
-        showToast('Erreur sync Drive : ' + err.message, 'error');
-      }
-    }
-
-    function mergeStates(remote) {
-      if (!remote || typeof remote !== 'object') return;
-      const courseMap = new Map();
-      (remote.courses || []).forEach(c => courseMap.set(c.id, c));
-      (state.courses || []).forEach(c => {
-        const ex = courseMap.get(c.id);
-        if (!ex || (c.updatedAt || 0) >= (ex.updatedAt || 0)) courseMap.set(c.id, c);
-      });
-      state.courses = Array.from(courseMap.values());
-      ensureSm2MetadataOnAllCards();
-
-      const dlMap = new Map();
-      (remote.deadlines || []).forEach(d => dlMap.set(d.id, d));
-      (state.deadlines || []).forEach(d => dlMap.set(d.id, d));
-      state.deadlines = Array.from(dlMap.values());
-
-      if (remote.settings?.casRelayUrl && !state.settings.casRelayUrl) state.settings.casRelayUrl = remote.settings.casRelayUrl;
-      if (remote.settings?.casRelaySecret && !state.settings.casRelaySecret) state.settings.casRelaySecret = remote.settings.casRelaySecret;
-
-      if (remote.adeImportedEvents?.length && (remote.settings?.adeLastSyncAt || 0) >= (state.settings.adeLastSyncAt || 0)) {
-        state.adeImportedEvents = remote.adeImportedEvents;
-        state.settings.adeLastSyncAt = remote.settings.adeLastSyncAt;
-      }
-
-      state.ignoredDriveIds = Array.from(new Set([...(state.ignoredDriveIds || []), ...(remote.ignoredDriveIds || [])]));
-      state.ignoredClipperUrls = Array.from(new Set([...(state.ignoredClipperUrls || []), ...(remote.ignoredClipperUrls || [])]));
-    }
-
-    async function uploadStateToDrive(folderId, existingFileId) {
-      const payload = JSON.stringify({ ...state, updatedAt: Date.now() });
-      const metadata = existingFileId ? { name: DRIVE_DB_FILENAME } : { name: DRIVE_DB_FILENAME, parents: [folderId] };
-      const boundary = '-------studyflow_boundary_final';
-      const body =
-        '--' + boundary + '\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(metadata) + '\r\n' +
-        '--' + boundary + '\r\nContent-Type: application/json\r\n\r\n' + payload + '\r\n' +
-        '--' + boundary + '--';
-      const url = existingFileId
-        ? 'https://www.googleapis.com/upload/drive/v3/files/' + existingFileId + '?uploadType=multipart'
-        : 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
-      await fetch(url, {
-        method: existingFileId ? 'PATCH' : 'POST',
-        headers: { Authorization: 'Bearer ' + googleToken, 'Content-Type': 'multipart/related; boundary=' + boundary },
-        body
-      });
-    }
-
-    function renderEventCardHtml(ev, compact = false) {
-      const h1 = new Date(ev.start).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-      const h2 = new Date(ev.end).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-      const style = getEventBadgeStyle(ev.type);
-      return `
-        <div class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 ${style.border} bg-white dark:bg-slate-900/90 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div class="flex items-start sm:items-center gap-3.5 min-w-0">
-            <div class="w-16 shrink-0 text-left sm:text-center border-r border-slate-200 dark:border-slate-800 pr-3">
-              <div class="text-sm font-extrabold text-slate-900 dark:text-white leading-tight">${h1}</div>
-              <div class="text-xs font-medium text-slate-400 mt-0.5">${h2}</div>
-            </div>
-            <div class="min-w-0 space-y-1">
-              <div class="flex flex-wrap items-center gap-1.5 text-[11px]">
-                <span class="px-2 py-0.5 rounded-md font-bold ${style.badge}">${ev.type}</span>
-                ${ev.group && ev.group !== ev.type ? `<span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 font-semibold text-slate-600 dark:text-slate-300">${ev.group}</span>` : ''}
-                <span class="font-semibold ${ev.roomUpdated ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-600 dark:text-slate-300'}">📍 ${ev.location}</span>
-                ${!compact && ev.calendarName ? `<span class="text-slate-400 truncate max-w-[160px]">• ${ev.calendarName}</span>` : ''}
-              </div>
-              <h4 class="font-bold text-sm text-slate-900 dark:text-slate-100 leading-snug">${ev.title}</h4>
-              ${!compact && ev.description ? `<p class="text-xs text-slate-500 line-clamp-1">${ev.description}</p>` : ''}
-            </div>
-          </div>
-          ${state.modules.tutor ? `<button onclick="askTutorAboutEvent('${ev.id.replace(/'/g, "\\'")}')" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-brand-600 hover:text-white text-xs font-semibold shrink-0 self-end sm:self-center transition">🤖 Résumer</button>` : ''}
-        </div>
-      `;
-    }
-
-    function renderDashboard() {
-      const el = document.getElementById('view-dashboard');
-      const todayStr = new Date().toISOString().split('T')[0];
-      const todayEvents = getFilteredEvents().filter(e => e.start.startsWith(todayStr));
-      const upcomingDeadlines = state.deadlines.filter(d => !d.done).sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
-      const pendingClipper = state.clipperInbox.filter(x => !state.ignoredClipperUrls.includes(x.url));
-      const pendingMails = state.webmailInbox.filter(x => x.status === 'pending');
-      const dueSm2 = getDueSm2Cards();
-      const relayReady = !!(state.settings.casRelayUrl && state.settings.casRelaySecret);
-
-      el.innerHTML = `
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <span class="text-xs font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400">Tableau de bord • ${new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
-            <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight mt-0.5">Vue centralisée de ta journée</h2>
-          </div>
-          <div class="flex flex-wrap gap-2">
-            ${state.modules.sm2 ? `<button onclick="switchView('sm2')" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-sm transition">🧠 Révision SM-2 (${dueSm2.length})</button>` : ''}
-            ${state.modules.tutor ? `<button onclick="startColleOraleFromDashboard()" class="px-3.5 py-2 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-brand-600 text-white text-xs font-semibold transition">🎙️ Colle Orale</button>` : ''}
-            ${state.modules.drive ? `<button onclick="syncDriveDatabase()" class="px-3.5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold shadow-sm transition">☁️ Sync Drive</button>` : ''}
-          </div>
-        </div>
-
-        ${!relayReady ? `
-          <div class="p-4 rounded-2xl bg-brand-50 dark:bg-brand-950/40 border border-brand-200 dark:border-brand-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <div class="text-xs font-bold uppercase text-brand-700 dark:text-brand-300">🔐 Relais CAS Cloudflare détecté</div>
-              <div class="font-bold text-sm mt-0.5">Entre ton Secret API_SECRET pour activer la mise à jour automatique ADE sur Opera GX & Brave mobile.</div>
-            </div>
-            <button onclick="switchView('calendar')" class="px-3.5 py-2 rounded-xl bg-brand-600 text-white text-xs font-semibold shrink-0">Configurer maintenant →</button>
-          </div>
-        ` : ''}
-
-        ${(state.modules.webmail && pendingMails.length > 0) || (state.modules.clipper && pendingClipper.length > 0) ? `
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          ${state.modules.webmail && pendingMails.length > 0 ? `
-          <div class="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 flex items-center justify-between gap-3">
-            <div>
-              <div class="text-xs font-bold uppercase text-amber-700 dark:text-amber-400">✉️ Automate Webmail → Action</div>
-              <div class="font-bold text-sm mt-0.5">${pendingMails.length} mail(s) avec actions détectées (salle / deadline)</div>
-            </div>
-            <button onclick="switchView('webmail')" class="px-3 py-1.5 rounded-xl bg-amber-600 text-white text-xs font-semibold shrink-0">Valider →</button>
-          </div>
-          ` : ''}
-
-          ${state.modules.clipper && pendingClipper.length > 0 ? `
-          <div class="p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 flex items-center justify-between gap-3">
-            <div>
-              <div class="text-xs font-bold uppercase text-indigo-700 dark:text-indigo-400">🧩 Chamilo / Moodle (Relais CAS)</div>
-              <div class="font-bold text-sm mt-0.5">${pendingClipper.length} support(s) en attente de tri & dépôt Drive</div>
-            </div>
-            <button onclick="switchView('clipper')" class="px-3 py-1.5 rounded-xl bg-indigo-600 text-white text-xs font-semibold shrink-0">Trier →</button>
-          </div>
-          ` : ''}
-        </div>
-        ` : ''}
-
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          ${state.modules.calendar ? `
-          <div class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4">
-            <div class="flex items-center justify-between">
-              <h3 class="font-bold text-base">📅 Séances du jour (${todayEvents.length})</h3>
-              <button onclick="switchView('calendar')" class="text-xs font-semibold text-brand-600 hover:underline">Planning complet & Relais CAS →</button>
-            </div>
-            <div class="space-y-3">
-              ${todayEvents.map(ev => renderEventCardHtml(ev, true)).join('') || "<p class='text-sm text-slate-500'>Aucun créneau aujourd'hui (ou clique sur <strong>Planning ADE</strong> pour actualiser ton emploi du temps).</p>"}
-            </div>
-          </div>
-          ` : ''}
-
-          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-3">
-            <div class="flex items-center justify-between">
-              <h3 class="font-bold text-base">⏰ Prochaines Deadlines</h3>
-              <button onclick="switchView('deadlines')" class="text-xs font-semibold text-brand-600 hover:underline">Tout voir</button>
-            </div>
-            <div class="space-y-2.5">
-              ${upcomingDeadlines.slice(0, 4).map(dl => {
-                const diffDays = Math.ceil((new Date(dl.dueDate) - new Date()) / 86400000);
-                return `
-                  <div class="p-3 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1">
-                    <div class="flex items-center justify-between text-xs">
-                      <span class="font-semibold text-brand-600 dark:text-brand-400">${dl.ue}</span>
-                      <span class="px-2 py-0.5 rounded-full font-bold bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300">J-${Math.max(0, diffDays)}</span>
-                    </div>
-                    <div class="font-semibold text-sm">${dl.title}</div>
-                  </div>
-                `;
-              }).join('') || '<p class="text-xs text-slate-500">Aucun rendu en attente.</p>'}
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
-    function renderClipperView() {
-      const el = document.getElementById('view-clipper');
-      const items = state.clipperInbox.filter(x => !state.ignoredClipperUrls.includes(x.url));
-      const selectedCount = items.filter(x => x.selected).length;
-
-      el.innerHTML = `
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h2 class="text-2xl font-extrabold">🧩 Chamilo & Moodle via Relais CAS</h2>
-            <p class="text-sm text-slate-500">Aspire automatiquement les supports PDF d'une page de cours Chamilo/Moodle (sans extension, sur PC et mobile).</p>
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <button onclick="processSelectedClipperItems(false)" class="px-3.5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold ${selectedCount === 0 ? 'opacity-50 pointer-events-none' : ''}">
-              ✨ Analyser dans StudyFlow (${selectedCount})
-            </button>
-            <button onclick="processSelectedClipperItems(true)" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold ${selectedCount === 0 ? 'opacity-50 pointer-events-none' : ''}">
-              ☁️ Déposer sur Drive + StudyFlow (${selectedCount})
-            </button>
-          </div>
-        </div>
-
-        <div class="bg-gradient-to-r from-indigo-50 to-brand-50 dark:from-indigo-950/40 dark:to-brand-950/40 border border-indigo-200 dark:border-indigo-800 rounded-2xl p-5 space-y-3">
-          <div>
-            <h3 class="font-bold text-sm text-indigo-900 dark:text-indigo-200">🔗 Aspirateur automatique de cours Chamilo / Moodle (authentifié CAS)</h3>
-            <p class="text-xs text-slate-600 dark:text-slate-300">Colle l'URL d'une page de cours Chamilo ou Moodle : ton Worker Cloudflare se connecte avec tes identifiants CAS et liste tous les PDF disponibles.</p>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-            <input id="relayCoursePageUrl" type="text" placeholder="https://chamilo.grenoble-inp.fr/courses/..." class="md:col-span-2 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs" />
-            <div class="flex gap-2">
-              <input id="relayCoursePageUE" type="text" placeholder="Nom de l'UE" class="flex-1 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs" />
-              <button onclick="scanCoursePageViaRelay()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shrink-0">🔍 Scanner</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4">
-          <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-            <h3 class="font-bold text-base">📥 Supports détectés (${items.length})</h3>
-            ${state.ignoredClipperUrls.length > 0 ? `<button onclick="clearIgnoredClipper()" class="text-xs text-slate-500 hover:underline">Réafficher ${state.ignoredClipperUrls.length} masqué(s)</button>` : ''}
-          </div>
-
-          ${items.length === 0 ? `
-            <p class="text-sm text-slate-500 py-6 text-center">Aucun support en attente. Colle le lien d'un espace de cours Chamilo ou Moodle ci-dessus.</p>
-          ` : `
-            <div class="divide-y divide-slate-200 dark:divide-slate-800">
-              ${items.map(item => `
-                <div class="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div class="flex items-start gap-3 min-w-0">
-                    <input type="checkbox" ${item.selected ? 'checked' : ''} onchange="toggleClipperItemSelection('${item.id}', this.checked)" class="mt-1 w-4 h-4 accent-brand-600 shrink-0" />
-                    <div class="min-w-0 space-y-1">
-                      <div class="flex flex-wrap items-center gap-2 text-xs">
-                        <span class="px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-bold">${item.ue}</span>
-                        <span class="text-slate-400">${item.source}</span>
-                      </div>
-                      <div class="font-bold text-sm truncate">${item.title}</div>
-                      ${item.snippet ? `<p class="text-xs text-slate-500 line-clamp-1">${item.snippet}</p>` : ''}
-                    </div>
-                  </div>
-                  <div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
-                    <input type="text" value="${item.ue}" onchange="updateClipperItemUE('${item.id}', this.value)" title="Modifier le dossier UE cible" class="w-36 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs" />
-                    <button onclick="ignoreClipperItem('${item.id}')" class="px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-500 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950">Ignorer</button>
-                  </div>
-                </div>
-              `).join('')}
-            </div>
-          `}
-        </div>
-      `;
-    }
-
-    function toggleClipperItemSelection(id, checked) {
-      const it = state.clipperInbox.find(x => x.id === id);
-      if (it) it.selected = checked;
-      saveStateToDB();
-      renderClipperView();
-    }
-
-    function updateClipperItemUE(id, newUE) {
-      const it = state.clipperInbox.find(x => x.id === id);
-      if (it && newUE.trim()) it.ue = newUE.trim();
-      saveStateToDB();
-    }
-
-    function ignoreClipperItem(id) {
-      const it = state.clipperInbox.find(x => x.id === id);
-      if (it && !state.ignoredClipperUrls.includes(it.url)) state.ignoredClipperUrls.push(it.url);
-      saveStateToDB();
-      renderNavigation();
-      renderClipperView();
-    }
-
-    function clearIgnoredClipper() {
-      state.ignoredClipperUrls = [];
-      saveStateToDB();
-      renderNavigation();
-      renderClipperView();
-    }
-
-    async function processSelectedClipperItems(alsoUploadDrive) {
-      const selected = state.clipperInbox.filter(x => x.selected && !state.ignoredClipperUrls.includes(x.url));
-      if (!selected.length) return;
-      if (alsoUploadDrive && !googleToken) {
-        showToast('Connecte Google Drive pour activer le dépôt automatique par dossier UE.', 'warn');
-        return;
-      }
-
-      showToast('Téléchargement authentifié CAS et génération IA en cours...', 'info');
-      for (const item of selected) {
-        let extractedText = item.snippet || ('Support importé depuis ' + item.source + ' : ' + item.title);
-        let fileBlob = new Blob([extractedText], { type: 'text/plain;charset=utf-8' });
-
-        if (item.url && state.settings.casRelayUrl && state.settings.casRelaySecret) {
           try {
-            const res = await fetchProtectedUrlViaRelay(item.url);
-            fileBlob = await res.blob();
-            const parsedText = await extractPdfTextFromArrayBuffer(await fileBlob.arrayBuffer());
-            if (parsedText) extractedText = parsedText;
+            const parsed = await parseBinaryFile(file.name, '', buffer, ueName);
+            if (parsed) added.push(parsed);
           } catch (e) {}
         }
-
-        if (alsoUploadDrive && googleToken) {
-          try {
-            await uploadBinaryOrTextToDriveUE(item.ue, item.title.endsWith('.pdf') ? item.title : item.title + '.pdf', fileBlob);
-          } catch (err) {
-            showToast('Erreur dépôt Drive (' + item.title + ') : ' + err.message, 'error');
-          }
-        }
-
-        await createCourseFromText(item.title.replace(/\.pdf$/i, ''), item.ue, extractedText);
-        state.clipperInbox = state.clipperInbox.filter(x => x.id !== item.id);
       }
 
-      await saveStateToDB();
-      renderNavigation();
-      switchView('courses');
-    }
-
-    function renderWebmailView() {
-      const el = document.getElementById('view-webmail');
-      el.innerHTML = `
-        <div>
-          <h2 class="text-2xl font-extrabold">✉️ Automate Webmail → Action</h2>
-          <p class="text-sm text-slate-500">Transforme automatiquement les e-mails de scolarité ou d'enseignants en deadlines ou mises à jour de salle.</p>
-        </div>
-
-        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-3">
-          <h3 class="font-bold text-sm">🧪 Analyser un e-mail reçu (Zimbra / Partage Grenoble INP)</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <input id="manualMailSender" type="text" placeholder="Expéditeur (ex: enseignant@grenoble-inp.fr)" class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs" />
-            <input id="manualMailSubject" type="text" placeholder="Objet (ex: Report rendu TP2 ou changement salle)" class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs" />
-          </div>
-          <textarea id="manualMailBody" rows="3" placeholder="Colle le contenu de l'e-mail ici..." class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs"></textarea>
-          <div class="flex justify-end">
-            <button onclick="handleManualMailAnalyze()" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold">🔍 Extraire les actions</button>
-          </div>
-        </div>
-
-        <div class="space-y-4">
-          ${state.webmailInbox.map(mail => `
-            <div class="bg-white dark:bg-slate-900 rounded-2xl border ${mail.status === 'pending' ? 'border-amber-400/70' : 'border-slate-200 dark:border-slate-800 opacity-75'} p-5 space-y-3">
-              <div class="flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <span class="text-xs font-semibold text-slate-500">De : ${mail.sender}</span>
-                  <h4 class="font-bold text-base">${mail.subject}</h4>
-                </div>
-                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold ${mail.status === 'pending' ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300' : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'}">
-                  ${mail.status === 'pending' ? 'Action à valider' : 'Traité'}
-                </span>
-              </div>
-              <p class="text-xs text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl leading-relaxed">${mail.body}</p>
-              <div class="space-y-2">
-                ${(mail.proposedActions || []).map(act => `
-                  <div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-brand-50/40 dark:bg-brand-950/20">
-                    <div class="text-xs">
-                      <span class="font-bold uppercase text-brand-600 dark:text-brand-400 mr-1.5">${act.kind === 'room_change' ? '📍 Changement de salle' : '⏰ Nouvelle Deadline'}</span>
-                      <span class="font-semibold">${act.summary}</span>
-                    </div>
-                    ${act.applied
-                      ? '<span class="text-xs font-bold text-emerald-600">✓ Appliqué</span>'
-                      : `<button onclick="applyWebmailAction('${mail.id}', '${act.id}')" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shrink-0">Appliquer l'action</button>`}
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      `;
-    }
-
-    async function handleManualMailAnalyze() {
-      const sender = document.getElementById('manualMailSender').value.trim() || 'Scolarité Grenoble INP';
-      const subject = document.getElementById('manualMailSubject').value.trim() || 'Information cours';
-      const body = document.getElementById('manualMailBody').value.trim();
-      if (!body) return;
-      document.getElementById('manualMailBody').value = '';
-      await ingestWebmailPayload({ sender, subject, body });
-    }
-
-    async function analyzeEmailWithAI(sender, subject, body) {
-      const apiKey = state.settings.geminiApiKey.trim();
-      if (apiKey) {
-        try {
-          const prompt = 'Analyse cet e-mail universitaire et détecte changement de salle ou deadline. Réponds UNIQUEMENT en JSON [{kind: "room_change"|"deadline", ue, targetEventTitle, newLocation, title, dueDate, summary}]. Sujet: ' + subject + '. Corps: ' + body;
-          const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + encodeURIComponent(apiKey), {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: 'application/json' } })
-          });
-          const data = await res.json();
-          const txt = data.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (txt) return JSON.parse(txt).map((p, idx) => ({ id: 'act-' + Date.now() + '-' + idx, applied: false, ...p }));
-        } catch (e) {}
-      }
-
-      const actions = [];
-      const roomMatch = body.match(/(?:salle|amphi)\s+([A-Z0-9éèêàâîïôûü\- ]{2,25})/i);
-      if (/salle|amphi|déplacé|reporté/i.test(subject + ' ' + body) && roomMatch) {
-        actions.push({ id: 'act-' + Date.now() + '-r', kind: 'room_change', ue: 'UE Détectée', targetEventTitle: subject, newLocation: roomMatch[0].trim(), summary: 'Mettre à jour le lieu → ' + roomMatch[0].trim(), applied: false });
-      }
-      if (/rendu|rapport|devoir|déposer|échéance|avant le/i.test(subject + ' ' + body) || !actions.length) {
-        actions.push({ id: 'act-' + Date.now() + '-d', kind: 'deadline', ue: 'UE Mail', title: subject, dueDate: new Date(Date.now() + 4 * 86400000).toISOString().split('T')[0], summary: 'Créer la deadline « ' + subject + ' »', applied: false });
-      }
-      return actions;
-    }
-
-    function applyWebmailAction(mailId, actionId) {
-      const mail = state.webmailInbox.find(m => m.id === mailId);
-      const act = mail?.proposedActions?.find(a => a.id === actionId);
-      if (!act) return;
-
-      if (act.kind === 'room_change') {
-        const allEvs = getAllCombinedEvents();
-        const target = allEvs.find(e => e.title.toLowerCase().includes((act.ue || '').toLowerCase())) || allEvs[0];
-        if (target) {
-          target.location = act.newLocation;
-          target.roomUpdated = true;
-        }
-        showToast('Salle mise à jour : ' + act.newLocation, 'success');
-      } else {
-        state.deadlines.push({
-          id: 'dl-' + Date.now(),
-          title: act.title || mail.subject,
-          ue: act.ue || 'Mail Scolarité',
-          type: 'Rendu Mail',
-          dueDate: act.dueDate || new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0],
-          done: false
-        });
-        showToast('Deadline ajoutée depuis le webmail !', 'success');
-      }
-
-      act.applied = true;
-      if (mail.proposedActions.every(a => a.applied)) mail.status = 'done';
-      saveStateToDB();
-      renderNavigation();
-      renderWebmailView();
-    }
-
-    function renderCalendarView() {
-      const el = document.getElementById('view-calendar');
-      const combinedEvents = getAllCombinedEvents();
-      const allUEs = Array.from(new Set([...(state.filters.enabledUEs || []), ...(state.filters.disabledUEs || []), ...combinedEvents.map(e => e.ue)]));
-      const allGroups = Array.from(new Set([...(state.filters.allowedGroups || []), ...(state.filters.blockedGroups || []), ...combinedEvents.map(e => e.group)]));
-      const horizonLimit = Date.now() + calendarHorizonDays * 86400000;
-      const pastCutoff = Date.now() - 86400000;
-      const visibleEvents = getFilteredEvents().filter(ev => {
-        const t = new Date(ev.start).getTime();
-        return t >= pastCutoff && t <= horizonLimit;
-      });
-
-      const groupedByDay = new Map();
-      visibleEvents.forEach(ev => {
-        const dayKey = ev.start.split('T')[0];
-        if (!groupedByDay.has(dayKey)) groupedByDay.set(dayKey, []);
-        groupedByDay.get(dayKey).push(ev);
-      });
-
-      const selectedCalIds = state.settings.selectedCalendarIds || [];
-      const relayReady = !!(state.settings.casRelayUrl && state.settings.casRelaySecret);
-      const lastSyncLabel = state.settings.adeLastSyncAt
-        ? 'Synchronisé à ' + new Date(state.settings.adeLastSyncAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
-        : 'Jamais synchronisé';
-
-      el.innerHTML = `
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h2 class="text-2xl font-extrabold">📅 Planning ADE (Mise à jour automatique via Relais CAS)</h2>
-            <p class="text-sm text-slate-500">Synchronisation automatique à l'ouverture sur Opera GX (PC) et Brave (Téléphone), sans fichier .ics manuel.</p>
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <button onclick="syncAdeFromRelay(false)" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold shadow-sm ${isSyncingAde ? 'opacity-60 pointer-events-none' : ''}">
-              ${isSyncingAde ? '⏳ Connexion CAS en cours...' : '🔄 Actualiser ADE maintenant'}
-            </button>
-          </div>
-        </div>
-
-        <div class="bg-gradient-to-r from-brand-50 to-indigo-50 dark:from-brand-950/40 dark:to-indigo-950/40 border border-brand-200 dark:border-brand-800 rounded-2xl p-5 space-y-3">
-          <div class="flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <h3 class="font-bold text-sm text-brand-900 dark:text-brand-200">🔐 Connexion directe à ton Worker Cloudflare CAS</h3>
-              <p class="text-xs text-slate-600 dark:text-slate-300">Ton Worker utilise les variables <code>CAS_USER</code>, <code>CAS_PASS</code> et <code>ADE_URL</code> enregistrées sur Cloudflare.</p>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="px-2.5 py-1 rounded-full text-[11px] font-bold ${relayReady ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'}">
-                ${relayReady ? '✓ Relais CAS configuré' : '⚠️ Secret requis'}
-              </span>
-              ${state.adeImportedEvents.length > 0 ? `<span class="px-2.5 py-1 rounded-full bg-brand-600 text-white text-[11px] font-bold">${state.adeImportedEvents.length} créneaux • ${lastSyncLabel}</span>` : ''}
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-12 gap-2">
-            <input id="inlineRelayUrl" type="text" value="${state.settings.casRelayUrl || ''}" placeholder="https://studyflow-cas-relay.phoenix-et-phoenix.workers.dev" class="md:col-span-5 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs" />
-            <input id="inlineRelaySecret" type="password" value="${state.settings.casRelaySecret || ''}" placeholder="Secret API_SECRET Cloudflare" class="md:col-span-4 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs" />
-            <button onclick="syncAdeFromRelay(false)" class="md:col-span-3 px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold">
-              ⚡ Connecter & Synchroniser
-            </button>
-          </div>
-
-          <details class="text-xs text-slate-500">
-            <summary class="cursor-pointer font-semibold hover:text-brand-600">Optionnel : surcharger l'URL ADE configurée sur Cloudflare</summary>
-            <input id="inlineAdeOverrideUrl" type="text" value="${state.settings.adeCustomOverrideUrl || ''}" placeholder="Laisser vide pour utiliser la variable ADE_URL de Cloudflare..." class="mt-2 w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs" />
-          </details>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-5 h-fit">
-            <div>
-              <div class="flex items-center justify-between mb-2">
-                <label class="text-xs font-bold uppercase text-slate-500">Agendas Google associés</label>
-                <button onclick="fetchGoogleCalendars()" class="text-[11px] font-semibold text-brand-600 hover:underline">Actualiser</button>
-              </div>
-              <div class="space-y-1.5 max-h-40 overflow-y-auto pr-1">
-                ${state.calendars.map(c => {
-                  const checked = selectedCalIds.includes(c.id);
-                  return `
-                    <label class="flex items-center gap-2.5 p-2 rounded-xl border ${checked ? 'border-brand-300 dark:border-brand-800 bg-brand-50/50 dark:bg-brand-950/30' : 'border-slate-200 dark:border-slate-800'} text-xs cursor-pointer">
-                      <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleCalendarSelection('${c.id.replace(/'/g, "\\'")}', this.checked)" class="accent-brand-600 shrink-0" />
-                      <span class="font-semibold truncate">${c.summary}</span>
-                    </label>
-                  `;
-                }).join('')}
-              </div>
-            </div>
-
-            <div class="pt-3 border-t border-slate-200 dark:border-slate-800">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-bold uppercase text-slate-500">Filtres UE & Groupes</span>
-                <button onclick="toggleBypassFilters()" class="text-[11px] font-bold ${state.filters.bypassFilters ? 'text-emerald-600' : 'text-brand-600'} hover:underline">
-                  ${state.filters.bypassFilters ? '✓ Tout affiché' : 'Tout afficher'}
-                </button>
-              </div>
-              ${allGroups.length > 0 ? `
-                <div class="flex flex-wrap gap-1.5 mb-3">
-                  ${allGroups.map(grp => {
-                    const active = state.filters.bypassFilters || !state.filters.blockedGroups.includes(grp);
-                    return `<button onclick="toggleGroupFilter('${grp.replace(/'/g, "\\'")}')" class="px-2.5 py-1 rounded-lg text-xs font-bold border ${active ? 'bg-brand-600 text-white border-brand-600' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 line-through'}">${grp}</button>`;
-                  }).join('')}
-                </div>
-              ` : ''}
-              <div class="space-y-1 max-h-56 overflow-y-auto pr-1">
-                ${allUEs.map(ue => `
-                  <label class="flex items-center gap-2 py-1 text-xs cursor-pointer">
-                    <input type="checkbox" ${state.filters.bypassFilters || !state.filters.disabledUEs.includes(ue) ? 'checked' : ''} onchange="toggleUEFilter('${ue.replace(/'/g, "\\'")}', this.checked)" class="accent-brand-600 shrink-0" />
-                    <span class="truncate">${ue}</span>
-                  </label>
-                `).join('')}
-              </div>
-            </div>
-          </div>
-
-          <div class="lg:col-span-2 space-y-5">
-            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 flex flex-wrap items-center justify-between gap-3">
-              <div class="flex items-center gap-2 text-xs font-bold">
-                <span class="px-2.5 py-1 rounded-lg bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300">CM</span>
-                <span class="px-2.5 py-1 rounded-lg bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300">TD</span>
-                <span class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">TP</span>
-                <span class="text-slate-400 ml-1">• ${visibleEvents.length} séance(s)</span>
-              </div>
-              <div class="flex gap-1.5">
-                ${[7, 14, 30].map(d => `
-                  <button onclick="calendarHorizonDays = ${d}; renderCalendarView();" class="px-2.5 py-1 rounded-lg text-xs font-bold ${calendarHorizonDays === d ? 'bg-slate-900 dark:bg-brand-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}">${d} jours</button>
-                `).join('')}
-              </div>
-            </div>
-
-            ${groupedByDay.size === 0 ? `
-              <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 text-center space-y-2">
-                <p class="text-sm font-semibold">Aucune séance affichée sur cette période.</p>
-                <p class="text-xs text-slate-500">Entre ton Secret <code>API_SECRET</code> dans le cadre bleu ci-dessus et clique sur <strong>Connecter & Synchroniser</strong>.</p>
-              </div>
-            ` : Array.from(groupedByDay.entries()).map(([dayKey, dayEvents]) => {
-              const header = formatDayHeaderLabel(dayKey);
-              return `
-                <div class="space-y-2.5">
-                  <div class="flex items-center justify-between px-1">
-                    <h3 class="text-sm font-extrabold tracking-tight ${header.isToday ? 'text-brand-600 dark:text-brand-400' : 'text-slate-700 dark:text-slate-200'}">${header.title}</h3>
-                    <span class="text-xs font-semibold text-slate-400">${dayEvents.length} séance(s)</span>
-                  </div>
-                  <div class="space-y-2">
-                    ${dayEvents.map(ev => renderEventCardHtml(ev, false)).join('')}
-                  </div>
-                </div>
-              `;
-            }).join('')}
-          </div>
-        </div>
-      `;
-    }
-
-    async function toggleCalendarSelection(calId, checked) {
-      let list = [...(state.settings.selectedCalendarIds || [])];
-      if (checked) {
-        if (!list.includes(calId)) list.push(calId);
-      } else {
-        list = list.filter(x => x !== calId);
-      }
-      state.settings.selectedCalendarIds = list;
-      state.settings.selectedCalendarId = list[0] || 'primary';
-      await saveStateToDB();
-      if (googleToken) await syncSelectedGoogleCalendar();
-      else renderCalendarView();
-    }
-
-    function toggleBypassFilters() {
-      state.filters.bypassFilters = !state.filters.bypassFilters;
-      saveStateToDB();
-      renderCalendarView();
-    }
-
-    function toggleUEFilter(ue, enabled) {
-      state.filters.bypassFilters = false;
-      if (enabled) state.filters.disabledUEs = state.filters.disabledUEs.filter(x => x !== ue);
-      else if (!state.filters.disabledUEs.includes(ue)) state.filters.disabledUEs.push(ue);
-      saveStateToDB();
-      renderCalendarView();
-    }
-
-    function toggleGroupFilter(grp) {
-      state.filters.bypassFilters = false;
-      if (state.filters.blockedGroups.includes(grp)) state.filters.blockedGroups = state.filters.blockedGroups.filter(x => x !== grp);
-      else state.filters.blockedGroups.push(grp);
-      saveStateToDB();
-      renderCalendarView();
-    }
-
-    function renderDriveView() {
-      const el = document.getElementById('view-drive');
-      const visibleFiles = driveListedFiles.filter(f => !state.ignoredDriveIds.includes(f.id));
-      el.innerHTML = `
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h2 class="text-2xl font-extrabold">☁️ Google Drive & Synchronisation Cloud</h2>
-            <p class="text-sm text-slate-500">Parcours tes dossiers d'UE et fusionne ta base studyflow_db.json entre Opera GX et Brave mobile.</p>
-          </div>
-          <div class="flex gap-2">
-            <button onclick="openStudyFlowDriveRoot()" class="px-3.5 py-2 rounded-xl bg-slate-800 text-white text-xs font-semibold">📂 Dossier StudyFlow_GrenobleINP</button>
-            <button onclick="syncDriveDatabase()" class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold">🔄 Fusionner studyflow_db.json</button>
-          </div>
-        </div>
-        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4">
-          <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-            <div class="flex items-center gap-1.5 text-xs font-semibold">
-              ${driveFolderBreadcrumbs.map((b, idx) => `<button onclick="navigateDriveBreadcrumb(${idx})" class="text-brand-600 hover:underline">${b.name}</button>${idx < driveFolderBreadcrumbs.length - 1 ? ' / ' : ''}`).join('')}
-            </div>
-            <button onclick="importSelectedDriveFiles()" class="px-3.5 py-1.5 rounded-xl bg-brand-600 text-white text-xs font-semibold ${selectedDriveFileIds.size === 0 ? 'opacity-50 pointer-events-none' : ''}">✨ Importer (${selectedDriveFileIds.size})</button>
-          </div>
-          ${!googleToken ? `<div class="py-8 text-center"><button onclick="connectGoogle()" class="px-4 py-2 rounded-xl bg-brand-600 text-white text-xs font-semibold">Se connecter à Google Drive</button></div>` : `
-            <div class="divide-y divide-slate-200 dark:divide-slate-800">
-              ${visibleFiles.map(file => {
-                const isFolder = file.mimeType === 'application/vnd.google-apps.folder';
-                return `
-                  <div class="py-2.5 flex items-center justify-between">
-                    <div class="flex items-center gap-2.5">
-                      ${!isFolder ? `<input type="checkbox" ${selectedDriveFileIds.has(file.id) ? 'checked' : ''} onchange="toggleDriveFileSelection('${file.id}', this.checked)" class="accent-brand-600" />` : ''}
-                      <span>${isFolder ? '📁' : '📄'}</span>
-                      ${isFolder ? `<button onclick="openDriveFolder('${file.id}', '${file.name.replace(/'/g, "\\'")}')" class="font-semibold text-sm hover:text-brand-600">${file.name}</button>` : `<span class="text-sm">${file.name}</span>`}
-                    </div>
-                    ${!isFolder ? `<button onclick="ignoreDriveFile('${file.id}')" class="text-xs text-slate-400 hover:text-rose-600">Ignorer</button>` : ''}
-                  </div>
-                `;
-              }).join('') || '<p class="text-xs text-slate-500 py-4 text-center">Clique sur Dossier StudyFlow_GrenobleINP pour charger tes UE.</p>'}
-            </div>
-          `}
-        </div>
-      `;
-    }
-
-    async function openStudyFlowDriveRoot() {
-      if (!googleToken) return connectGoogle();
-      const rootId = await ensureDriveFolder(DRIVE_FOLDER_NAME);
-      driveFolderBreadcrumbs = [{ id: rootId, name: DRIVE_FOLDER_NAME }];
-      await listDriveFolderContents(rootId);
-    }
-
-    async function openDriveFolder(folderId, folderName) {
-      driveFolderBreadcrumbs.push({ id: folderId, name: folderName });
-      await listDriveFolderContents(folderId);
-    }
-
-    async function navigateDriveBreadcrumb(idx) {
-      const target = driveFolderBreadcrumbs[idx];
-      driveFolderBreadcrumbs = driveFolderBreadcrumbs.slice(0, idx + 1);
-      await listDriveFolderContents(target.id);
-    }
-
-    async function listDriveFolderContents(folderId) {
-      selectedDriveFileIds.clear();
-      const q = encodeURIComponent("'" + folderId + "' in parents and trashed=false and (mimeType='application/vnd.google-apps.folder' or mimeType='application/pdf' or mimeType='application/vnd.google-apps.document')");
-      const res = await googleFetch('https://www.googleapis.com/drive/v3/files?q=' + q + '&orderBy=folder,name&fields=files(id,name,mimeType)');
-      driveListedFiles = res.files || [];
-      renderDriveView();
-    }
-
-    function toggleDriveFileSelection(id, checked) {
-      if (checked) selectedDriveFileIds.add(id);
-      else selectedDriveFileIds.delete(id);
-      renderDriveView();
-    }
-
-    function ignoreDriveFile(id) {
-      state.ignoredDriveIds.push(id);
-      selectedDriveFileIds.delete(id);
-      saveStateToDB();
-      renderDriveView();
-    }
-
-    async function extractPdfTextFromArrayBuffer(buffer) {
-      if (!window.pdfjsLib) return '';
-      const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
-      let fullText = '';
-      for (let p = 1; p <= Math.min(pdf.numPages, 25); p++) {
-        const page = await pdf.getPage(p);
-        const content = await page.getTextContent();
-        fullText += content.items.map(i => i.str).join(' ') + '\n';
-      }
-      return fullText.trim();
-    }
-
-    async function importSelectedDriveFiles() {
-      const currentUe = driveFolderBreadcrumbs[driveFolderBreadcrumbs.length - 1]?.name || 'UE Drive';
-      for (const fileId of selectedDriveFileIds) {
-        const meta = driveListedFiles.find(f => f.id === fileId);
-        if (!meta) continue;
-        const res = await fetch('https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media', {
-          headers: { Authorization: 'Bearer ' + googleToken }
-        });
-        const text = await extractPdfTextFromArrayBuffer(await res.arrayBuffer());
-        await createCourseFromText(meta.name.replace(/\.pdf$/i, ''), currentUe, text || meta.name);
-      }
-      selectedDriveFileIds.clear();
-      await saveStateToDB();
-      switchView('courses');
-    }
-
-    function renderCoursesView() {
-      const el = document.getElementById('view-courses');
-      el.innerHTML = `
-        <div>
-          <h2 class="text-2xl font-extrabold">📚 Mes Cours & Supports Scientifiques (KaTeX)</h2>
-          <p class="text-sm text-slate-500">Retrouve tes synthèses, quiz et flashcards avec rendu mathématique LaTeX complet.</p>
-        </div>
-
-        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-3">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <input id="newCourseTitle" type="text" placeholder="Titre du cours" class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm" />
-            <input id="newCourseUE" type="text" placeholder="UE associée" class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm" />
-            <label class="flex items-center justify-center px-3 py-2 rounded-xl border border-dashed border-brand-500 text-brand-600 text-xs font-semibold cursor-pointer">
-              📄 Importer PDF / TXT
-              <input type="file" accept=".pdf,.txt,.md" onchange="handleLocalCourseFile(event)" class="hidden" />
-            </label>
-          </div>
-          <textarea id="newCourseText" rows="2" placeholder="Ou colle le contenu du cours (les formules $...$ et $$...$$ sont automatiquement rendues)..." class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"></textarea>
-          <div class="flex justify-end">
-            <button onclick="handleManualCourseImport()" class="px-4 py-2 rounded-xl bg-brand-600 text-white text-xs font-semibold">✨ Générer les fiches & cartes SM-2</button>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          ${state.courses.map(c => `
-            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 flex flex-col justify-between gap-4">
-              <div>
-                <div class="flex items-center justify-between">
-                  <span class="px-2.5 py-0.5 rounded-full bg-brand-50 dark:bg-brand-950 text-brand-700 dark:text-brand-300 text-xs font-bold">${c.ue}</span>
-                  <span class="text-xs text-slate-400">${(c.flashcards || []).length} carte(s) SM-2</span>
-                </div>
-                <h3 class="font-bold text-base mt-2">${c.title}</h3>
-              </div>
-              <button onclick="openCourseDetail('${c.id}')" class="w-full py-2 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-brand-600 text-white text-xs font-semibold transition">Ouvrir le support →</button>
-            </div>
-          `).join('')}
-        </div>
-      `;
-    }
-
-    async function handleLocalCourseFile(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      document.getElementById('newCourseTitle').value = file.name.replace(/\.(pdf|txt|md)$/i, '');
-      if (file.name.toLowerCase().endsWith('.pdf')) {
-        const text = await extractPdfTextFromArrayBuffer(await file.arrayBuffer());
-        document.getElementById('newCourseText').value = text;
-      } else {
-        document.getElementById('newCourseText').value = await file.text();
-      }
-    }
-
-    async function handleManualCourseImport() {
-      const title = document.getElementById('newCourseTitle').value.trim() || 'Nouveau Cours';
-      const ue = document.getElementById('newCourseUE').value.trim() || 'UE Générale';
-      const text = document.getElementById('newCourseText').value.trim();
-      if (!text) return;
-      await createCourseFromText(title, ue, text);
-      await saveStateToDB();
-      renderNavigation();
-      renderCoursesView();
-    }
-
-    async function createCourseFromText(title, ue, rawText) {
-      const apiKey = state.settings.geminiApiKey.trim();
-      let generated = null;
-      if (apiKey) {
-        try {
-          const prompt = 'Analyse ce cours d\'ingénieur (formate toutes les formules mathématiques en LaTeX $...$ ou $$...$$) et réponds en JSON valide avec les clés "summary" (markdown), "memo" (markdown), "quiz" ([{question, options, answer, explanation}]) et "flashcards" ([{front, back}]). Texte : ' + rawText.slice(0, 14000);
-          const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + encodeURIComponent(apiKey), {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: 'application/json' } })
-          });
-          const data = await res.json();
-          const txt = data.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (txt) generated = JSON.parse(txt);
-        } catch (e) {}
-      }
-
-      if (!generated) {
-        const sentences = rawText.split(/[.!?]\s+/).filter(s => s.length > 20).slice(0, 4);
-        generated = {
-          summary: '### Synthèse : ' + title + '\n' + (sentences.length ? sentences.map(s => '- ' + s.trim() + '.').join('\n') : '- ' + rawText.slice(0, 350)),
-          memo: '- **À retenir** : Vérifie les formules clés et hypothèses de **' + title + '**.',
-          quiz: [{ question: 'Quel est le sujet principal de « ' + title + ' » ?', options: [sentences[0]?.slice(0, 60) || title, "Histoire de l'art", 'Droit civil', 'Aucune réponse'], answer: 0, explanation: 'Notion extraite du support.' }],
-          flashcards: [{ front: 'Notion clé : ' + title, back: sentences[0] || rawText.slice(0, 160) }]
-        };
-      }
-
-      const now = Date.now();
-      state.courses.unshift({
-        id: 'crs-' + now + '-' + Math.random().toString(36).slice(2, 6),
-        title,
-        ue,
-        updatedAt: now,
-        rawText,
-        summary: generated.summary,
-        memo: generated.memo,
-        quiz: generated.quiz || [],
-        flashcards: (generated.flashcards || []).map((f, i) => ({
-          id: 'fc-' + now + '-' + i,
-          front: f.front,
-          back: f.back,
-          sm2: { interval: 0, repetition: 0, efactor: 2.5, nextReview: now }
-        }))
-      });
-      showToast('Support « ' + title + ' » généré !', 'success');
-    }
-
-    function openCourseDetail(courseId, tab = 'summary') {
-      const c = state.courses.find(x => x.id === courseId);
-      if (!c) return;
-      const modal = document.getElementById('courseDetailModal');
-      const container = document.getElementById('courseDetailContent');
-      let bodyHtml = '';
-      if (tab === 'summary') {
-        bodyHtml = `<div class="prose dark:prose-invert max-w-none text-sm">${marked.parse(c.summary || '')}</div><div class="mt-4 p-4 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-xs prose dark:prose-invert">${marked.parse(c.memo || '')}</div>`;
-      } else if (tab === 'quiz') {
-        bodyHtml = (c.quiz || []).map((q, qIdx) => `
-          <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 mb-3 space-y-2">
-            <div class="font-bold text-sm prose dark:prose-invert">${qIdx + 1}. ${q.question}</div>
-            ${q.options.map((opt, oIdx) => `<button onclick="this.classList.add('${oIdx === q.answer ? 'bg-emerald-600' : 'bg-rose-600'}', 'text-white')" class="block w-full text-left px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-xs">${opt}</button>`).join('')}
-          </div>
-        `).join('');
-      } else {
-        bodyHtml = (c.flashcards || []).map(fc => `
-          <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 mb-3 prose dark:prose-invert max-w-none">
-            <div class="font-bold text-sm">${marked.parse(fc.front)}</div>
-            <div class="text-xs text-slate-500 mt-1">${marked.parse(fc.back)}</div>
-          </div>
-        `).join('');
-      }
-
-      container.innerHTML = `
-        <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-          <div><span class="text-xs font-bold text-brand-600">${c.ue}</span><h3 class="font-bold text-lg">${c.title}</h3></div>
-          <button onclick="document.getElementById('courseDetailModal').classList.add('hidden')" class="text-2xl font-bold">&times;</button>
-        </div>
-        <div class="px-5 pt-2 border-b border-slate-200 dark:border-slate-800 flex gap-3">
-          <button onclick="openCourseDetail('${c.id}', 'summary')" class="pb-2 text-xs font-bold ${tab === 'summary' ? 'border-b-2 border-brand-600 text-brand-600' : 'text-slate-500'}">📝 Résumé & KaTeX</button>
-          <button onclick="openCourseDetail('${c.id}', 'quiz')" class="pb-2 text-xs font-bold ${tab === 'quiz' ? 'border-b-2 border-brand-600 text-brand-600' : 'text-slate-500'}">🎯 Quiz</button>
-          <button onclick="openCourseDetail('${c.id}', 'flashcards')" class="pb-2 text-xs font-bold ${tab === 'flashcards' ? 'border-b-2 border-brand-600 text-brand-600' : 'text-slate-500'}">🗂️ Flashcards</button>
-        </div>
-        <div class="p-5 overflow-y-auto flex-1">${bodyHtml}</div>
-      `;
-      modal.classList.remove('hidden');
-      renderMathInContainer(container);
-    }
-
-    function renderDeadlinesView() {
-      const el = document.getElementById('view-deadlines');
-      const sorted = [...state.deadlines].sort((a, b) => Number(a.done) - Number(b.done) || new Date(a.dueDate) - new Date(b.dueDate));
-      el.innerHTML = `
-        <h2 class="text-2xl font-extrabold">⏰ Deadlines & Rapports</h2>
-        <div class="space-y-3">
-          ${sorted.map(dl => `
-            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 flex items-center justify-between ${dl.done ? 'opacity-60' : ''}">
-              <div class="flex items-center gap-3">
-                <input type="checkbox" ${dl.done ? 'checked' : ''} onchange="toggleDeadlineDone('${dl.id}')" class="accent-brand-600" />
-                <div>
-                  <div class="text-xs font-bold text-brand-600">${dl.ue} • ${new Date(dl.dueDate).toLocaleDateString('fr-FR')}</div>
-                  <div class="font-bold text-sm ${dl.done ? 'line-through' : ''}">${dl.title}</div>
-                </div>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      `;
-    }
-
-    function toggleDeadlineDone(id) {
-      const dl = state.deadlines.find(d => d.id === id);
-      if (dl) dl.done = !dl.done;
-      saveStateToDB();
-      renderDeadlinesView();
-    }
-
-    function speakTextFrench(rawText) {
-      if (!('speechSynthesis' in window)) return;
-      window.speechSynthesis.cancel();
-      const clean = rawText.replace(/[\$\*#`\\]/g, ' ').replace(/\s+/g, ' ').trim();
-      const utter = new SpeechSynthesisUtterance(clean);
-      utter.lang = 'fr-FR';
-      utter.rate = 1.05;
-      window.speechSynthesis.speak(utter);
-    }
-
-    function toggleVoiceRecognition() {
-      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRec) {
-        showToast('Reconnaissance vocale non supportée sur ce navigateur.', 'warn');
+      if (!added.length) {
+        statusEl.textContent = 'Aucun texte exploitable détecté.';
+        showToast('Aucun texte exploitable trouvé dans ces fichiers.', 'warn');
         return;
       }
-      if (isListeningMic && speechRecognition) {
-        speechRecognition.stop();
-        isListeningMic = false;
-        renderTutorView();
+
+      added.forEach(doc => {
+        state.docs.unshift(doc);
+        state.selectedDocIds.add(doc.id);
+      });
+      persistDocs();
+      statusEl.textContent = added.length + ' support(s) extrait(s) et ajouté(s) à la bibliothèque.';
+      showToast(added.length + ' support(s) de cours extraits avec succès.', 'success');
+    }
+
+    function renderLibrary() {
+      const container = document.getElementById('libraryList');
+      const query = (document.getElementById('libFilterInput').value || '').toLowerCase();
+      container.innerHTML = '';
+
+      const filtered = state.docs.filter(d =>
+        d.title.toLowerCase().includes(query) ||
+        d.ue.toLowerCase().includes(query) ||
+        (d.folder || '').toLowerCase().includes(query)
+      );
+
+      if (!filtered.length) {
+        container.innerHTML = '<div class="card-subtitle">Aucun support extrait pour le moment. Importe un cours Moodle ou un ZIP Chamilo dans l’onglet 1.</div>';
         return;
       }
-      speechRecognition = new SpeechRec();
-      speechRecognition.lang = 'fr-FR';
-      speechRecognition.interimResults = false;
-      speechRecognition.onstart = () => {
-        isListeningMic = true;
-        renderTutorView();
-      };
-      speechRecognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        const input = document.getElementById('tutorInput');
-        if (input) {
-          input.value = transcript;
-          sendTutorMessage();
+
+      filtered.forEach(doc => {
+        const row = document.createElement('div');
+        row.className = 'item-row';
+        row.innerHTML = `
+          <div class="item-info">
+            <div class="item-title">${escapeHtml(doc.title)}</div>
+            <div class="item-meta">
+              <span class="pill">${escapeHtml(doc.source)}</span>
+              <strong>${escapeHtml(doc.ue)}</strong> • ${escapeHtml(doc.folder || 'Racine')} • ${doc.charCount.toLocaleString('fr-FR')} caractères
+            </div>
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="openPreviewModal('${doc.id}')">Aperçu</button>
+            <button type="button" class="btn btn-sm" onclick="sendDocToStudio('${doc.id}')">Studio IA</button>
+            <button type="button" class="btn btn-danger btn-sm" onclick="deleteDocument('${doc.id}')">Suppr.</button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function openPreviewModal(docId) {
+      const doc = state.docs.find(d => d.id === docId);
+      if (!doc) return;
+      document.getElementById('previewModalTitle').textContent = doc.title;
+      document.getElementById('previewModalBody').textContent = doc.content;
+      document.getElementById('previewModal').classList.add('open');
+    }
+
+    function closePreviewModal() {
+      document.getElementById('previewModal').classList.remove('open');
+    }
+
+    function deleteDocument(docId) {
+      state.docs = state.docs.filter(d => d.id !== docId);
+      state.selectedDocIds.delete(docId);
+      persistDocs();
+      renderLibrary();
+    }
+
+    function clearAllDocuments() {
+      if (!state.docs.length) return;
+      state.docs = [];
+      state.selectedDocIds.clear();
+      persistDocs();
+      renderLibrary();
+      showToast('Bibliothèque vidée.', 'info');
+    }
+
+    function sendDocToStudio(docId) {
+      state.selectedDocIds.clear();
+      state.selectedDocIds.add(docId);
+      switchTab('studio');
+    }
+
+    function renderStudioSelector() {
+      const container = document.getElementById('studioDocSelector');
+      container.innerHTML = '';
+      if (!state.docs.length) {
+        container.innerHTML = '<div class="card-subtitle">Aucun support disponible. Importe d’abord un cours.</div>';
+        return;
+      }
+      state.docs.forEach(doc => {
+        const row = document.createElement('label');
+        row.className = 'item-row';
+        row.style.cursor = 'pointer';
+        row.style.marginBottom = '0';
+        const checked = state.selectedDocIds.has(doc.id) ? 'checked' : '';
+        row.innerHTML = `
+          <input type="checkbox" ${checked} style="width:auto;margin:0;" onchange="toggleDocSelection('${doc.id}', this.checked)">
+          <div class="item-info">
+            <div class="item-title">${escapeHtml(doc.title)}</div>
+            <div class="item-meta">${escapeHtml(doc.ue)} • ${doc.charCount.toLocaleString('fr-FR')} caractères</div>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function toggleDocSelection(docId, isChecked) {
+      if (isChecked) {
+        state.selectedDocIds.add(docId);
+      } else {
+        state.selectedDocIds.delete(docId);
+      }
+    }
+
+    function toggleSelectAllDocs() {
+      if (state.selectedDocIds.size === state.docs.length) {
+        state.selectedDocIds.clear();
+      } else {
+        state.docs.forEach(d => state.selectedDocIds.add(d.id));
+      }
+      renderStudioSelector();
+    }
+
+    function buildStudyPrompt() {
+      const selected = state.docs.filter(d => state.selectedDocIds.has(d.id));
+      if (!selected.length) {
+        throw new Error('Sélectionne au moins un support de cours.');
+      }
+      const mode = document.getElementById('studioMode').value;
+      const focus = document.getElementById('studioFocus').value.trim();
+      const combinedCorpus = selected
+        .map(d => '=== SUPPORT : ' + d.title + ' (' + d.ue + ') ===\n' + d.content)
+        .join('\n\n')
+        .slice(0, 42000);
+
+      let instruction = '';
+      if (mode === 'fiche') {
+        instruction = 'Tu es un professeur d’école d’ingénieurs (Grenoble INP). Rédige une fiche de révision claire, structurée et rigoureuse en français à partir des supports ci-dessous : définitions exactes, concepts clés, formules ou méthodes, et points de vigilance pour l’examen.';
+      } else if (mode === 'resume') {
+        instruction = 'Rédige un résumé synthétique et structuré en français permettant de maîtriser l’essentiel des supports ci-dessous en 5 minutes.';
+      } else {
+        instruction = 'Génère un quiz de 8 questions QCM de niveau ingénieur en français à partir des supports ci-dessous. Réponds UNIQUEMENT avec un tableau JSON valide (sans texte avant ni après, sans balises markdown) au format exact : [{"question":"...","options":["A","B","C","D"],"answerIndex":0,"explanation":"..."}]';
+      }
+
+      if (focus) {
+        instruction += '\nConsigne spécifique : ' + focus;
+      }
+
+      return instruction + '\n\n' + combinedCorpus;
+    }
+
+    function copyPromptForExternalAI() {
+      try {
+        const prompt = buildStudyPrompt();
+        navigator.clipboard.writeText(prompt).then(() => {
+          showToast('Prompt complet copié dans le presse-papiers !', 'success');
+        });
+      } catch (err) {
+        showToast(err.message, 'warn');
+      }
+    }
+
+    async function generateStudyMaterial() {
+      let prompt = '';
+      try {
+        prompt = buildStudyPrompt();
+      } catch (err) {
+        showToast(err.message, 'warn');
+        return;
+      }
+
+      if (!state.settings.aiEndpoint || !state.settings.aiKey) {
+        showToast('Aucune clé API configurée dans Réglages. Utilise « Copier le prompt » ou renseigne ta clé API.', 'warn');
+        return;
+      }
+
+      const mode = document.getElementById('studioMode').value;
+      const btn = document.getElementById('btnGenerateAI');
+      btn.disabled = true;
+      btn.textContent = 'Génération en cours...';
+
+      try {
+        const res = await fetch(state.settings.aiEndpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + state.settings.aiKey
+          },
+          body: JSON.stringify({
+            model: state.settings.aiModel || 'llama-3.3-70b-versatile',
+            messages: [{ role: 'user', content: prompt }],
+            temperature: 0.3
+          })
+        });
+
+        if (!res.ok) {
+          throw new Error('Erreur API IA (' + res.status + ')');
         }
-      };
-      speechRecognition.onerror = () => {
-        isListeningMic = false;
-        renderTutorView();
-      };
-      speechRecognition.onend = () => {
-        isListeningMic = false;
-        renderTutorView();
-      };
-      speechRecognition.start();
-    }
 
-    function startColleOraleFromDashboard() {
-      colleModeActive = true;
-      switchView('tutor');
-      triggerColleQuestion();
-    }
+        const data = await res.json();
+        const rawOutput = data.choices?.[0]?.message?.content || '';
+        state.lastStudioText = rawOutput;
 
-    async function triggerColleQuestion() {
-      colleModeActive = true;
-      const ueCourses = state.courses.filter(c => c.ue === colleSelectedUE);
-      const refCourse = ueCourses[0] || state.courses[0];
-      const prompt = "Mode Colle Orale activé sur l'UE **" + colleSelectedUE + "**. Pose-moi une première question orale précise et technique issue du cours « " + (refCourse?.title || colleSelectedUE) + " » (avec une équation ou un cas concret si pertinent), et attends ma réponse avant de me noter sur 20.";
-      state.chatHistory.push({ role: 'user', text: '🎙️ Démarrer une colle orale sur : ' + colleSelectedUE });
-      await generateTutorReply(prompt, true);
-    }
+        const card = document.getElementById('studioResultCard');
+        const box = document.getElementById('studioOutputBox');
+        const quizBox = document.getElementById('studioQuizContainer');
+        const titleEl = document.getElementById('studioResultTitle');
 
-    function renderTutorView() {
-      const el = document.getElementById('view-tutor');
-      const allUEs = Array.from(new Set(state.courses.map(c => c.ue)));
-      if (!allUEs.includes(colleSelectedUE) && allUEs.length) colleSelectedUE = allUEs[0];
+        card.style.display = 'block';
+        quizBox.innerHTML = '';
 
-      el.innerHTML = `
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h2 class="text-2xl font-extrabold">🎙️ Tuteur IA & Mode Colle Orale</h2>
-            <p class="text-sm text-slate-500">Pose tes questions à l'écrit ou passe en interrogation orale vocale (micro + synthèse vocale).</p>
-          </div>
-          <div class="flex flex-wrap items-center gap-2">
-            <select onchange="colleSelectedUE = this.value" class="px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-semibold">
-              ${allUEs.map(ue => `<option value="${ue}" ${ue === colleSelectedUE ? 'selected' : ''}>${ue}</option>`).join('')}
-            </select>
-            <button onclick="triggerColleQuestion()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-sm">🎓 Lancer une Colle Orale</button>
-          </div>
-        </div>
-
-        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col h-[62vh]">
-          <div id="chatMessages" class="flex-1 p-5 overflow-y-auto space-y-3">
-            ${state.chatHistory.map((m, idx) => `
-              <div class="flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}">
-                <div class="max-w-[82%] p-3.5 rounded-2xl text-sm ${m.role === 'user' ? 'bg-brand-600 text-white' : 'bg-slate-100 dark:bg-slate-800 prose dark:prose-invert'}">
-                  ${m.role === 'user' ? m.text : marked.parse(m.text)}
-                  ${m.role === 'assistant' ? `<button onclick="speakTextFrench(state.chatHistory[${idx}].text)" class="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-brand-600 dark:text-brand-400 hover:underline">🔊 Écouter à voix haute</button>` : ''}
-                </div>
-              </div>
-            `).join('')}
-          </div>
-          <div class="p-3 border-t border-slate-200 dark:border-slate-800 flex items-center gap-2">
-            <button onclick="toggleVoiceRecognition()" title="Répondre au micro" class="p-2.5 rounded-xl border ${isListeningMic ? 'bg-rose-600 text-white border-rose-600 animate-pulse' : 'border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'} text-sm">
-              🎤
-            </button>
-            <input id="tutorInput" type="text" onkeydown="if(event.key==='Enter') sendTutorMessage()" placeholder="${colleModeActive ? "Réponds à l'examinateur à l'écrit ou au micro..." : 'Pose ta question sur tes cours du jour...'}" class="flex-1 px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm" />
-            <button onclick="sendTutorMessage()" class="px-4 py-2 rounded-xl bg-brand-600 text-white text-xs font-bold">Envoyer</button>
-          </div>
-        </div>
-      `;
-      const chatBox = document.getElementById('chatMessages');
-      if (chatBox) {
-        chatBox.scrollTop = chatBox.scrollHeight;
-        renderMathInContainer(chatBox);
-      }
-    }
-
-    function askTutorAboutEvent(eventId) {
-      const ev = getAllCombinedEvents().find(e => e.id === eventId);
-      if (!ev) return;
-      colleModeActive = false;
-      switchView('tutor');
-      document.getElementById('tutorInput').value = 'Explique-moi ma séance « ' + ev.title + ' » (' + ev.ue + ') en salle ' + ev.location + '.';
-      sendTutorMessage();
-    }
-
-    async function sendTutorMessage() {
-      const input = document.getElementById('tutorInput');
-      const text = input?.value.trim();
-      if (!text) return;
-      input.value = '';
-      state.chatHistory.push({ role: 'user', text });
-      renderTutorView();
-      await generateTutorReply(text, colleModeActive);
-    }
-
-    async function generateTutorReply(userPrompt, autoSpeak = false) {
-      const apiKey = state.settings.geminiApiKey.trim();
-      let reply = '';
-      if (apiKey) {
-        try {
-          const coursesContext = state.courses.map(c => '[' + c.ue + '] ' + c.title + ': ' + c.summary).join('\n').slice(0, 9000);
-          const systemRole = colleModeActive
-            ? "Tu es un professeur examinateur de colle orale à Grenoble INP sur l'UE " + colleSelectedUE + ". Évalue la réponse de l'étudiant avec bienveillance et rigueur (note indicative /20 si applicable), corrige les imprécisions avec des formules LaTeX $...$ et pose une question de relance."
-            : 'Tu es le tuteur pédagogique IA de Grenoble INP. Utilise LaTeX $...$ et $$...$$ pour les formules.';
-          const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + encodeURIComponent(apiKey), {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ contents: [{ parts: [{ text: systemRole + '\nSupports:\n' + coursesContext + '\nMessage: ' + userPrompt }] }] })
-          });
-          const data = await res.json();
-          reply = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        } catch (e) {}
-      }
-      if (!reply) {
-        if (colleModeActive) {
-          reply = '**Question de Colle (' + colleSelectedUE + ')** : Peux-tu expliquer les hypothèses principales du modèle étudié dans ton cours et écrire la relation mathématique fondamentale associée (par exemple $Q^* = \\sqrt{\\frac{2 D C_l}{C_p}}$ en gestion des stocks ou $a = \\frac{m(Z_1+Z_2)}{2}$ en transmission) ?';
+        if (mode === 'quiz') {
+          titleEl.textContent = 'Quiz interactif';
+          box.style.display = 'none';
+          renderInteractiveQuiz(rawOutput);
         } else {
-          reply = 'Voici les éléments clés basés sur tes supports (**' + state.courses.map(c => c.ue).join(', ') + '**) : vérifie les formules principales et les hypothèses de ton polycopié correspondant.';
+          titleEl.textContent = mode === 'fiche' ? 'Fiche de révision' : 'Résumé synthétique';
+          box.style.display = 'block';
+          box.textContent = rawOutput;
         }
-      }
-      state.chatHistory.push({ role: 'assistant', text: reply });
-      await saveStateToDB();
-      renderTutorView();
-      if (autoSpeak) speakTextFrench(reply);
-    }
-
-    function renderModulesView() {
-      const el = document.getElementById('view-modules');
-      el.innerHTML = `
-        <h2 class="text-2xl font-extrabold">🧩 Centre de Modules</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          ${MODULE_DEFINITIONS.map(mod => `
-            <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4">
-              <div>
-                <div class="text-xs font-bold text-slate-400">${mod.icon} ${mod.category}</div>
-                <h3 class="font-bold text-base">${mod.name}</h3>
-                <p class="text-xs text-slate-500">${mod.desc}</p>
-              </div>
-              <input type="checkbox" ${state.modules[mod.id] ? 'checked' : ''} onchange="toggleModule('${mod.id}', this.checked)" class="w-5 h-5 accent-brand-600" />
-            </div>
-          `).join('')}
-        </div>
-      `;
-    }
-
-    function toggleModule(id, enabled) {
-      state.modules[id] = enabled;
-      saveStateToDB();
-      renderNavigation();
-      renderModulesView();
-    }
-
-    function openSettingsModal() {
-      document.getElementById('inputRelayUrl').value = state.settings.casRelayUrl || '';
-      document.getElementById('inputRelaySecret').value = state.settings.casRelaySecret || '';
-      document.getElementById('inputClientId').value = state.settings.googleClientId || '';
-      document.getElementById('inputGeminiKey').value = state.settings.geminiApiKey || '';
-      document.getElementById('settingsModal').classList.remove('hidden');
-    }
-
-    function closeSettingsModal() {
-      document.getElementById('settingsModal').classList.add('hidden');
-    }
-
-    async function saveSettings() {
-      state.settings.casRelayUrl = document.getElementById('inputRelayUrl').value.trim().replace(/\/+$/, '');
-      state.settings.casRelaySecret = document.getElementById('inputRelaySecret').value.trim();
-      state.settings.googleClientId = document.getElementById('inputClientId').value.trim();
-      state.settings.geminiApiKey = document.getElementById('inputGeminiKey').value.trim();
-      await saveStateToDB();
-      closeSettingsModal();
-      showToast('Paramètres enregistrés.', 'success');
-      if (state.settings.casRelayUrl && state.settings.casRelaySecret) {
-        await syncAdeFromRelay(false);
+        showToast('Génération terminée.', 'success');
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Générer avec l’API IA';
       }
     }
 
-    function exportJsonBackup() {
+    function loadPastedQuiz() {
+      const raw = document.getElementById('pasteQuizJson').value.trim();
+      if (!raw) return;
+      state.lastStudioText = raw;
+      document.getElementById('studioResultCard').style.display = 'block';
+      document.getElementById('studioResultTitle').textContent = 'Quiz interactif';
+      document.getElementById('studioOutputBox').style.display = 'none';
+      renderInteractiveQuiz(raw);
+    }
+
+    function renderInteractiveQuiz(rawJsonText) {
+      const container = document.getElementById('studioQuizContainer');
+      container.innerHTML = '';
+      let questions = [];
+      try {
+        const cleaned = rawJsonText.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
+        questions = JSON.parse(cleaned);
+      } catch (e) {
+        document.getElementById('studioOutputBox').style.display = 'block';
+        document.getElementById('studioOutputBox').textContent = rawJsonText;
+        showToast('Format JSON invalide pour le mode quiz interactif, affichage brut.', 'warn');
+        return;
+      }
+
+      questions.forEach((q, qIdx) => {
+        const card = document.createElement('div');
+        card.className = 'quiz-card';
+        const qTitle = document.createElement('div');
+        qTitle.className = 'quiz-q';
+        qTitle.textContent = (qIdx + 1) + '. ' + q.question;
+        card.appendChild(qTitle);
+
+        const expDiv = document.createElement('div');
+        expDiv.className = 'quiz-exp';
+        expDiv.style.display = 'none';
+        expDiv.textContent = q.explanation || '';
+
+        (q.options || []).forEach((optText, optIdx) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'quiz-opt';
+          btn.textContent = optText;
+          btn.onclick = () => {
+            const allBtns = card.querySelectorAll('.quiz-opt');
+            allBtns.forEach((b, i) => {
+              b.disabled = true;
+              if (i === q.answerIndex) b.classList.add('correct');
+              else if (i === optIdx) b.classList.add('wrong');
+            });
+            if (q.explanation) expDiv.style.display = 'block';
+          };
+          card.appendChild(btn);
+        });
+
+        card.appendChild(expDiv);
+        container.appendChild(card);
+      });
+    }
+
+    function copyStudioOutput() {
+      if (!state.lastStudioText) return;
+      navigator.clipboard.writeText(state.lastStudioText).then(() => {
+        showToast('Contenu copié.', 'success');
+      });
+    }
+
+    function exportStudioMarkdown() {
+      if (!state.lastStudioText) return;
+      const blob = new Blob([state.lastStudioText], { type: 'text/markdown;charset=utf-8' });
       const a = document.createElement('a');
-      a.href = URL.createObjectURL(new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' }));
-      a.download = 'studyflow_backup.json';
+      a.href = URL.createObjectURL(blob);
+      a.download = 'StudyFlow_Export_' + new Date().toISOString().slice(0, 10) + '.md';
       a.click();
     }
 
-    function importJsonBackup(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        mergeStates(JSON.parse(e.target.result));
-        await saveStateToDB();
-        renderNavigation();
-        renderCurrentView();
-        closeSettingsModal();
+    function parseIcsDate(raw) {
+      const clean = raw.replace(/^.*:/, '').trim();
+      const m = clean.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})(Z?)$/);
+      if (!m) return null;
+      if (m[7] === 'Z') {
+        return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]));
+      }
+      return new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]);
+    }
+
+    function parseIcsEvents(icsText) {
+      const unfolded = icsText.replace(/\r?\n[ \t]/g, '');
+      const blocks = unfolded.split('BEGIN:VEVENT').slice(1);
+      const events = [];
+      for (const block of blocks) {
+        const endIdx = block.indexOf('END:VEVENT');
+        const body = endIdx >= 0 ? block.slice(0, endIdx) : block;
+        const getField = name => {
+          const re = new RegExp('^' + name + '(?:;[^:]*)?:(.*)$', 'm');
+          const match = body.match(re);
+          return match ? match[1].replace(/\\n/g, ' ').replace(/\\,/g, ',').trim() : '';
+        };
+        const start = parseIcsDate(getField('DTSTART'));
+        const end = parseIcsDate(getField('DTEND'));
+        if (!start) continue;
+        events.push({
+          summary: getField('SUMMARY') || 'Cours ADE',
+          location: getField('LOCATION') || 'Salle non précisée',
+          description: getField('DESCRIPTION'),
+          start: start.toISOString(),
+          end: end ? end.toISOString() : start.toISOString()
+        });
+      }
+      return events.sort((a, b) => new Date(a.start) - new Date(b.start));
+    }
+
+    async function syncAdeSchedule() {
+      const btn = document.getElementById('btnSyncAde');
+      btn.disabled = true;
+      btn.textContent = 'Synchronisation...';
+      try {
+        const res = await callWorker('/ade', { url: state.settings.adeUrl });
+        const icsText = await res.text();
+        const events = parseIcsEvents(icsText);
+        state.adeEvents = events;
+        localStorage.setItem(STORAGE_KEYS.ade, JSON.stringify(events));
+        renderAdeEvents();
+        showToast(events.length + ' créneau(x) ADE synchronisé(s).', 'success');
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Synchroniser ADE';
+      }
+    }
+
+    function renderAdeEvents() {
+      const container = document.getElementById('adeEventsList');
+      container.innerHTML = '';
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+      const upcoming = state.adeEvents.filter(ev => new Date(ev.end) >= now).slice(0, 40);
+
+      if (!upcoming.length) {
+        container.innerHTML = '<div class="card-subtitle">Aucun créneau à venir en cache. Clique sur « Synchroniser ADE ».</div>';
+        return;
+      }
+
+      upcoming.forEach(ev => {
+        const startDate = new Date(ev.start);
+        const endDate = new Date(ev.end);
+        const dayStr = startDate.toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: 'short' });
+        const timeStr = startDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) + ' - ' + endDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+        const row = document.createElement('div');
+        row.className = 'item-row';
+        row.innerHTML = `
+          <div class="item-info">
+            <div class="item-title">${escapeHtml(ev.summary)}</div>
+            <div class="item-meta"><span class="pill">${escapeHtml(dayStr)} • ${escapeHtml(timeStr)}</span> ${escapeHtml(ev.location)}</div>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function exportBackupJson() {
+      const payload = {
+        exportedAt: new Date().toISOString(),
+        settings: state.settings,
+        docs: state.docs
       };
-      reader.readAsText(file);
-    }
-
-    async function resetDemoData() {
-      const keep = { ...state.settings };
-      state = getDefaultState();
-      state.settings = keep;
-      await saveStateToDB();
-      renderNavigation();
-      renderCurrentView();
-      closeSettingsModal();
-    }
-
-    function downloadStandaloneApp() {
-      const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
       const a = document.createElement('a');
-      a.href = URL.createObjectURL(new Blob([html], { type: 'text/html;charset=utf-8' }));
-      a.download = 'index.html';
+      a.href = URL.createObjectURL(blob);
+      a.download = 'StudyFlow_Backup_' + new Date().toISOString().slice(0, 10) + '.json';
       a.click();
     }
 
-    (async function initApp() {
-      initPwaManifestAndIcons();
-      await loadStateFromDB();
-      applyTheme();
-      renderNavigation();
-      renderCurrentView();
-      if (state.settings.casRelayUrl && state.settings.casRelaySecret) {
-        syncAdeFromRelay(true);
-      }
+    (function initApp() {
+      loadSettingsIntoForm();
+      updateCounts();
+      state.docs.slice(0, 5).forEach(d => state.selectedDocIds.add(d.id));
+
+      const dz = document.getElementById('archiveDropzone');
+      dz.addEventListener('dragover', e => {
+        e.preventDefault();
+        dz.classList.add('dragover');
+      });
+      dz.addEventListener('dragleave', () => {
+        dz.classList.remove('dragover');
+      });
+      dz.addEventListener('drop', e => {
+        e.preventDefault();
+        dz.classList.remove('dragover');
+        if (e.dataTransfer?.files?.length) {
+          handleLocalFiles(e.dataTransfer.files);
+        }
+      });
     })();
   </script>
 </body>
