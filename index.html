@@ -385,7 +385,7 @@
     }
 
     .cal-grid {
-      min-width: 780px;
+      min-width: 820px;
       display: grid;
       grid-template-columns: 56px repeat(6, 1fr);
     }
@@ -439,8 +439,6 @@
 
     .cal-event {
       position: absolute;
-      left: 3px;
-      right: 3px;
       border-radius: 6px;
       padding: 4px 6px;
       font-size: 11px;
@@ -448,14 +446,17 @@
       overflow: hidden;
       cursor: pointer;
       border-left: 3px solid #3b82f6;
-      background: rgba(59, 130, 246, 0.18);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(30, 41, 59, 0.92);
       color: #f8fafc;
-      transition: transform 0.1s, filter 0.15s;
+      transition: filter 0.15s, z-index 0s;
     }
 
     .cal-event:hover {
-      filter: brightness(1.15);
-      z-index: 10;
+      filter: brightness(1.18);
+      z-index: 25 !important;
     }
 
     .cal-event-time {
@@ -731,7 +732,7 @@
           </div>
           <div class="bookmarklet-box">
             <div style="font-size:12px;font-weight:600;margin-bottom:6px;">1. Installe le favori d’extraction récursive Chamilo :</div>
-            <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Glisse ce bouton dans ta barre de favoris (ou copie son code). Depuis un cours Chamilo, un clic explore tous les sous-dossiers et télécharge tous les documents.</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Glisse ce bouton dans ta barre de favoris (ou copie son code). Depuis un cours Chamilo, un clic explore tous les sous-dossiers et télécharge uniquement les vrais documents (sans .php ni slideshow).</div>
             <div class="btn-row">
               <a id="chamiloBookmarkletAnchor" class="bookmarklet-link" href="#">StudyFlow : Télécharger Chamilo</a>
               <button type="button" class="btn btn-secondary btn-sm" onclick="copyBookmarkletCode()">Copier le code du favori</button>
@@ -870,7 +871,7 @@
       navigator.serviceWorker.register('./sw.js').catch(() => {});
     }
 
-    const BOOKMARKLET_CODE = "javascript:(function(){if(!location.hostname.includes('chamilo.grenoble-inp.fr')){alert('Ouvre d’abord un cours sur Chamilo Grenoble INP.');return;}const old=document.getElementById('sfChamiloBox');if(old)old.remove();const box=document.createElement('div');box.id='sfChamiloBox';box.style.cssText='position:fixed;bottom:20px;right:20px;z-index:999999;background:#0f172a;color:#f1f5f9;padding:16px 18px;border-radius:12px;font-family:system-ui,-apple-system,sans-serif;font-size:13px;box-shadow:0 12px 30px rgba(0,0,0,0.45);border:1px solid #334155;max-width:340px;';box.textContent='Analyse récursive des dossiers Chamilo...';document.body.appendChild(box);const queue=[{url:location.href,folder:'Racine'}];const visited=new Set();const files=new Map();const getFolderKey=u=>{try{const p=new URL(u);return(p.searchParams.get('cidReq')||'')+'_'+(p.searchParams.get('id')||p.searchParams.get('curdirpath')||'root');}catch(e){return u;}};visited.add(getFolderKey(location.href));const sanitize=s=>s.replace(/[<>:\"/\\\\|?*\\x00-\\x1F]/g,'_').replace(/\\s+/g,' ').trim();(async()=>{while(queue.length){const{url,folder}=queue.shift();box.textContent='Exploration : '+visited.size+' dossier(s), '+files.size+' fichier(s)...';try{const res=await fetch(url,{credentials:'include'});const html=await res.text();const doc=new DOMParser().parseFromString(html,'text/html');for(const a of doc.querySelectorAll('a[href]')){const raw=a.getAttribute('href');if(!raw||raw.startsWith('#')||raw.startsWith('javascript:'))continue;let full='';try{full=new URL(raw,url).toString();}catch(e){continue;}const label=sanitize(a.textContent||a.getAttribute('title')||'');const isDownloadAction=full.includes('action=download')&&!full.includes('downloadfolder');const isDirectDoc=/\\.(pdf|docx?|pptx?|xlsx?|odt|odp|txt|md)(\\?|$)/i.test(full)||full.includes('showinframes.php')||(full.includes('/document/')&&!full.includes('document.php'));if(isDownloadAction||isDirectDoc){let targetUrl=full;if(full.includes('showinframes.php')){try{const fParam=new URL(full).searchParams.get('file');if(fParam)targetUrl=new URL(fParam,full).toString();}catch(e){}}const fileKey=targetUrl.replace(/[&?]_=[^&]+/,'');if(!files.has(fileKey)){const fallbackName=decodeURIComponent(targetUrl.split('/').pop().split('?')[0]||'document');files.set(fileKey,{url:targetUrl,name:label||fallbackName,folder:folder});}}else if(full.includes('document.php')&&full.includes('cidReq=')&&(/[?&]id=\\d+/.test(full)||full.includes('curdirpath='))&&!/action=|delete|move|edit|visible|export|sort|curdirpath=\\.\\./i.test(full)){const k=getFolderKey(full);if(!visited.has(k)){visited.add(k);queue.push({url:full,folder:label||folder});}}}}catch(e){}await new Promise(r=>setTimeout(r,100));}const list=[...files.values()];if(!list.length){box.textContent='Aucun document détecté dans ce cours.';setTimeout(()=>box.remove(),4000);return;}const downloadSingle=async(item)=>{const r=await fetch(item.url,{credentials:'include'});const blob=await r.blob();let fname=item.name;const cd=r.headers.get('content-disposition')||'';const m=cd.match(/filename\\*?=(?:UTF-8'')?[\"']?([^\"';\\n]+)[\"']?/i);if(m&&m[1])fname=sanitize(decodeURIComponent(m[1]));if(!/\\.[a-z0-9]{2,5}$/i.test(fname)){const ext=(blob.type.split('/')[1]||'pdf').replace('vnd.openxmlformats-officedocument.wordprocessingml.document','docx').replace('vnd.openxmlformats-officedocument.presentationml.presentation','pptx');fname+='.'+ext;}const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fname;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);};box.innerHTML='<div style=\"font-weight:700;margin-bottom:6px;\">'+list.length+' fichier(s) dans '+visited.size+' dossier(s)</div><div style=\"font-size:12px;color:#94a3b8;margin-bottom:10px;\">Téléchargement direct vers ton dossier Téléchargements</div><div style=\"display:flex;gap:8px;\"><button id=\"sfDlAll\" style=\"flex:1;background:#3b82f6;color:#fff;border:none;padding:8px 10px;border-radius:8px;font-weight:600;cursor:pointer;\">Tout télécharger</button><button id=\"sfClose\" style=\"background:#1e293b;color:#cbd5e1;border:1px solid #334155;padding:8px 10px;border-radius:8px;cursor:pointer;\">Fermer</button></div>';document.getElementById('sfClose').onclick=()=>box.remove();document.getElementById('sfDlAll').onclick=async()=>{const btn=document.getElementById('sfDlAll');btn.disabled=true;for(let i=0;i<list.length;i++){btn.textContent='Téléchargement '+(i+1)+'/'+list.length+'...';try{await downloadSingle(list[i]);}catch(e){}await new Promise(r=>setTimeout(r,350));}box.textContent='Téléchargement terminé ('+list.length+' fichiers). Glisse-les dans StudyFlow IA !';setTimeout(()=>box.remove(),4000);};})();})();";
+    const BOOKMARKLET_CODE = "javascript:(function(){if(!location.hostname.includes('chamilo.grenoble-inp.fr')){alert('Ouvre d’abord un cours sur Chamilo Grenoble INP.');return;}const old=document.getElementById('sfChamiloBox');if(old)old.remove();const box=document.createElement('div');box.id='sfChamiloBox';box.style.cssText='position:fixed;bottom:20px;right:20px;z-index:999999;background:#0f172a;color:#f1f5f9;padding:16px 18px;border-radius:12px;font-family:system-ui,-apple-system,sans-serif;font-size:13px;box-shadow:0 12px 30px rgba(0,0,0,0.45);border:1px solid #334155;max-width:350px;';box.textContent='Analyse récursive des dossiers Chamilo...';document.body.appendChild(box);const queue=[{url:location.href,folder:'Racine'}];const visited=new Set();const files=new Map();const getFolderKey=u=>{try{const p=new URL(u);return(p.searchParams.get('cidReq')||'')+'_'+(p.searchParams.get('id')||p.searchParams.get('curdirpath')||'root');}catch(e){return u;}};visited.add(getFolderKey(location.href));const sanitize=s=>s.replace(/[<>:\"/\\\\|?*\\x00-\\x1F]/g,'_').replace(/\\s+/g,' ').trim();const docExtRegex=/\\.(pdf|docx?|pptx?|xlsx?|odt|odp|ods|txt|md|csv|rtf)(\\?|$)/i;const isFolderLink=u=>{try{const p=new URL(u);if(!p.pathname.endsWith('/document.php'))return false;if(!p.searchParams.get('cidReq'))return false;if(p.searchParams.get('action')||p.searchParams.get('sort')||p.searchParams.get('direction'))return false;const id=p.searchParams.get('id');const dir=p.searchParams.get('curdirpath');if(dir&&dir!=='/'&&dir!=='..')return true;return Boolean(id&&/^\\d+$/.test(id)&&id!=='0');}catch(e){return false;}};const resolveViewerUrl=async viewerUrl=>{try{const u=new URL(viewerUrl);const fParam=u.searchParams.get('file');if(fParam){const resolved=new URL(fParam,viewerUrl).toString();if(docExtRegex.test(resolved))return resolved;}const res=await fetch(viewerUrl,{credentials:'include'});const html=await res.text();const doc=new DOMParser().parseFromString(html,'text/html');for(const el of doc.querySelectorAll('iframe[src],embed[src],object[data],a[href]')){const raw=el.getAttribute('src')||el.getAttribute('data')||el.getAttribute('href');if(!raw)continue;const cand=new URL(raw,viewerUrl).toString();if(cand.includes('action=download')||docExtRegex.test(cand))return cand;}}catch(e){}return null;};(async()=>{while(queue.length){const{url,folder}=queue.shift();box.textContent='Exploration : '+visited.size+' dossier(s), '+files.size+' support(s)...';try{const res=await fetch(url,{credentials:'include'});const html=await res.text();const doc=new DOMParser().parseFromString(html,'text/html');for(const a of doc.querySelectorAll('a[href]')){const raw=a.getAttribute('href');if(!raw||raw.startsWith('#')||raw.startsWith('javascript:'))continue;let full='';try{full=new URL(raw,url).toString();}catch(e){continue;}if(/slideshow\\.php|create_document\\.php|upload\\.php|record_audio\\.php|export_to_pdf/i.test(full))continue;const label=sanitize(a.textContent||a.getAttribute('title')||'');const isDownloadAction=full.includes('document.php')&&full.includes('action=download')&&!full.includes('downloadfolder');const isDirectDoc=docExtRegex.test(full)&&!/\\.php(\\?|$)/i.test(new URL(full).pathname);const isViewer=full.includes('showinframes.php');if(isDownloadAction||isDirectDoc||isViewer){let targetUrl=full;if(isViewer){targetUrl=await resolveViewerUrl(full);if(!targetUrl)continue;}const parsed=new URL(targetUrl);const docId=parsed.searchParams.get('id');const dedupKey=docId&&parsed.pathname.endsWith('/document.php')?'id_'+docId:parsed.origin+parsed.pathname;if(!files.has(dedupKey)){const fallbackName=decodeURIComponent(parsed.pathname.split('/').pop()||'document');files.set(dedupKey,{url:targetUrl,name:label&&!/^télécharger$/i.test(label)?label:fallbackName,folder:folder});}}else if(isFolderLink(full)){const k=getFolderKey(full);if(!visited.has(k)){visited.add(k);queue.push({url:full,folder:label||folder});}}}}catch(e){}await new Promise(r=>setTimeout(r,100));}const list=[...files.values()];if(!list.length){box.textContent='Aucun support détecté dans ce cours.';setTimeout(()=>box.remove(),4000);return;}const downloadSingle=async item=>{const r=await fetch(item.url,{credentials:'include'});const ct=(r.headers.get('content-type')||'').toLowerCase();if(ct.includes('text/html'))return false;const blob=await r.blob();let fname=item.name.replace(/\\.php$/i,'');const cd=r.headers.get('content-disposition')||'';const m=cd.match(/filename\\*?=(?:UTF-8'')?[\"']?([^\"';\\n]+)[\"']?/i);if(m&&m[1])fname=sanitize(decodeURIComponent(m[1]));if(!/\\.(pdf|docx?|pptx?|xlsx?|odt|odp|ods|txt|md|csv|rtf)$/i.test(fname)){const ext=(blob.type.split('/')[1]||'pdf').replace('vnd.openxmlformats-officedocument.wordprocessingml.document','docx').replace('vnd.openxmlformats-officedocument.presentationml.presentation','pptx').replace('vnd.openxmlformats-officedocument.spreadsheetml.sheet','xlsx');if(ext==='html'||ext==='php')return false;fname+='.'+ext;}const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fname;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);return true;};box.innerHTML='<div style=\"font-weight:700;margin-bottom:6px;\">'+list.length+' support(s) dans '+visited.size+' dossier(s)</div><div style=\"font-size:12px;color:#94a3b8;margin-bottom:10px;\">Uniquement les documents (PDF, DOCX, PPTX, XLSX)</div><div style=\"display:flex;gap:8px;\"><button id=\"sfDlAll\" style=\"flex:1;background:#3b82f6;color:#fff;border:none;padding:8px 10px;border-radius:8px;font-weight:600;cursor:pointer;\">Tout télécharger</button><button id=\"sfClose\" style=\"background:#1e293b;color:#cbd5e1;border:1px solid #334155;padding:8px 10px;border-radius:8px;cursor:pointer;\">Fermer</button></div>';document.getElementById('sfClose').onclick=()=>box.remove();document.getElementById('sfDlAll').onclick=async()=>{const btn=document.getElementById('sfDlAll');btn.disabled=true;let okCount=0;for(let i=0;i<list.length;i++){btn.textContent='Téléchargement '+(i+1)+'/'+list.length+'...';try{const ok=await downloadSingle(list[i]);if(ok)okCount++;}catch(e){}await new Promise(r=>setTimeout(r,350));}box.textContent='Téléchargement terminé ('+okCount+' fichier(s)). Glisse-les dans StudyFlow IA !';setTimeout(()=>box.remove(),4000);};})();})();";
 
     const STORAGE_KEYS = {
       settings: 'studyflow_settings_v3',
@@ -879,12 +880,12 @@
     };
 
     const EVENT_COLORS = [
-      { bg: 'rgba(59, 130, 246, 0.22)', border: '#3b82f6' },
-      { bg: 'rgba(16, 185, 129, 0.20)', border: '#10b981' },
-      { bg: 'rgba(245, 158, 11, 0.20)', border: '#f59e0b' },
-      { bg: 'rgba(139, 92, 246, 0.22)', border: '#8b5cf6' },
-      { bg: 'rgba(236, 72, 153, 0.20)', border: '#ec4899' },
-      { bg: 'rgba(20, 184, 166, 0.22)', border: '#14b8a6' }
+      { bg: 'rgba(30, 58, 138, 0.85)', border: '#3b82f6' },
+      { bg: 'rgba(6, 78, 59, 0.85)', border: '#10b981' },
+      { bg: 'rgba(120, 53, 15, 0.85)', border: '#f59e0b' },
+      { bg: 'rgba(76, 29, 149, 0.85)', border: '#8b5cf6' },
+      { bg: 'rgba(131, 24, 67, 0.85)', border: '#ec4899' },
+      { bg: 'rgba(19, 78, 74, 0.85)', border: '#14b8a6' }
     ];
 
     function getMondayOfWeek(dateObj) {
@@ -1044,6 +1045,75 @@
       renderWeeklyCalendar();
     }
 
+    function computeNonOverlappingLayout(rawEvents) {
+      const uniqueMap = new Map();
+      for (const ev of rawEvents) {
+        const s = new Date(ev.start);
+        const e = new Date(ev.end);
+        const dedupKey = ev.summary.trim() + '|' + s.getTime() + '|' + e.getTime() + '|' + (ev.location || '').trim();
+        if (!uniqueMap.has(dedupKey)) {
+          const startMin = Math.max(0, (s.getHours() - 8) * 60 + s.getMinutes());
+          const rawEndMin = Math.min(720, (e.getHours() - 8) * 60 + e.getMinutes());
+          const endMin = Math.max(startMin + 28, rawEndMin);
+          uniqueMap.set(dedupKey, {
+            ev,
+            s,
+            e,
+            startMin,
+            endMin,
+            col: 0,
+            totalCols: 1
+          });
+        }
+      }
+
+      const items = Array.from(uniqueMap.values()).sort((a, b) => {
+        if (a.startMin !== b.startMin) return a.startMin - b.startMin;
+        return b.endMin - a.endMin;
+      });
+
+      const clusters = [];
+      let currentCluster = [];
+      let clusterEnd = -1;
+
+      for (const item of items) {
+        if (!currentCluster.length || item.startMin < clusterEnd) {
+          currentCluster.push(item);
+          clusterEnd = Math.max(clusterEnd, item.endMin);
+        } else {
+          clusters.push(currentCluster);
+          currentCluster = [item];
+          clusterEnd = item.endMin;
+        }
+      }
+      if (currentCluster.length) clusters.push(currentCluster);
+
+      for (const cluster of clusters) {
+        const colEnds = [];
+        for (const item of cluster) {
+          let placedCol = -1;
+          for (let c = 0; c < colEnds.length; c++) {
+            if (colEnds[c] <= item.startMin) {
+              placedCol = c;
+              colEnds[c] = item.endMin;
+              break;
+            }
+          }
+          if (placedCol === -1) {
+            placedCol = colEnds.length;
+            colEnds.push(item.endMin);
+          }
+          item.col = placedCol;
+        }
+        const total = colEnds.length;
+        for (const item of cluster) {
+          item.totalCols = total;
+        }
+      }
+
+      return items;
+    }
+
     function renderWeeklyCalendar() {
       const grid = document.getElementById('weeklyCalendarGrid');
       const weekLabel = document.getElementById('calWeekLabel');
@@ -1101,23 +1171,25 @@
           col.appendChild(line);
         }
 
-        const dayEvents = state.adeEvents.filter(ev => {
+        const rawDayEvents = state.adeEvents.filter(ev => {
           const s = new Date(ev.start);
           return s >= dayDate && s < nextDay;
         });
 
-        dayEvents.forEach(ev => {
-          const s = new Date(ev.start);
-          const e = new Date(ev.end);
-          const startMin = Math.max(0, (s.getHours() - 8) * 60 + s.getMinutes());
-          const endMin = Math.min(720, (e.getHours() - 8) * 60 + e.getMinutes());
-          const durationMin = Math.max(25, endMin - startMin);
+        const positionedItems = computeNonOverlappingLayout(rawDayEvents);
 
+        positionedItems.forEach(item => {
+          const { ev, s, e, startMin, endMin, col: colIdx, totalCols } = item;
+          const durationMin = endMin - startMin;
           const color = hashStringColor(ev.summary);
+
           const block = document.createElement('div');
           block.className = 'cal-event';
           block.style.top = (startMin * (50 / 60)) + 'px';
           block.style.height = (durationMin * (50 / 60) - 2) + 'px';
+          block.style.left = 'calc(' + ((colIdx / totalCols) * 100) + '% + 2px)';
+          block.style.width = 'calc(' + ((1 / totalCols) * 100) + '% - 4px)';
+          block.style.zIndex = String(5 + colIdx);
           block.style.background = color.bg;
           block.style.borderLeftColor = color.border;
 
