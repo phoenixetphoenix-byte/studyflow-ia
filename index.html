@@ -43,7 +43,7 @@
     header {
       background-color: var(--surface);
       border-bottom: 1px solid var(--border);
-      padding: 14px 24px;
+      padding: 12px 24px;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
@@ -51,7 +51,7 @@
       gap: 12px;
       position: sticky;
       top: 0;
-      z-index: 50;
+      z-index: 60;
     }
 
     .brand {
@@ -83,7 +83,7 @@
       background: transparent;
       border: 1px solid transparent;
       color: var(--muted);
-      padding: 7px 14px;
+      padding: 7px 13px;
       border-radius: 8px;
       font-size: 13px;
       font-weight: 600;
@@ -104,9 +104,9 @@
 
     main {
       width: 100%;
-      max-width: 1180px;
+      max-width: 1280px;
       margin: 0 auto;
-      padding: 24px 20px 60px;
+      padding: 20px 20px 60px;
       flex: 1;
     }
 
@@ -120,8 +120,45 @@
 
     .grid-2 {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
       gap: 18px;
+    }
+
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+
+    .stat-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .card {
@@ -134,10 +171,11 @@
 
     .card-header {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
 
     .card-title {
@@ -238,7 +276,7 @@
     .dropzone {
       border: 2px dashed var(--border);
       border-radius: var(--radius);
-      padding: 24px 16px;
+      padding: 22px 16px;
       text-align: center;
       cursor: pointer;
       background: var(--bg);
@@ -249,6 +287,27 @@
     .dropzone.dragover {
       border-color: var(--accent);
       background: rgba(59, 130, 246, 0.06);
+    }
+
+    .bookmarklet-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 14px;
+    }
+
+    .bookmarklet-link {
+      display: inline-block;
+      background: var(--surface-alt);
+      border: 1px dashed var(--accent);
+      color: #93c5fd;
+      padding: 6px 12px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: grab;
     }
 
     .item-list {
@@ -304,6 +363,135 @@
       border-color: rgba(16, 185, 129, 0.35);
     }
 
+    .cal-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .cal-week-label {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .cal-wrapper {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg);
+    }
+
+    .cal-grid {
+      min-width: 780px;
+      display: grid;
+      grid-template-columns: 56px repeat(6, 1fr);
+    }
+
+    .cal-head-cell {
+      background: var(--surface-alt);
+      border-bottom: 1px solid var(--border);
+      border-left: 1px solid var(--border);
+      padding: 8px 6px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .cal-head-cell.today {
+      color: #60a5fa;
+      background: rgba(59, 130, 246, 0.12);
+    }
+
+    .cal-head-corner {
+      background: var(--surface-alt);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .cal-time-col {
+      position: relative;
+      height: 600px;
+      background: var(--surface);
+    }
+
+    .cal-time-slot {
+      height: 50px;
+      border-bottom: 1px solid rgba(37, 48, 71, 0.55);
+      font-size: 11px;
+      color: var(--muted);
+      text-align: right;
+      padding: 2px 6px 0 0;
+    }
+
+    .cal-day-col {
+      position: relative;
+      height: 600px;
+      border-left: 1px solid var(--border);
+      background-image: linear-gradient(to bottom, rgba(37, 48, 71, 0.55) 1px, transparent 1px);
+      background-size: 100% 50px;
+    }
+
+    .cal-day-col.today {
+      background-color: rgba(59, 130, 246, 0.03);
+    }
+
+    .cal-event {
+      position: absolute;
+      left: 3px;
+      right: 3px;
+      border-radius: 6px;
+      padding: 4px 6px;
+      font-size: 11px;
+      line-height: 1.25;
+      overflow: hidden;
+      cursor: pointer;
+      border-left: 3px solid #3b82f6;
+      background: rgba(59, 130, 246, 0.18);
+      color: #f8fafc;
+      transition: transform 0.1s, filter 0.15s;
+    }
+
+    .cal-event:hover {
+      filter: brightness(1.15);
+      z-index: 10;
+    }
+
+    .cal-event-time {
+      font-weight: 700;
+      font-size: 10px;
+      opacity: 0.9;
+    }
+
+    .cal-event-title {
+      font-weight: 600;
+      margin-top: 1px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .cal-event-loc {
+      font-size: 10px;
+      opacity: 0.85;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .cal-now-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--danger);
+      z-index: 15;
+      pointer-events: none;
+    }
+
     .output-box {
       background: var(--bg);
       border: 1px solid var(--border);
@@ -314,6 +502,29 @@
       line-height: 1.65;
       max-height: 560px;
       overflow-y: auto;
+    }
+
+    .flashcard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 12px;
+    }
+
+    .flashcard {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      min-height: 140px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+    }
+
+    .flashcard.flipped {
+      border-color: var(--accent);
+      background: rgba(59, 130, 246, 0.1);
     }
 
     .quiz-card {
@@ -446,16 +657,55 @@
       <span class="brand-badge">Grenoble INP</span>
     </div>
     <nav>
-      <button type="button" class="tab-btn active" data-tab="import" onclick="switchTab('import')">1. Import &amp; Cours</button>
-      <button type="button" class="tab-btn" data-tab="library" onclick="switchTab('library')">2. Supports (<span id="libCountBadge">0</span>)</button>
-      <button type="button" class="tab-btn" data-tab="studio" onclick="switchTab('studio')">3. Studio IA</button>
-      <button type="button" class="tab-btn" data-tab="ade" onclick="switchTab('ade')">4. Emploi du temps</button>
+      <button type="button" class="tab-btn active" data-tab="agenda" onclick="switchTab('agenda')">Agenda</button>
+      <button type="button" class="tab-btn" data-tab="import" onclick="switchTab('import')">Import Cours</button>
+      <button type="button" class="tab-btn" data-tab="library" onclick="switchTab('library')">Supports (<span id="libCountBadge">0</span>)</button>
+      <button type="button" class="tab-btn" data-tab="studio" onclick="switchTab('studio')">Studio IA</button>
       <button type="button" class="tab-btn" data-tab="settings" onclick="switchTab('settings')">Réglages</button>
     </nav>
   </header>
 
   <main>
-    <section id="panel-import" class="panel active">
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-label">Prochain cours</div>
+        <div class="stat-value" id="statNextCourseTime">--:--</div>
+        <div class="stat-sub" id="statNextCourseTitle">Synchronise ADE pour afficher</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Supports extraits</div>
+        <div class="stat-value" id="statDocsCount">0</div>
+        <div class="stat-sub" id="statDocsChars">0 caractères indexés</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Matières / UE</div>
+        <div class="stat-value" id="statUeCount">0</div>
+        <div class="stat-sub">Prêts pour fiches, flashcards &amp; quiz</div>
+      </div>
+    </div>
+
+    <section id="panel-agenda" class="panel active">
+      <div class="card">
+        <div class="cal-toolbar">
+          <div class="btn-row">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="shiftCalendarWeek(-1)">◀ Semaine préc.</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="resetCalendarToday()">Aujourd’hui</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="shiftCalendarWeek(1)">Semaine suiv. ▶</button>
+            <span class="cal-week-label" id="calWeekLabel" style="margin-left:6px;">Semaine</span>
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn btn-sm" id="btnSyncAde" onclick="syncAdeSchedule()">Synchroniser ADE</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('icsFileInput').click()">Importer .ics</button>
+            <input type="file" id="icsFileInput" accept=".ics" style="display:none;" onchange="handleIcsUpload(this.files)">
+          </div>
+        </div>
+        <div class="cal-wrapper">
+          <div class="cal-grid" id="weeklyCalendarGrid"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="panel-import" class="panel">
       <div class="grid-2">
         <div class="card">
           <div class="card-header">
@@ -476,20 +726,23 @@
 
         <div class="card">
           <div class="card-header">
-            <span class="card-title">Chamilo &amp; Fichiers locaux</span>
-            <span class="pill">ZIP / PDF / DOCX / PPTX</span>
+            <span class="card-title">Chamilo (Favori récursif) &amp; Fichiers</span>
+            <span class="pill">PDF / DOCX / PPTX / ZIP</span>
           </div>
-          <p class="card-subtitle">Télécharge l’archive ZIP complète d’un dossier Chamilo (avec tous ses sous-dossiers) puis dépose-la ci-dessous.</p>
-          <label for="chamiloFolderUrl">URL de la page Documents Chamilo (optionnel)</label>
-          <input type="url" id="chamiloFolderUrl" placeholder="https://chamilo.grenoble-inp.fr/main/document/document.php?cidReq=...">
-          <label for="chamiloUeName">Nom de l’UE / Matière</label>
-          <input type="text" id="chamiloUeName" placeholder="Ex. GI4 - Gestion de production">
-          <div class="btn-row" style="margin-bottom:14px;">
-            <button type="button" class="btn btn-secondary" onclick="downloadChamiloZip()">Télécharger le ZIP du dossier Chamilo</button>
+          <div class="bookmarklet-box">
+            <div style="font-size:12px;font-weight:600;margin-bottom:6px;">1. Installe le favori d’extraction récursive Chamilo :</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Glisse ce bouton dans ta barre de favoris (ou copie son code). Depuis un cours Chamilo, un clic explore tous les sous-dossiers et télécharge tous les documents.</div>
+            <div class="btn-row">
+              <a id="chamiloBookmarkletAnchor" class="bookmarklet-link" href="#">StudyFlow : Télécharger Chamilo</a>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="copyBookmarkletCode()">Copier le code du favori</button>
+            </div>
           </div>
+
+          <label for="chamiloUeName">2. Nom de l’UE / Matière des fichiers importés</label>
+          <input type="text" id="chamiloUeName" placeholder="Ex. GI4 - Écoconception / Eco-innovation">
           <div id="archiveDropzone" class="dropzone" onclick="document.getElementById('archiveFileInput').click()">
-            <div style="font-weight:600;font-size:13px;margin-bottom:4px;">Glisse ici le .zip Chamilo ou tes fichiers (.pdf, .docx, .pptx)</div>
-            <div id="archiveStatus" style="font-size:12px;color:var(--muted);">Exploration récursive automatique des sous-dossiers en mémoire</div>
+            <div style="font-weight:600;font-size:13px;margin-bottom:4px;">Glisse ici tes fichiers téléchargés (.pdf, .docx, .pptx, .zip)</div>
+            <div id="archiveStatus" style="font-size:12px;color:var(--muted);">Extraction automatique du texte intégral en mémoire</div>
             <input type="file" id="archiveFileInput" accept=".zip,.pdf,.docx,.pptx,.txt,.md" multiple style="display:none;" onchange="handleLocalFiles(this.files)">
           </div>
         </div>
@@ -505,7 +758,7 @@
             <button type="button" class="btn btn-danger btn-sm" onclick="clearAllDocuments()">Vider tout</button>
           </div>
         </div>
-        <p class="card-subtitle">Tous les documents ci-dessous ont leur texte intégral prêt pour la génération de fiches, résumés et quiz.</p>
+        <p class="card-subtitle">Tous les supports ci-dessous ont leur texte intégral prêt pour la génération de fiches, résumés, flashcards et quiz.</p>
         <div id="libraryList" class="item-list"></div>
       </div>
     </section>
@@ -517,18 +770,19 @@
             <span class="card-title">1. Sélection des supports</span>
             <button type="button" class="btn btn-secondary btn-sm" onclick="toggleSelectAllDocs()">Tout cocher / décocher</button>
           </div>
-          <div id="studioDocSelector" class="item-list" style="max-height:320px;overflow-y:auto;"></div>
+          <div id="studioDocSelector" class="item-list" style="max-height:330px;overflow-y:auto;"></div>
         </div>
 
         <div class="card">
           <div class="card-header">
-            <span class="card-title">2. Paramètres de génération</span>
+            <span class="card-title">2. Génération IA</span>
           </div>
-          <label for="studioMode">Type de livrable</label>
+          <label for="studioMode">Format de révision</label>
           <select id="studioMode">
             <option value="fiche">Fiche de révision structurée (notions clés, formules, pièges)</option>
             <option value="resume">Résumé synthétique rapide (essentiel en 5 minutes)</option>
-            <option value="quiz">Quiz interactif (8 questions QCM avec correction)</option>
+            <option value="flashcards">Flashcards interactives (10 cartes recto / verso)</option>
+            <option value="quiz">Quiz QCM interactif (8 questions corrigées)</option>
           </select>
           <label for="studioFocus">Consigne complémentaire (optionnel)</label>
           <input type="text" id="studioFocus" placeholder="Ex. Insiste sur les calculs d'ACV et les définitions normatives">
@@ -537,10 +791,10 @@
             <button type="button" class="btn btn-secondary" onclick="copyPromptForExternalAI()">Copier le prompt (sans API)</button>
           </div>
           <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
-            <label for="pasteQuizJson">Importer un Quiz JSON généré ailleurs</label>
+            <label for="pasteJsonInput">Coller un JSON (Quiz ou Flashcards générés ailleurs)</label>
             <div class="btn-row">
-              <input type="text" id="pasteQuizJson" placeholder='Colle ici le tableau JSON [{"question":...}]' style="margin-bottom:0;flex:1;">
-              <button type="button" class="btn btn-secondary btn-sm" onclick="loadPastedQuiz()">Lancer le Quiz</button>
+              <input type="text" id="pasteJsonInput" placeholder='Colle ici le tableau JSON [...]' style="margin-bottom:0;flex:1;">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="loadPastedInteractiveJson()">Afficher</button>
             </div>
           </div>
         </div>
@@ -555,18 +809,7 @@
           </div>
         </div>
         <div id="studioOutputBox" class="output-box"></div>
-        <div id="studioQuizContainer"></div>
-      </div>
-    </section>
-
-    <section id="panel-ade" class="panel">
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">Emploi du temps ADE (Grenoble INP)</span>
-          <button type="button" class="btn btn-sm" id="btnSyncAde" onclick="syncAdeSchedule()">Synchroniser ADE</button>
-        </div>
-        <p class="card-subtitle">Récupération directe de ton calendrier iCalendar via l’authentification Basic du Worker Cloudflare.</p>
-        <div id="adeEventsList" class="item-list"></div>
+        <div id="studioInteractiveContainer"></div>
       </div>
     </section>
 
@@ -587,10 +830,9 @@
 
         <div class="card">
           <div class="card-header">
-            <span class="card-title">Fournisseur IA (Optionnel — Compatible OpenAI)</span>
+            <span class="card-title">Fournisseur IA &amp; Sauvegarde</span>
           </div>
-          <p class="card-subtitle">Renseigne une clé API (Groq, Mistral, OpenAI, OpenRouter ou Ollama local) pour générer fiches et quiz directement dans l’application.</p>
-          <label for="cfgAiEndpoint">Endpoint Chat Completions</label>
+          <label for="cfgAiEndpoint">Endpoint Chat Completions (Compatible OpenAI)</label>
           <input type="url" id="cfgAiEndpoint" placeholder="https://api.groq.com/openai/v1/chat/completions">
           <label for="cfgAiKey">Clé API</label>
           <input type="password" id="cfgAiKey" placeholder="gsk_... ou sk-...">
@@ -599,6 +841,8 @@
           <div class="btn-row">
             <button type="button" class="btn" onclick="saveSettings()">Enregistrer l’IA</button>
             <button type="button" class="btn btn-secondary" onclick="exportBackupJson()">Exporter sauvegarde (.json)</button>
+            <button type="button" class="btn btn-secondary" onclick="document.getElementById('backupImportInput').click()">Restaurer (.json)</button>
+            <input type="file" id="backupImportInput" accept=".json" style="display:none;" onchange="importBackupJson(this.files)">
           </div>
         </div>
       </div>
@@ -608,7 +852,7 @@
   <div id="previewModal" class="modal-backdrop" onclick="if(event.target===this)closePreviewModal()">
     <div class="modal-box">
       <div class="card-header">
-        <span class="card-title" id="previewModalTitle">Aperçu du document</span>
+        <span class="card-title" id="previewModalTitle">Détails</span>
         <button type="button" class="btn btn-secondary btn-sm" onclick="closePreviewModal()">Fermer</button>
       </div>
       <div id="previewModalBody" class="output-box" style="flex:1;"></div>
@@ -626,11 +870,31 @@
       navigator.serviceWorker.register('./sw.js').catch(() => {});
     }
 
+    const BOOKMARKLET_CODE = "javascript:(function(){if(!location.hostname.includes('chamilo.grenoble-inp.fr')){alert('Ouvre d’abord un cours sur Chamilo Grenoble INP.');return;}const old=document.getElementById('sfChamiloBox');if(old)old.remove();const box=document.createElement('div');box.id='sfChamiloBox';box.style.cssText='position:fixed;bottom:20px;right:20px;z-index:999999;background:#0f172a;color:#f1f5f9;padding:16px 18px;border-radius:12px;font-family:system-ui,-apple-system,sans-serif;font-size:13px;box-shadow:0 12px 30px rgba(0,0,0,0.45);border:1px solid #334155;max-width:340px;';box.textContent='Analyse récursive des dossiers Chamilo...';document.body.appendChild(box);const queue=[{url:location.href,folder:'Racine'}];const visited=new Set();const files=new Map();const getFolderKey=u=>{try{const p=new URL(u);return(p.searchParams.get('cidReq')||'')+'_'+(p.searchParams.get('id')||p.searchParams.get('curdirpath')||'root');}catch(e){return u;}};visited.add(getFolderKey(location.href));const sanitize=s=>s.replace(/[<>:\"/\\\\|?*\\x00-\\x1F]/g,'_').replace(/\\s+/g,' ').trim();(async()=>{while(queue.length){const{url,folder}=queue.shift();box.textContent='Exploration : '+visited.size+' dossier(s), '+files.size+' fichier(s)...';try{const res=await fetch(url,{credentials:'include'});const html=await res.text();const doc=new DOMParser().parseFromString(html,'text/html');for(const a of doc.querySelectorAll('a[href]')){const raw=a.getAttribute('href');if(!raw||raw.startsWith('#')||raw.startsWith('javascript:'))continue;let full='';try{full=new URL(raw,url).toString();}catch(e){continue;}const label=sanitize(a.textContent||a.getAttribute('title')||'');const isDownloadAction=full.includes('action=download')&&!full.includes('downloadfolder');const isDirectDoc=/\\.(pdf|docx?|pptx?|xlsx?|odt|odp|txt|md)(\\?|$)/i.test(full)||full.includes('showinframes.php')||(full.includes('/document/')&&!full.includes('document.php'));if(isDownloadAction||isDirectDoc){let targetUrl=full;if(full.includes('showinframes.php')){try{const fParam=new URL(full).searchParams.get('file');if(fParam)targetUrl=new URL(fParam,full).toString();}catch(e){}}const fileKey=targetUrl.replace(/[&?]_=[^&]+/,'');if(!files.has(fileKey)){const fallbackName=decodeURIComponent(targetUrl.split('/').pop().split('?')[0]||'document');files.set(fileKey,{url:targetUrl,name:label||fallbackName,folder:folder});}}else if(full.includes('document.php')&&full.includes('cidReq=')&&(/[?&]id=\\d+/.test(full)||full.includes('curdirpath='))&&!/action=|delete|move|edit|visible|export|sort|curdirpath=\\.\\./i.test(full)){const k=getFolderKey(full);if(!visited.has(k)){visited.add(k);queue.push({url:full,folder:label||folder});}}}}catch(e){}await new Promise(r=>setTimeout(r,100));}const list=[...files.values()];if(!list.length){box.textContent='Aucun document détecté dans ce cours.';setTimeout(()=>box.remove(),4000);return;}const downloadSingle=async(item)=>{const r=await fetch(item.url,{credentials:'include'});const blob=await r.blob();let fname=item.name;const cd=r.headers.get('content-disposition')||'';const m=cd.match(/filename\\*?=(?:UTF-8'')?[\"']?([^\"';\\n]+)[\"']?/i);if(m&&m[1])fname=sanitize(decodeURIComponent(m[1]));if(!/\\.[a-z0-9]{2,5}$/i.test(fname)){const ext=(blob.type.split('/')[1]||'pdf').replace('vnd.openxmlformats-officedocument.wordprocessingml.document','docx').replace('vnd.openxmlformats-officedocument.presentationml.presentation','pptx');fname+='.'+ext;}const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fname;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);};box.innerHTML='<div style=\"font-weight:700;margin-bottom:6px;\">'+list.length+' fichier(s) dans '+visited.size+' dossier(s)</div><div style=\"font-size:12px;color:#94a3b8;margin-bottom:10px;\">Téléchargement direct vers ton dossier Téléchargements</div><div style=\"display:flex;gap:8px;\"><button id=\"sfDlAll\" style=\"flex:1;background:#3b82f6;color:#fff;border:none;padding:8px 10px;border-radius:8px;font-weight:600;cursor:pointer;\">Tout télécharger</button><button id=\"sfClose\" style=\"background:#1e293b;color:#cbd5e1;border:1px solid #334155;padding:8px 10px;border-radius:8px;cursor:pointer;\">Fermer</button></div>';document.getElementById('sfClose').onclick=()=>box.remove();document.getElementById('sfDlAll').onclick=async()=>{const btn=document.getElementById('sfDlAll');btn.disabled=true;for(let i=0;i<list.length;i++){btn.textContent='Téléchargement '+(i+1)+'/'+list.length+'...';try{await downloadSingle(list[i]);}catch(e){}await new Promise(r=>setTimeout(r,350));}box.textContent='Téléchargement terminé ('+list.length+' fichiers). Glisse-les dans StudyFlow IA !';setTimeout(()=>box.remove(),4000);};})();})();";
+
     const STORAGE_KEYS = {
-      settings: 'studyflow_settings_v2',
-      docs: 'studyflow_docs_v2',
-      ade: 'studyflow_ade_v2'
+      settings: 'studyflow_settings_v3',
+      docs: 'studyflow_docs_v3',
+      ade: 'studyflow_ade_v3'
     };
+
+    const EVENT_COLORS = [
+      { bg: 'rgba(59, 130, 246, 0.22)', border: '#3b82f6' },
+      { bg: 'rgba(16, 185, 129, 0.20)', border: '#10b981' },
+      { bg: 'rgba(245, 158, 11, 0.20)', border: '#f59e0b' },
+      { bg: 'rgba(139, 92, 246, 0.22)', border: '#8b5cf6' },
+      { bg: 'rgba(236, 72, 153, 0.20)', border: '#ec4899' },
+      { bg: 'rgba(20, 184, 166, 0.22)', border: '#14b8a6' }
+    ];
+
+    function getMondayOfWeek(dateObj) {
+      const d = new Date(dateObj);
+      const day = d.getDay();
+      const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+      d.setDate(diff);
+      d.setHours(0, 0, 0, 0);
+      return d;
+    }
 
     const state = {
       settings: Object.assign({
@@ -645,7 +909,8 @@
       adeEvents: JSON.parse(localStorage.getItem(STORAGE_KEYS.ade) || '[]'),
       moodleLinks: [],
       selectedDocIds: new Set(),
-      lastStudioText: ''
+      lastStudioText: '',
+      currentWeekMonday: getMondayOfWeek(new Date())
     };
 
     function escapeHtml(str) {
@@ -667,17 +932,41 @@
       }, 4200);
     }
 
+    function copyBookmarkletCode() {
+      navigator.clipboard.writeText(BOOKMARKLET_CODE).then(() => {
+        showToast('Code du favori Chamilo copié dans le presse-papiers.', 'success');
+      });
+    }
+
+    function updateDashboardStats() {
+      document.getElementById('libCountBadge').textContent = state.docs.length;
+      document.getElementById('statDocsCount').textContent = state.docs.length;
+      const totalChars = state.docs.reduce((acc, d) => acc + (d.charCount || 0), 0);
+      document.getElementById('statDocsChars').textContent = totalChars.toLocaleString('fr-FR') + ' caractères indexés';
+      const ues = new Set(state.docs.map(d => d.ue).filter(Boolean));
+      document.getElementById('statUeCount').textContent = ues.size;
+
+      const now = new Date();
+      const nextEv = state.adeEvents.find(ev => new Date(ev.end) > now);
+      if (nextEv) {
+        const s = new Date(nextEv.start);
+        const dayPart = s.toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: 'short' });
+        const timePart = s.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+        document.getElementById('statNextCourseTime').textContent = dayPart + ' ' + timePart;
+        document.getElementById('statNextCourseTitle').textContent = nextEv.summary + ' (' + nextEv.location + ')';
+      } else {
+        document.getElementById('statNextCourseTime').textContent = '--:--';
+        document.getElementById('statNextCourseTitle').textContent = state.adeEvents.length ? 'Aucun cours à venir' : 'Synchronise ADE pour afficher';
+      }
+    }
+
     function persistDocs() {
       try {
         localStorage.setItem(STORAGE_KEYS.docs, JSON.stringify(state.docs));
       } catch (e) {
-        showToast('Espace localStorage saturé : supprime d’anciens supports dans la bibliothèque.', 'warn');
+        showToast('Stockage local plein : supprime d’anciens supports dans la bibliothèque.', 'warn');
       }
-      updateCounts();
-    }
-
-    function updateCounts() {
-      document.getElementById('libCountBadge').textContent = state.docs.length;
+      updateDashboardStats();
     }
 
     function switchTab(tabName) {
@@ -687,9 +976,9 @@
       document.querySelectorAll('.panel').forEach(panel => {
         panel.classList.toggle('active', panel.id === 'panel-' + tabName);
       });
+      if (tabName === 'agenda') renderWeeklyCalendar();
       if (tabName === 'library') renderLibrary();
       if (tabName === 'studio') renderStudioSelector();
-      if (tabName === 'ade') renderAdeEvents();
     }
 
     function loadSettingsIntoForm() {
@@ -732,6 +1021,199 @@
         throw new Error(errText);
       }
       return res;
+    }
+
+    function hashStringColor(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = ((hash << 5) - hash) + str.charCodeAt(i);
+        hash |= 0;
+      }
+      return EVENT_COLORS[Math.abs(hash) % EVENT_COLORS.length];
+    }
+
+    function shiftCalendarWeek(deltaWeeks) {
+      const next = new Date(state.currentWeekMonday);
+      next.setDate(next.getDate() + deltaWeeks * 7);
+      state.currentWeekMonday = next;
+      renderWeeklyCalendar();
+    }
+
+    function resetCalendarToday() {
+      state.currentWeekMonday = getMondayOfWeek(new Date());
+      renderWeeklyCalendar();
+    }
+
+    function renderWeeklyCalendar() {
+      const grid = document.getElementById('weeklyCalendarGrid');
+      const weekLabel = document.getElementById('calWeekLabel');
+      grid.innerHTML = '';
+
+      const monday = new Date(state.currentWeekMonday);
+      const saturday = new Date(monday);
+      saturday.setDate(monday.getDate() + 5);
+
+      const fmtShort = d => d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+      weekLabel.textContent = 'Semaine du ' + fmtShort(monday) + ' au ' + fmtShort(saturday) + ' ' + monday.getFullYear();
+
+      const todayStr = new Date().toDateString();
+      const dayNames = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+
+      const corner = document.createElement('div');
+      corner.className = 'cal-head-corner';
+      grid.appendChild(corner);
+
+      for (let d = 0; d < 6; d++) {
+        const dayDate = new Date(monday);
+        dayDate.setDate(monday.getDate() + d);
+        const head = document.createElement('div');
+        head.className = 'cal-head-cell' + (dayDate.toDateString() === todayStr ? ' today' : '');
+        head.textContent = dayNames[d] + ' ' + dayDate.getDate() + '/' + String(dayDate.getMonth() + 1).padStart(2, '0');
+        grid.appendChild(head);
+      }
+
+      const timeCol = document.createElement('div');
+      timeCol.className = 'cal-time-col';
+      for (let h = 8; h < 20; h++) {
+        const slot = document.createElement('div');
+        slot.className = 'cal-time-slot';
+        slot.textContent = String(h).padStart(2, '0') + ':00';
+        timeCol.appendChild(slot);
+      }
+      grid.appendChild(timeCol);
+
+      const now = new Date();
+      const nowMinutes = (now.getHours() - 8) * 60 + now.getMinutes();
+
+      for (let d = 0; d < 6; d++) {
+        const dayDate = new Date(monday);
+        dayDate.setDate(monday.getDate() + d);
+        const nextDay = new Date(dayDate);
+        nextDay.setDate(dayDate.getDate() + 1);
+
+        const col = document.createElement('div');
+        col.className = 'cal-day-col' + (dayDate.toDateString() === todayStr ? ' today' : '');
+
+        if (dayDate.toDateString() === todayStr && nowMinutes >= 0 && nowMinutes <= 720) {
+          const line = document.createElement('div');
+          line.className = 'cal-now-line';
+          line.style.top = (nowMinutes * (50 / 60)) + 'px';
+          col.appendChild(line);
+        }
+
+        const dayEvents = state.adeEvents.filter(ev => {
+          const s = new Date(ev.start);
+          return s >= dayDate && s < nextDay;
+        });
+
+        dayEvents.forEach(ev => {
+          const s = new Date(ev.start);
+          const e = new Date(ev.end);
+          const startMin = Math.max(0, (s.getHours() - 8) * 60 + s.getMinutes());
+          const endMin = Math.min(720, (e.getHours() - 8) * 60 + e.getMinutes());
+          const durationMin = Math.max(25, endMin - startMin);
+
+          const color = hashStringColor(ev.summary);
+          const block = document.createElement('div');
+          block.className = 'cal-event';
+          block.style.top = (startMin * (50 / 60)) + 'px';
+          block.style.height = (durationMin * (50 / 60) - 2) + 'px';
+          block.style.background = color.bg;
+          block.style.borderLeftColor = color.border;
+
+          const startStr = s.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+          const endStr = e.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+          block.innerHTML = `
+            <div class="cal-event-time">${startStr} - ${endStr}</div>
+            <div class="cal-event-title">${escapeHtml(ev.summary)}</div>
+            <div class="cal-event-loc">${escapeHtml(ev.location)}</div>
+          `;
+          block.onclick = () => {
+            document.getElementById('previewModalTitle').textContent = ev.summary;
+            document.getElementById('previewModalBody').textContent =
+              'Horaire : ' + dayDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) + ' (' + startStr + ' - ' + endStr + ')\n' +
+              'Salle : ' + ev.location + '\n\n' +
+              (ev.description || 'Aucune description supplémentaire.');
+            document.getElementById('previewModal').classList.add('open');
+          };
+          col.appendChild(block);
+        });
+
+        grid.appendChild(col);
+      }
+    }
+
+    function parseIcsDate(raw) {
+      const clean = raw.replace(/^.*:/, '').trim();
+      const m = clean.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})(Z?)$/);
+      if (!m) return null;
+      if (m[7] === 'Z') {
+        return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]));
+      }
+      return new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]);
+    }
+
+    function parseIcsEvents(icsText) {
+      const unfolded = icsText.replace(/\r?\n[ \t]/g, '');
+      const blocks = unfolded.split('BEGIN:VEVENT').slice(1);
+      const events = [];
+      for (const block of blocks) {
+        const endIdx = block.indexOf('END:VEVENT');
+        const body = endIdx >= 0 ? block.slice(0, endIdx) : block;
+        const getField = name => {
+          const re = new RegExp('^' + name + '(?:;[^:]*)?:(.*)$', 'm');
+          const match = body.match(re);
+          return match ? match[1].replace(/\\n/g, '\n').replace(/\\,/g, ',').trim() : '';
+        };
+        const start = parseIcsDate(getField('DTSTART'));
+        const end = parseIcsDate(getField('DTEND'));
+        if (!start) continue;
+        events.push({
+          summary: getField('SUMMARY') || 'Cours ADE',
+          location: getField('LOCATION') || 'Salle non précisée',
+          description: getField('DESCRIPTION'),
+          start: start.toISOString(),
+          end: end ? end.toISOString() : start.toISOString()
+        });
+      }
+      return events.sort((a, b) => new Date(a.start) - new Date(b.start));
+    }
+
+    async function syncAdeSchedule() {
+      const btn = document.getElementById('btnSyncAde');
+      btn.disabled = true;
+      btn.textContent = 'Synchronisation...';
+      try {
+        const res = await callWorker('/ade', { url: state.settings.adeUrl });
+        const icsText = await res.text();
+        const events = parseIcsEvents(icsText);
+        state.adeEvents = events;
+        localStorage.setItem(STORAGE_KEYS.ade, JSON.stringify(events));
+        renderWeeklyCalendar();
+        updateDashboardStats();
+        showToast(events.length + ' créneau(x) ADE synchronisé(s).', 'success');
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Synchroniser ADE';
+      }
+    }
+
+    async function handleIcsUpload(files) {
+      if (!files || !files.length) return;
+      const text = await files[0].text();
+      const events = parseIcsEvents(text);
+      if (!events.length) {
+        showToast('Aucun événement valide trouvé dans ce fichier .ics.', 'warn');
+        return;
+      }
+      state.adeEvents = events;
+      localStorage.setItem(STORAGE_KEYS.ade, JSON.stringify(events));
+      renderWeeklyCalendar();
+      updateDashboardStats();
+      showToast(events.length + ' créneau(x) importé(s) depuis le fichier .ics.', 'success');
     }
 
     async function scanMoodleCourse() {
@@ -885,22 +1367,6 @@
       }
     }
 
-    function downloadChamiloZip() {
-      const rawUrl = document.getElementById('chamiloFolderUrl').value.trim();
-      if (!rawUrl || !rawUrl.includes('chamilo.grenoble-inp.fr')) {
-        showToast('Colle d’abord l’URL de la page Documents de ton cours Chamilo.', 'warn');
-        return;
-      }
-      try {
-        const zipUrl = new URL(rawUrl);
-        zipUrl.searchParams.set('action', 'downloadfolder');
-        window.open(zipUrl.toString(), '_blank');
-        showToast('Téléchargement du ZIP Chamilo lancé. Glisse-le dans la zone ci-dessous.', 'info');
-      } catch (e) {
-        showToast('URL Chamilo invalide.', 'error');
-      }
-    }
-
     async function extractTextFromPdfBuffer(arrayBuffer) {
       if (!window.pdfjsLib) return '';
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
@@ -1035,7 +1501,7 @@
       );
 
       if (!filtered.length) {
-        container.innerHTML = '<div class="card-subtitle">Aucun support extrait pour le moment. Importe un cours Moodle ou un ZIP Chamilo dans l’onglet 1.</div>';
+        container.innerHTML = '<div class="card-subtitle">Aucun support extrait pour le moment. Importe un cours Moodle ou tes fichiers Chamilo dans l’onglet Import Cours.</div>';
         return;
       }
 
@@ -1149,9 +1615,11 @@
 
       let instruction = '';
       if (mode === 'fiche') {
-        instruction = 'Tu es un professeur d’école d’ingénieurs (Grenoble INP). Rédige une fiche de révision claire, structurée et rigoureuse en français à partir des supports ci-dessous : définitions exactes, concepts clés, formules ou méthodes, et points de vigilance pour l’examen.';
+        instruction = 'Tu es un enseignant d’école d’ingénieurs (Grenoble INP). Rédige une fiche de révision claire, structurée et rigoureuse en français à partir des supports ci-dessous : définitions exactes, concepts clés, formules ou méthodes, et points de vigilance pour l’examen.';
       } else if (mode === 'resume') {
         instruction = 'Rédige un résumé synthétique et structuré en français permettant de maîtriser l’essentiel des supports ci-dessous en 5 minutes.';
+      } else if (mode === 'flashcards') {
+        instruction = 'Génère 10 flashcards de révision en français à partir des supports ci-dessous. Réponds UNIQUEMENT avec un tableau JSON valide (sans texte avant ni après, sans balises markdown) au format exact : [{"front":"Question ou notion","back":"Réponse précise et concise"}]';
       } else {
         instruction = 'Génère un quiz de 8 questions QCM de niveau ingénieur en français à partir des supports ci-dessous. Réponds UNIQUEMENT avec un tableau JSON valide (sans texte avant ni après, sans balises markdown) au format exact : [{"question":"...","options":["A","B","C","D"],"answerIndex":0,"explanation":"..."}]';
       }
@@ -1217,16 +1685,20 @@
 
         const card = document.getElementById('studioResultCard');
         const box = document.getElementById('studioOutputBox');
-        const quizBox = document.getElementById('studioQuizContainer');
+        const interBox = document.getElementById('studioInteractiveContainer');
         const titleEl = document.getElementById('studioResultTitle');
 
         card.style.display = 'block';
-        quizBox.innerHTML = '';
+        interBox.innerHTML = '';
 
         if (mode === 'quiz') {
-          titleEl.textContent = 'Quiz interactif';
+          titleEl.textContent = 'Quiz QCM interactif';
           box.style.display = 'none';
-          renderInteractiveQuiz(rawOutput);
+          renderInteractiveJson(rawOutput);
+        } else if (mode === 'flashcards') {
+          titleEl.textContent = 'Flashcards actives (clique pour retourner)';
+          box.style.display = 'none';
+          renderInteractiveJson(rawOutput);
         } else {
           titleEl.textContent = mode === 'fiche' ? 'Fiche de révision' : 'Résumé synthétique';
           box.style.display = 'block';
@@ -1241,31 +1713,59 @@
       }
     }
 
-    function loadPastedQuiz() {
-      const raw = document.getElementById('pasteQuizJson').value.trim();
+    function loadPastedInteractiveJson() {
+      const raw = document.getElementById('pasteJsonInput').value.trim();
       if (!raw) return;
       state.lastStudioText = raw;
       document.getElementById('studioResultCard').style.display = 'block';
-      document.getElementById('studioResultTitle').textContent = 'Quiz interactif';
+      document.getElementById('studioResultTitle').textContent = 'Module interactif';
       document.getElementById('studioOutputBox').style.display = 'none';
-      renderInteractiveQuiz(raw);
+      renderInteractiveJson(raw);
     }
 
-    function renderInteractiveQuiz(rawJsonText) {
-      const container = document.getElementById('studioQuizContainer');
+    function renderInteractiveJson(rawJsonText) {
+      const container = document.getElementById('studioInteractiveContainer');
       container.innerHTML = '';
-      let questions = [];
+      let items = [];
       try {
         const cleaned = rawJsonText.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
-        questions = JSON.parse(cleaned);
+        items = JSON.parse(cleaned);
       } catch (e) {
         document.getElementById('studioOutputBox').style.display = 'block';
         document.getElementById('studioOutputBox').textContent = rawJsonText;
-        showToast('Format JSON invalide pour le mode quiz interactif, affichage brut.', 'warn');
+        showToast('JSON non reconnu, affichage texte brut.', 'warn');
         return;
       }
 
-      questions.forEach((q, qIdx) => {
+      if (!Array.isArray(items) || !items.length) return;
+
+      if (items[0].front !== undefined && items[0].back !== undefined) {
+        const grid = document.createElement('div');
+        grid.className = 'flashcard-grid';
+        items.forEach((fc, idx) => {
+          const card = document.createElement('div');
+          card.className = 'flashcard';
+          let flipped = false;
+          const renderSide = () => {
+            card.classList.toggle('flipped', flipped);
+            card.innerHTML = `
+              <div style="font-size:11px;color:var(--muted);font-weight:600;">${flipped ? 'RÉPONSE' : 'CARTE ' + (idx + 1)}</div>
+              <div style="font-size:14px;font-weight:${flipped ? '400' : '600'};margin:8px 0;">${escapeHtml(flipped ? fc.back : fc.front)}</div>
+              <div style="font-size:11px;color:var(--muted);">Cliquer pour retourner</div>
+            `;
+          };
+          renderSide();
+          card.onclick = () => {
+            flipped = !flipped;
+            renderSide();
+          };
+          grid.appendChild(card);
+        });
+        container.appendChild(grid);
+        return;
+      }
+
+      items.forEach((q, qIdx) => {
         const card = document.createElement('div');
         card.className = 'quiz-card';
         const qTitle = document.createElement('div');
@@ -1316,96 +1816,12 @@
       a.click();
     }
 
-    function parseIcsDate(raw) {
-      const clean = raw.replace(/^.*:/, '').trim();
-      const m = clean.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})(Z?)$/);
-      if (!m) return null;
-      if (m[7] === 'Z') {
-        return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]));
-      }
-      return new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]);
-    }
-
-    function parseIcsEvents(icsText) {
-      const unfolded = icsText.replace(/\r?\n[ \t]/g, '');
-      const blocks = unfolded.split('BEGIN:VEVENT').slice(1);
-      const events = [];
-      for (const block of blocks) {
-        const endIdx = block.indexOf('END:VEVENT');
-        const body = endIdx >= 0 ? block.slice(0, endIdx) : block;
-        const getField = name => {
-          const re = new RegExp('^' + name + '(?:;[^:]*)?:(.*)$', 'm');
-          const match = body.match(re);
-          return match ? match[1].replace(/\\n/g, ' ').replace(/\\,/g, ',').trim() : '';
-        };
-        const start = parseIcsDate(getField('DTSTART'));
-        const end = parseIcsDate(getField('DTEND'));
-        if (!start) continue;
-        events.push({
-          summary: getField('SUMMARY') || 'Cours ADE',
-          location: getField('LOCATION') || 'Salle non précisée',
-          description: getField('DESCRIPTION'),
-          start: start.toISOString(),
-          end: end ? end.toISOString() : start.toISOString()
-        });
-      }
-      return events.sort((a, b) => new Date(a.start) - new Date(b.start));
-    }
-
-    async function syncAdeSchedule() {
-      const btn = document.getElementById('btnSyncAde');
-      btn.disabled = true;
-      btn.textContent = 'Synchronisation...';
-      try {
-        const res = await callWorker('/ade', { url: state.settings.adeUrl });
-        const icsText = await res.text();
-        const events = parseIcsEvents(icsText);
-        state.adeEvents = events;
-        localStorage.setItem(STORAGE_KEYS.ade, JSON.stringify(events));
-        renderAdeEvents();
-        showToast(events.length + ' créneau(x) ADE synchronisé(s).', 'success');
-      } catch (err) {
-        showToast(err.message, 'error');
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'Synchroniser ADE';
-      }
-    }
-
-    function renderAdeEvents() {
-      const container = document.getElementById('adeEventsList');
-      container.innerHTML = '';
-      const now = new Date();
-      now.setHours(0, 0, 0, 0);
-      const upcoming = state.adeEvents.filter(ev => new Date(ev.end) >= now).slice(0, 40);
-
-      if (!upcoming.length) {
-        container.innerHTML = '<div class="card-subtitle">Aucun créneau à venir en cache. Clique sur « Synchroniser ADE ».</div>';
-        return;
-      }
-
-      upcoming.forEach(ev => {
-        const startDate = new Date(ev.start);
-        const endDate = new Date(ev.end);
-        const dayStr = startDate.toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: 'short' });
-        const timeStr = startDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) + ' - ' + endDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-        const row = document.createElement('div');
-        row.className = 'item-row';
-        row.innerHTML = `
-          <div class="item-info">
-            <div class="item-title">${escapeHtml(ev.summary)}</div>
-            <div class="item-meta"><span class="pill">${escapeHtml(dayStr)} • ${escapeHtml(timeStr)}</span> ${escapeHtml(ev.location)}</div>
-          </div>
-        `;
-        container.appendChild(row);
-      });
-    }
-
     function exportBackupJson() {
       const payload = {
         exportedAt: new Date().toISOString(),
         settings: state.settings,
-        docs: state.docs
+        docs: state.docs,
+        adeEvents: state.adeEvents
       };
       const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
       const a = document.createElement('a');
@@ -1414,10 +1830,36 @@
       a.click();
     }
 
+    async function importBackupJson(files) {
+      if (!files || !files.length) return;
+      try {
+        const parsed = JSON.parse(await files[0].text());
+        if (Array.isArray(parsed.docs)) {
+          state.docs = parsed.docs;
+          persistDocs();
+        }
+        if (Array.isArray(parsed.adeEvents)) {
+          state.adeEvents = parsed.adeEvents;
+          localStorage.setItem(STORAGE_KEYS.ade, JSON.stringify(state.adeEvents));
+        }
+        renderWeeklyCalendar();
+        updateDashboardStats();
+        showToast('Sauvegarde restaurée avec succès.', 'success');
+      } catch (e) {
+        showToast('Fichier de sauvegarde invalide.', 'error');
+      }
+    }
+
     (function initApp() {
       loadSettingsIntoForm();
-      updateCounts();
+      updateDashboardStats();
+      renderWeeklyCalendar();
       state.docs.slice(0, 5).forEach(d => state.selectedDocIds.add(d.id));
+
+      const bmAnchor = document.getElementById('chamiloBookmarkletAnchor');
+      if (bmAnchor) {
+        bmAnchor.href = BOOKMARKLET_CODE;
+      }
 
       const dz = document.getElementById('archiveDropzone');
       dz.addEventListener('dragover', e => {
